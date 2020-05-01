@@ -1,7 +1,10 @@
 #pragma once
+
 #include "IDataBase.h"
 #include "Communicator.h"
 #include "RequestHandlerFactory.h"
+
+#define EXIT "EXIT"
 
 class Server
 {
