@@ -1,5 +1,11 @@
 #pragma once
 #include "Buffer.h"
+#include "Communicator.h"
+#include "json.hpp"
+
+using json = nlohmann::json;
+
+class Communicator;
 
 struct 
 {

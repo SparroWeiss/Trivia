@@ -2,7 +2,9 @@
 #include <vector>
 #include <iostream>
 
+typedef unsigned char byte;
+
 struct
 {
-	std::vector<unsigned char> m_buffer;
+	std::vector<byte> m_buffer;
 }typedef Buffer;

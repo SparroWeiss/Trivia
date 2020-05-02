@@ -13,9 +13,21 @@
 #include <string>
 #include <Windows.h>
 
+
+class JsonResponsePacketSerializer;
+class JsonResponsePacketDesrializer;
+
+
 #define CONFIG_PATH "..\\config.txt"
 #define HELLO_MSG "Hello"
 #define FIRST_MSG_LEN 5
+
+enum messageCode
+{
+	ERRORCODE = 0,
+	SIGNUPCODE,
+	LOGINCODE
+};
 
 class Communicator
 {
