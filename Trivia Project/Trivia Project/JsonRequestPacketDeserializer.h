@@ -24,5 +24,14 @@ class JsonRequestPacketDeserializer
 {
 public:
 	static LoginRequest deserializeLoginRequest(Buffer buff);
-	static SignupRequest deserializeRequest(Buffer buff);
+	static SignupRequest deserializeSignupRequest(Buffer buff);
+
+	static unsigned int bytesToInt(Buffer);
+	static std::string bytesToString(Buffer);
 };
+
+void to_json(json&, const LoginRequest&);
+void from_json(const json&, LoginRequest&);
+
+void to_json(json&, const SignupRequest&);
+void from_json(const json&, SignupRequest&);

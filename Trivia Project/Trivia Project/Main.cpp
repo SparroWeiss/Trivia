@@ -17,9 +17,11 @@ int main()
 	}
 	*/
 
+	/*
 	Buffer b[3];
 
-	ErrorResponse e = { "Not log" };
+
+	ErrorResponse e = { "aaa" };
 	LoginResponse l = { 1 };
 	SignupResponse s = { 1 };
 
@@ -42,6 +44,7 @@ int main()
 		}
 		std::cout << std::endl;
 	}
+	*/
 
 	return 0;
 }

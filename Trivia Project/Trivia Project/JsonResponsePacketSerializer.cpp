@@ -120,7 +120,7 @@ Buffer JsonResponsePacketSerializer::intToBytes(int x)
 
 	for (int i = 0; i < sizeof(int); i++)
 	{
-		bytesOfInt.m_buffer[sizeof(int) - i - 1] = x << i * BITSOFBYTE;
+		bytesOfInt.m_buffer[sizeof(int) - i - 1] = (x >> (i * BITSOFBYTE));
 	}
 
 	return bytesOfInt;

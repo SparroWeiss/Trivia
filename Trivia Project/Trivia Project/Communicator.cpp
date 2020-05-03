@@ -85,7 +85,7 @@ void Communicator::startHandleRequests()
 	
 		std::cout << "Client accepted. Server and client can speak" << std::endl;
 		
-		m_clients.insert({ client_socket, &LoginRequestHandler() });
+		m_clients.insert({ client_socket, &(m_handlerFactory.createLoginRequestHandler()) });
 		std::thread(&Communicator::handleNewClient, this, client_socket).detach();
 	}
 }
@@ -99,11 +99,17 @@ void Communicator::handleNewClient(SOCKET client_socket)
 {
 	while (true)
 	{
-		std::string msg_from_client = "";
 		try
 		{
-			send_data(client_socket, HELLO_MSG);
-			msg_from_client = recv_data(client_socket, FIRST_MSG_LEN);
+			RequestInfo currRequest = getRequest(client_socket);
+
+
+			if (m_clients[client_socket] && m_clients[client_socket]->isRequestRelevent(currRequest))
+			{
+				RequestResult currResult = m_clients[client_socket]->handleRequest(currRequest);
+				// send result to client --> next stage
+				m_clients[client_socket] = currResult.newHandler; // in this version: NULL
+			}
 		}
 		catch (const std::exception & e)
 		{
@@ -112,7 +118,6 @@ void Communicator::handleNewClient(SOCKET client_socket)
 			closesocket(client_socket);
 			return;
 		}
-		std::cout << msg_from_client << std::endl;
 	}
 }
 
@@ -153,4 +158,24 @@ std::string Communicator::recv_data(SOCKET sock, int bytes_num)
 
 	data[bytes_num] = 0;
 	return data;
+}
+
+/*
+This method create a RequestInfo struct that contains details about a client's request.
+Input: socket of client
+Output: RequestInfo struct
+*/
+RequestInfo Communicator::getRequest(SOCKET client_socket)
+{
+	unsigned int requestCode = (unsigned int)stoi(recv_data(client_socket, CODE_SIZE));
+
+	int requestSize = JsonRequestPacketDeserializer::bytesToInt(
+		JsonResponsePacketSerializer::stringToBytes(recv_data(client_socket, LENGTH_SIZE)));
+
+	Buffer messageData = JsonResponsePacketSerializer::stringToBytes(
+		recv_data(client_socket, requestSize));
+
+	time_t now = time(0);
+
+	return RequestInfo{ requestCode, ctime(&now), messageData};
 }

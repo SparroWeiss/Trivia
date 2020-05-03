@@ -31,7 +31,6 @@ public:
 	static Buffer serializeResponse(LoginResponse login);
 	static Buffer serializeResponse(SignupResponse signup);
 
-private:
 	static Buffer intToBytes(int);
 	static Buffer stringToBytes(std::string);
 	static Buffer createResponseBuf(unsigned char, Buffer, Buffer);

@@ -2,12 +2,13 @@
 #include <ctime>
 #include "Buffer.h"
 
+
 class IRequestHandler;
 
 struct
 {
-	unsigned int id;// RequestId?
-	time_t receivalTime;// ctime?
+	unsigned int id;// Request Code
+	std::string receivalTime;// ctime = std::string
 	Buffer buffer;
 }typedef RequestInfo;
 

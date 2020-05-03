@@ -1,7 +1,9 @@
 #pragma once
 #pragma comment(lib, "ws2_32.lib")
+#pragma warning(disable : 4996) // allowing use of ctime() function
 
 #include "JsonResponsePacketSerializer.h"
+#include "JsonRequestPacketDeserializer.h"
 #include "IRequestHandler.h"
 #include "RequestHandlerFactory.h"
 #include "WSAInitializer.h"
@@ -15,12 +17,15 @@
 
 
 class JsonResponsePacketSerializer;
-class JsonResponsePacketDesrializer;
+class JsonRequestPacketDeserializer;
 
 
 #define CONFIG_PATH "..\\config.txt"
 #define HELLO_MSG "Hello"
 #define FIRST_MSG_LEN 5
+
+#define CODE_SIZE 1
+#define LENGTH_SIZE 4
 
 enum messageCode
 {
@@ -44,4 +49,5 @@ private:
 	void handleNewClient(SOCKET client_socket);
 	void send_data(SOCKET, std::string);
 	std::string recv_data(SOCKET, int);
+	RequestInfo getRequest(SOCKET);
 };
