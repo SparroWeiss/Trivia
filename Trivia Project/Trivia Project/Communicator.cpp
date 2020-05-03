@@ -106,9 +106,9 @@ void Communicator::handleNewClient(SOCKET client_socket)
 
 			if (m_clients[client_socket] && m_clients[client_socket]->isRequestRelevent(currRequest))
 			{
-				RequestResult currResult = m_clients[client_socket]->handleRequest(currRequest);
-				// send result to client --> next stage
-				m_clients[client_socket] = currResult.newHandler; // in this version: NULL
+				RequestResult currResult = m_clients[client_socket]->handleRequest(currRequest); // deserialize request
+				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(currResult.response)); // send serialized response to client
+				m_clients[client_socket] = currResult.newHandler; // in this version: NULL // updating client state
 			}
 		}
 		catch (const std::exception & e)
