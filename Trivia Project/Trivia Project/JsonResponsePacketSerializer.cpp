@@ -155,3 +155,20 @@ Buffer JsonResponsePacketSerializer::createResponseBuf(unsigned char responseCod
 
 	return responseBuf;
 }
+
+/*
+This helper method converts 'char*' type to 'Buffer' type.
+Input: char*
+Output : Buffer
+*/
+Buffer JsonResponsePacketSerializer::charToBytes(char* ch, unsigned int size)
+{
+	Buffer bytesOfChar;
+
+	for (int i = 0; i < size; i++)
+	{
+		bytesOfChar.m_buffer.push_back(ch[i]);
+	}
+
+	return bytesOfChar;
+}

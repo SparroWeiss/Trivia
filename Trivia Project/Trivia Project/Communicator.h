@@ -48,6 +48,6 @@ private:
 	
 	void handleNewClient(SOCKET client_socket);
 	void send_data(SOCKET, std::string);
-	std::string recv_data(SOCKET, int);
+	Buffer recv_data(SOCKET, int);
 	RequestInfo getRequest(SOCKET);
 };

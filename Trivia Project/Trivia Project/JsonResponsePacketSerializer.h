@@ -34,6 +34,8 @@ public:
 	static Buffer intToBytes(int);
 	static Buffer stringToBytes(std::string);
 	static Buffer createResponseBuf(unsigned char, Buffer, Buffer);
+	
+	static Buffer charToBytes(char*, unsigned int);
 };
 
 void to_json(json&, const ErrorResponse&);

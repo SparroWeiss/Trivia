@@ -2,7 +2,6 @@
 
 int main()
 {
-	/*
 	Server server;
 
 	try
@@ -15,7 +14,6 @@ int main()
 		std::cout << e.what() << std::endl;
 		exit(-1);
 	}
-	*/
 
 	/*
 	Buffer b[3];

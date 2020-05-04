@@ -108,14 +108,21 @@ void Communicator::handleNewClient(SOCKET client_socket)
 			{
 				RequestResult currResult = m_clients[client_socket]->handleRequest(currRequest); // deserialize request
 				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(currResult.response)); // send serialized response to client
-				m_clients[client_socket] = currResult.newHandler; // in this version: NULL // updating client state
+				m_clients[client_socket] = currResult.newHandler; // in this version: LoginHandler // updating client state
+			}
+
+			else
+			{
+				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(
+					JsonResponsePacketSerializer::serializeResponse(
+						ErrorResponse{ "Invalid request per state" })));
 			}
 		}
 		catch (const std::exception & e)
 		{
-			std::cout << e.what() << std::endl;
-			m_clients.erase(client_socket);
-			closesocket(client_socket);
+			std::cout << e.what() << std::endl; // When using 'test.py' client socket
+			m_clients.erase(client_socket); // are automatically closed, and that causes an exception.
+			closesocket(client_socket); // it is ok!!
 			return;
 		}
 	}
@@ -141,14 +148,14 @@ this function receive a message from the given socket
 input: the socket and the lenght of the message
 output: the message
 */
-std::string Communicator::recv_data(SOCKET sock, int bytes_num)
+Buffer Communicator::recv_data(SOCKET sock, int bytes_num)
 {
 	if (bytes_num == 0)
 	{
-		return (char*)"";
+		return Buffer();
 	}
 
-	char* data = new char[bytes_num + 1];
+	char* data = new char[bytes_num];
 	if (recv(sock, data, bytes_num, 0) == INVALID_SOCKET)
 	{
 		std::string s = "Error while recieving from socket: ";
@@ -156,8 +163,9 @@ std::string Communicator::recv_data(SOCKET sock, int bytes_num)
 		throw std::exception(s.c_str());
 	}
 
-	data[bytes_num] = 0;
-	return data;
+	Buffer bytesOfData = JsonResponsePacketSerializer::charToBytes(data, bytes_num);
+	delete[] data;
+	return bytesOfData;
 }
 
 /*
@@ -167,13 +175,18 @@ Output: RequestInfo struct
 */
 RequestInfo Communicator::getRequest(SOCKET client_socket)
 {
-	unsigned int requestCode = (unsigned int)stoi(recv_data(client_socket, CODE_SIZE));
+	unsigned int requestCode = recv_data(client_socket, CODE_SIZE).m_buffer[0];
+
+	std::cout << requestCode << std::endl;
 
 	int requestSize = JsonRequestPacketDeserializer::bytesToInt(
-		JsonResponsePacketSerializer::stringToBytes(recv_data(client_socket, LENGTH_SIZE)));
+		recv_data(client_socket, LENGTH_SIZE));
 
-	Buffer messageData = JsonResponsePacketSerializer::stringToBytes(
-		recv_data(client_socket, requestSize));
+	std::cout << requestSize << std::endl;
+	
+	Buffer messageData = recv_data(client_socket, requestSize);
+
+	std::cout << JsonRequestPacketDeserializer::bytesToString(messageData) << std::endl;
 
 	time_t now = time(0);
 
