@@ -85,7 +85,7 @@ void Communicator::startHandleRequests()
 	
 		std::cout << "Client accepted. Server and client can speak" << std::endl;
 		
-		m_clients.insert({ client_socket, &LoginRequestHandler() });
+		m_clients.insert({ client_socket, &(m_handlerFactory.createLoginRequestHandler()) });
 		std::thread(&Communicator::handleNewClient, this, client_socket).detach();
 	}
 }
@@ -99,20 +99,32 @@ void Communicator::handleNewClient(SOCKET client_socket)
 {
 	while (true)
 	{
-		std::string msg_from_client = "";
 		try
 		{
-			send_data(client_socket, HELLO_MSG);
-			msg_from_client = recv_data(client_socket, FIRST_MSG_LEN);
+			RequestInfo currRequest = getRequest(client_socket);
+
+
+			if (m_clients[client_socket] && m_clients[client_socket]->isRequestRelevent(currRequest))
+			{
+				RequestResult currResult = m_clients[client_socket]->handleRequest(currRequest); // deserialize request
+				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(currResult.response)); // send serialized response to client
+				m_clients[client_socket] = currResult.newHandler; // in this version: LoginHandler // updating client state
+			}
+
+			else
+			{
+				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(
+					JsonResponsePacketSerializer::serializeResponse(
+						ErrorResponse{ "Invalid request per state" })));
+			}
 		}
 		catch (const std::exception & e)
 		{
-			std::cout << e.what() << std::endl;
-			m_clients.erase(client_socket);
-			closesocket(client_socket);
+			std::cout << e.what() << std::endl; // When using 'test.py' client socket
+			m_clients.erase(client_socket); // are automatically closed, and that causes an exception.
+			closesocket(client_socket); // it is ok!!
 			return;
 		}
-		std::cout << msg_from_client << std::endl;
 	}
 }
 
@@ -136,14 +148,14 @@ this function receive a message from the given socket
 input: the socket and the lenght of the message
 output: the message
 */
-std::string Communicator::recv_data(SOCKET sock, int bytes_num)
+Buffer Communicator::recv_data(SOCKET sock, int bytes_num)
 {
 	if (bytes_num == 0)
 	{
-		return (char*)"";
+		return Buffer();
 	}
 
-	char* data = new char[bytes_num + 1];
+	char* data = new char[bytes_num];
 	if (recv(sock, data, bytes_num, 0) == INVALID_SOCKET)
 	{
 		std::string s = "Error while recieving from socket: ";
@@ -151,6 +163,32 @@ std::string Communicator::recv_data(SOCKET sock, int bytes_num)
 		throw std::exception(s.c_str());
 	}
 
-	data[bytes_num] = 0;
-	return data;
+	Buffer bytesOfData = JsonResponsePacketSerializer::charToBytes(data, bytes_num);
+	delete[] data;
+	return bytesOfData;
+}
+
+/*
+This method create a RequestInfo struct that contains details about a client's request.
+Input: socket of client
+Output: RequestInfo struct
+*/
+RequestInfo Communicator::getRequest(SOCKET client_socket)
+{
+	unsigned int requestCode = recv_data(client_socket, CODE_SIZE).m_buffer[0];
+
+	std::cout << requestCode << std::endl;
+
+	int requestSize = JsonRequestPacketDeserializer::bytesToInt(
+		recv_data(client_socket, LENGTH_SIZE));
+
+	std::cout << requestSize << std::endl;
+	
+	Buffer messageData = recv_data(client_socket, requestSize);
+
+	std::cout << JsonRequestPacketDeserializer::bytesToString(messageData) << std::endl;
+
+	time_t now = time(0);
+
+	return RequestInfo{ requestCode, ctime(&now), messageData};
 }
