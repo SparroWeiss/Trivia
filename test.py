@@ -1,18 +1,65 @@
 import socket
+import json
 
-MSG_LEN = 5
-MSG = "Hello"
+ERROR_CODE = 0
+SIGNUP_CODE = 1
+LOGIN_CODE = 2
+
+CODE_SIZE = 1
+LEN_SIZE = 4
+BYTES_ORDER = 'big'
+
 CONFIG_PATH = "..\\Trivia Project\\config.txt"
+
 MIN_PORT = 1024
 MAX_PORT = 65535
+
+
+def create_msg(msg_code, msg):
+    """
+    this function create the message to the server
+    :param msg_code: the code of the message
+    :param msg: the message
+    :type msg_code: int
+    :type msg: dict
+    :return: the message to the server
+    :rtype: bytes
+    """
+
+    msg_to_server = msg_code.to_bytes(CODE_SIZE, BYTES_ORDER) \
+                    + len(json.dumps(msg)).to_bytes(LEN_SIZE, BYTES_ORDER) \
+                    + json.dumps(msg).encode()
+
+    return msg_to_server
+
+
+def get_msg_from_server(sock):
+    """
+    this function get the server message and return the code and the message
+    :param sock: the socket with the server
+    :type sock: socket.socket
+    :return: the code and the message
+    :rtype: tuple
+    """
+    msg_code = int.from_bytes(sock.recv(CODE_SIZE), BYTES_ORDER)
+    msg_len = int.from_bytes(sock.recv(LEN_SIZE), BYTES_ORDER)
+    msg_data = sock.recv(msg_len).decode()
+
+    return msg_code, msg_data
 
 
 def main():
     server_ip = ""
     server_port = 0
-    config = open(CONFIG_PATH, 'r')
-    lines = list(config)
 
+    config = 0
+    try:
+        config = open(CONFIG_PATH, 'r')
+    except:
+        print("Could not open config file")
+        quit()
+
+    lines = list(config)
     # get the ip the and port of the server
     for line in lines:
         if "server_ip=" in line:
@@ -35,19 +82,51 @@ def main():
         quit()
     print("socket has connected")
 
-    server_msg = sock.recv(MSG_LEN)
-    server_msg = server_msg.decode()
+    sign_in = {"username": "user1", "password": "1234", "email": "user1@gmail.com"}
+    try:
+        sock.sendall(create_msg(SIGNUP_CODE, sign_in))
+    except Exception as e:
+        print("ERROR -", e)
+        sock.close()
+        quit()
 
-    if server_msg == MSG:
-        print(server_msg)
-        try:
-            sock.sendall(server_msg.encode())
-        except Exception as e:
-            print("ERROR -", e)
-            sock.close()
-            quit()
+    try:
+        msg_code, server_msg = get_msg_from_server(sock)
+        print(msg_code, server_msg)
+    except Exception as e:
+        print("ERROR -", e)
+        sock.close()
+        quit()
 
-    sock.close()
+    sock.close() ## client 1 --> Signup Req
+
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        sock.connect(server_address)
+    except Exception as e:
+        print("ERROR -", e)
+        sock.close()
+        quit()
+    print("socket has connected")
+
+    login = {"username": "user1", "password": "1234"}
+    try:
+        sock.sendall(create_msg(LOGIN_CODE, login))
+    except Exception as e:
+        print("ERROR -", e)
+        sock.close()
+        quit()
+
+    try:
+        msg_code, server_msg = get_msg_from_server(sock)
+        print(msg_code, server_msg)
+    except Exception as e:
+        print("ERROR -", e)
+        sock.close()
+        quit()
+
+    sock.close() ## client 2 Login Req
 
 
 if __name__ == '__main__':
