@@ -5,9 +5,23 @@
 class LoggedUser
 {
 public:
-	LoggedUser(std::string name);
-	~LoggedUser();
-	std::string getUsername() const;
+	/*
+	constructor
+	*/
+	LoggedUser(std::string name)
+	{
+		m_username = name;
+	}
+	~LoggedUser(){}
+	/*
+	function gets the username
+	input: none
+	output: the username
+	*/
+	std::string getUsername() const
+	{
+		return std::string(m_username);
+	}
 private:
 	std::string m_username;
 };
