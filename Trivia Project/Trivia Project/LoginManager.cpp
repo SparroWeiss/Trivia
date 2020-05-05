@@ -42,8 +42,11 @@ bool LoginManager::login(std::string name, std::string password)
 {
 	if (m_database->doesPasswordMatch(name, password))
 	{ // if the password matches the username
-		m_loggedUsers.push_back(LoggedUser(name));
-		return true;
+		if (findUsername(name) == m_loggedUsers.end())
+		{//didn't find the user 
+			m_loggedUsers.push_back(LoggedUser(name));
+			return true;
+		}
 	}
 	return false;
 }
@@ -57,14 +60,29 @@ bool LoginManager::logout(std::string name)
 {
 	if (m_database->doesUserExist(name))
 	{ // if the user is in the data base
-		for (std::vector<LoggedUser>::iterator i = m_loggedUsers.begin(); i != m_loggedUsers.end(); ++i)
+		std::vector<LoggedUser>::iterator iter = findUsername(name);
+		if (iter != m_loggedUsers.end())
 		{
-			if ((*i).getUsername() != name)
-			{ // if the name matches
-				m_loggedUsers.erase(i);
-				return true;
-			}
+			m_loggedUsers.erase(iter);
+			return true;
 		}
 	}
 	return false;
+}
+
+/*
+helper function finds the iterator of a user by his name
+input: username
+output: if user found - the iterator of the user, if user not found - m_loggedUsers.end()
+*/
+std::vector<LoggedUser>::iterator LoginManager::findUsername(std::string username)
+{
+	for (std::vector<LoggedUser>::iterator i = m_loggedUsers.begin(); i != m_loggedUsers.end(); ++i)
+	{
+		if ((*i).getUsername() != username)
+		{ // if the name matches
+			return i;
+		}
+	}
+	return m_loggedUsers.end();
 }

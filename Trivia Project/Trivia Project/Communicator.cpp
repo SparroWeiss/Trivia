@@ -1,4 +1,6 @@
 #include "Communicator.h"
+#include <typeinfo>
+#include "MenuRequestHandler.h"
 
 Communicator::Communicator() : Communicator(nullptr){}
 /*
@@ -104,18 +106,39 @@ output: none
 */
 void Communicator::handleNewClient(SOCKET client_socket)
 {
+	std::string name = "";
+	bool loggedIn = false;
 	while (true)
 	{
 		try
 		{
 			RequestInfo currRequest = getRequest(client_socket);
 
-
+			
 			if (m_clients[client_socket] && m_clients[client_socket]->isRequestRelevent(currRequest))
 			{
 				RequestResult currResult = m_clients[client_socket]->handleRequest(currRequest); // deserialize request
 				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(currResult.response)); // send serialized response to client
 				m_clients[client_socket] = currResult.newHandler; // in this version: LoginHandler // updating client state
+				if (!loggedIn)
+				{
+					try
+					{
+						json j = json::parse(JsonRequestPacketDeserializer::bytesToString(currResult.response).substr(5));
+						LoginResponse loginRes = j.get<LoginResponse>();
+						if (loginRes.status == 1)
+						{
+							name = JsonRequestPacketDeserializer::deserializeLoginRequest(currRequest.buffer).username;
+							std::cout << "\n" << name << "\n";
+							loggedIn = true;
+						}
+					}
+					catch (const std::exception& e)
+					{
+						std::cout << e.what() << std::endl;
+					}
+					
+				}
 			}
 			else
 			{
@@ -126,8 +149,9 @@ void Communicator::handleNewClient(SOCKET client_socket)
 		}
 		catch (const std::exception & e)
 		{
-			std::cout << e.what() << std::endl; // When using 'test.py' client socket
-			m_clients.erase(client_socket); // are automatically closed, and that causes an exception.
+			//std::cout << e.what() << std::endl; // When using 'test.py' client socket
+			m_clients.erase(client_socket); // are automatically closed, and that causes an exception
+			m_handlerFactory.getLoginManager().logout(name);
 			closesocket(client_socket); // it is ok!!
 			return;
 		}
@@ -183,16 +207,10 @@ RequestInfo Communicator::getRequest(SOCKET client_socket)
 {
 	unsigned int requestCode = recv_data(client_socket, CODE_SIZE).m_buffer[0];
 
-	std::cout << requestCode << std::endl;
-
 	int requestSize = JsonRequestPacketDeserializer::bytesToInt(
 		recv_data(client_socket, LENGTH_SIZE));
-
-	std::cout << requestSize << std::endl;
 	
 	Buffer messageData = recv_data(client_socket, requestSize);
-
-	std::cout << JsonRequestPacketDeserializer::bytesToString(messageData) << std::endl;
 
 	time_t now = time(0);
 

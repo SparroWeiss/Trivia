@@ -39,4 +39,5 @@ public:
 private:
 	IDataBase* m_database;
 	std::vector<LoggedUser> m_loggedUsers;
+	std::vector<LoggedUser>::iterator findUsername(std::string username);
 };
