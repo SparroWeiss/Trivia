@@ -30,10 +30,11 @@ class LoginManager
 {
 public:
 	LoginManager();
+	LoginManager(IDataBase * db);
 	~LoginManager();
-	void signup(std::string, std::string, std::string);
-	void login(std::string, std::string);
-	void logout(std::string);
+	bool signup(std::string, std::string, std::string);
+	bool login(std::string, std::string);
+	bool logout(std::string);
 
 private:
 	IDataBase* m_database;

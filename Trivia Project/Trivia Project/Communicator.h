@@ -38,6 +38,7 @@ class Communicator
 {
 public:
 	Communicator();
+	Communicator(RequestHandlerFactory handleFactory);
 	~Communicator();
 	SOCKET bindAndListen();
 	void startHandleRequests();

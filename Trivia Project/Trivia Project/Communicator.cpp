@@ -1,7 +1,14 @@
 #include "Communicator.h"
 
-Communicator::Communicator()
+Communicator::Communicator() : Communicator(nullptr){}
+/*
+constructor
+function sets the map of clients and the handler factory 
+*/
+Communicator::Communicator(RequestHandlerFactory handleFactory)
 {
+	m_clients = std::map<SOCKET, IRequestHandler*>();
+	m_handlerFactory = handleFactory;
 }
 
 Communicator::~Communicator()
@@ -110,7 +117,6 @@ void Communicator::handleNewClient(SOCKET client_socket)
 				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(currResult.response)); // send serialized response to client
 				m_clients[client_socket] = currResult.newHandler; // in this version: LoginHandler // updating client state
 			}
-
 			else
 			{
 				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(
