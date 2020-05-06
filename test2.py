@@ -82,33 +82,6 @@ def main():
         quit()
     print("socket has connected")
 
-    sign_in = {"username": "user1", "password": "1234", "email": "user1@gmail.com"}
-    try:
-        sock.sendall(create_msg(SIGNUP_CODE, sign_in))
-    except Exception as e:
-        print("ERROR -", e)
-        sock.close()
-        quit()
-
-    try:
-        msg_code, server_msg = get_msg_from_server(sock)
-        print("sign in: ", msg_code, server_msg)
-    except Exception as e:
-        print("ERROR -", e)
-        sock.close()
-        quit()
-    aa = input("press to continue")
-    sock.close()  # client 1 --> Signup Req
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        sock.connect(server_address)
-    except Exception as e:
-        print("ERROR -", e)
-        sock.close()
-        quit()
-    print("socket has connected")
-
     login = {"username": "user1", "password": "1234"}
     try:
         sock.sendall(create_msg(LOGIN_CODE, login))
@@ -124,7 +97,7 @@ def main():
         print("ERROR -", e)
         sock.close()
         quit()
-
+    aa = input("press to continue")
     sock.close()  # client 2 Login Req
 
 
