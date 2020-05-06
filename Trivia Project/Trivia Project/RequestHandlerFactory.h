@@ -8,8 +8,10 @@ class RequestHandlerFactory
 {
 public:
 	RequestHandlerFactory();
+	RequestHandlerFactory(IDataBase* db);
 	~RequestHandlerFactory();
 	LoginRequestHandler createLoginRequestHandler();
+	LoginManager getLoginManager() const;
 
 private:
 	LoginManager m_loginManager;

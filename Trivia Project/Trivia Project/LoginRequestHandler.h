@@ -9,6 +9,7 @@ class LoginRequestHandler : public IRequestHandler
 {
 public:
 	LoginRequestHandler();
+	LoginRequestHandler(RequestHandlerFactory * handleFactory);
 	~LoginRequestHandler();
 	bool isRequestRelevent(RequestInfo);
 	RequestResult handleRequest(RequestInfo);

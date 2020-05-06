@@ -1,7 +1,18 @@
 #include "Communicator.h"
+#include "MenuRequestHandler.h"
 
-Communicator::Communicator()
+std::mutex _using_clients;
+
+Communicator::Communicator() : Communicator(nullptr) {}
+
+/*
+constructor
+function sets the map of clients and the handler factory 
+*/
+Communicator::Communicator(RequestHandlerFactory handleFactory)
 {
+	m_clients = std::map<SOCKET, IRequestHandler*>();
+	m_handlerFactory = handleFactory;
 }
 
 Communicator::~Communicator()
@@ -85,7 +96,9 @@ void Communicator::startHandleRequests()
 	
 		std::cout << "Client accepted. Server and client can speak" << std::endl;
 		
+		std::unique_lock<std::mutex> locker(_using_clients);
 		m_clients.insert({ client_socket, &(m_handlerFactory.createLoginRequestHandler()) });
+		locker.unlock();
 		std::thread(&Communicator::handleNewClient, this, client_socket).detach();
 	}
 }
@@ -97,22 +110,44 @@ output: none
 */
 void Communicator::handleNewClient(SOCKET client_socket)
 {
+	std::string name = "";
+	bool loggedIn = false;
 	while (true)
 	{
 		try
 		{
 			RequestInfo currRequest = getRequest(client_socket);
-
-
+	
+			std::unique_lock<std::mutex> locker(_using_clients);
 			if (m_clients[client_socket] && m_clients[client_socket]->isRequestRelevent(currRequest))
 			{
 				RequestResult currResult = m_clients[client_socket]->handleRequest(currRequest); // deserialize request
 				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(currResult.response)); // send serialized response to client
 				m_clients[client_socket] = currResult.newHandler; // in this version: LoginHandler // updating client state
+				locker.unlock();
+				if (!loggedIn)
+				{
+					try
+					{
+						json j = json::parse(JsonRequestPacketDeserializer::bytesToString(currResult.response).substr(5));
+						LoginResponse loginRes = j.get<LoginResponse>();
+						if (loginRes.status == 1)
+						{
+							name = JsonRequestPacketDeserializer::deserializeLoginRequest(currRequest.buffer).username;
+							std::cout << name << " joined" << std::endl;
+							loggedIn = true;
+						}
+					}
+					catch (const std::exception& e)
+					{
+						std::cout << e.what() << std::endl;
+					}
+					
+				}
 			}
-
 			else
 			{
+				locker.unlock();
 				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(
 					JsonResponsePacketSerializer::serializeResponse(
 						ErrorResponse{ "Invalid request per state" })));
@@ -120,8 +155,11 @@ void Communicator::handleNewClient(SOCKET client_socket)
 		}
 		catch (const std::exception & e)
 		{
-			std::cout << e.what() << std::endl; // When using 'test.py' client socket
-			m_clients.erase(client_socket); // are automatically closed, and that causes an exception.
+			std::cout << "Error with socket: " << client_socket << ". client " << name << " disconnected." << std::endl; // When using 'test.py' client socket
+			std::unique_lock<std::mutex> locker(_using_clients);
+			m_clients.erase(client_socket); // are automatically closed, and that causes an exception
+			locker.unlock();
+			m_handlerFactory.getLoginManager().logout(name);
 			closesocket(client_socket); // it is ok!!
 			return;
 		}
@@ -154,17 +192,18 @@ Buffer Communicator::recv_data(SOCKET sock, int bytes_num)
 	{
 		return Buffer();
 	}
-
-	char* data = new char[bytes_num];
-	if (recv(sock, data, bytes_num, 0) == INVALID_SOCKET)
+	char temp = ' ';
+	Buffer bytesOfData;
+	for (int i = 0; i < bytes_num; i++)
 	{
-		std::string s = "Error while recieving from socket: ";
-		s += std::to_string(sock);
-		throw std::exception(s.c_str());
+		if (recv(sock, &temp, 1, 0) == 0)
+		{
+			std::string s = "Error while recieving from socket: ";
+			s += std::to_string(sock);
+			throw std::exception(s.c_str());
+		}
+		bytesOfData.m_buffer.push_back(temp);
 	}
-
-	Buffer bytesOfData = JsonResponsePacketSerializer::charToBytes(data, bytes_num);
-	delete[] data;
 	return bytesOfData;
 }
 
@@ -177,16 +216,10 @@ RequestInfo Communicator::getRequest(SOCKET client_socket)
 {
 	unsigned int requestCode = recv_data(client_socket, CODE_SIZE).m_buffer[0];
 
-	std::cout << requestCode << std::endl;
-
 	int requestSize = JsonRequestPacketDeserializer::bytesToInt(
 		recv_data(client_socket, LENGTH_SIZE));
-
-	std::cout << requestSize << std::endl;
 	
 	Buffer messageData = recv_data(client_socket, requestSize);
-
-	std::cout << JsonRequestPacketDeserializer::bytesToString(messageData) << std::endl;
 
 	time_t now = time(0);
 

@@ -1,13 +1,28 @@
 #pragma once
 #include "IDataBase.h"
 #include <vector>
+#include <mutex>
 
 class LoggedUser
 {
 public:
-	LoggedUser(std::string name);
-	~LoggedUser();
-	std::string getUsername() const;
+	/*
+	constructor
+	*/
+	LoggedUser(std::string name)
+	{
+		m_username = name;
+	}
+	~LoggedUser(){}
+	/*
+	function gets the username
+	input: none
+	output: the username
+	*/
+	std::string getUsername() const
+	{
+		return std::string(m_username);
+	}
 private:
 	std::string m_username;
 };
@@ -16,12 +31,14 @@ class LoginManager
 {
 public:
 	LoginManager();
+	LoginManager(IDataBase * db);
 	~LoginManager();
-	void signup(std::string, std::string, std::string);
-	void login(std::string, std::string);
-	void logout(std::string);
+	bool signup(std::string, std::string, std::string);
+	bool login(std::string, std::string);
+	bool logout(std::string);
 
 private:
 	IDataBase* m_database;
 	std::vector<LoggedUser> m_loggedUsers;
+	std::vector<LoggedUser>::iterator findUsername(std::string username);
 };
