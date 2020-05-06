@@ -9,12 +9,14 @@
 class Server
 {
 public:
-	Server();
+	static Server* getInstence();
 	~Server();
 	void run();
 
 private:
+	Server();
+	static Server* instance;
 	IDataBase* m_database;
-	Communicator m_communicator;
-	RequestHandlerFactory m_RequestHandlerFactory;
+	Communicator* m_communicator;
+	RequestHandlerFactory* m_RequestHandlerFactory;
 };

@@ -9,13 +9,16 @@
 class SqliteDatabase : public IDataBase
 {
 public:
-	SqliteDatabase();
+	static SqliteDatabase* getInstance();
 	~SqliteDatabase();
 	bool doesUserExist(std::string name);
 	bool doesPasswordMatch(std::string name, std::string password);
 	bool addNewUser(std::string name, std::string password, std::string email);
 
 private:
+	SqliteDatabase();
+	static SqliteDatabase* instance;
+
 	sqlite3* _db;
 	std::vector<SignupRequest> _rows;
 	friend int callback(void* data, int size, char** argv, char** colName);

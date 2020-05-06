@@ -3,16 +3,28 @@
 
 std::mutex _using_clients;
 
-Communicator::Communicator() : Communicator(nullptr) {}
-
 /*
 constructor
-function sets the map of clients and the handler factory 
+function sets the map of clients and the handler factory
 */
-Communicator::Communicator(RequestHandlerFactory handleFactory)
+Communicator::Communicator()
 {
 	m_clients = std::map<SOCKET, IRequestHandler*>();
-	m_handlerFactory = handleFactory;
+	m_handlerFactory = m_handlerFactory->getInstance();
+}
+/*
+function make sure that there is only one instance of the object
+input: none
+output: pointer of the only instance
+*/
+Communicator* Communicator::getInstance()
+{
+	if (!instance)
+	{
+		instance = new Communicator();
+	}
+
+	return instance;
 }
 
 Communicator::~Communicator()
@@ -97,7 +109,7 @@ void Communicator::startHandleRequests()
 		std::cout << "Client accepted. Server and client can speak" << std::endl;
 		
 		std::unique_lock<std::mutex> locker(_using_clients);
-		m_clients.insert({ client_socket, &(m_handlerFactory.createLoginRequestHandler()) });
+		m_clients.insert({ client_socket, &(m_handlerFactory->createLoginRequestHandler()) });
 		locker.unlock();
 		std::thread(&Communicator::handleNewClient, this, client_socket).detach();
 	}
@@ -159,7 +171,7 @@ void Communicator::handleNewClient(SOCKET client_socket)
 			std::unique_lock<std::mutex> locker(_using_clients);
 			m_clients.erase(client_socket); // are automatically closed, and that causes an exception
 			locker.unlock();
-			m_handlerFactory.getLoginManager().logout(name);
+			m_handlerFactory->getLoginManager()->logout(name);
 			closesocket(client_socket); // it is ok!!
 			return;
 		}
