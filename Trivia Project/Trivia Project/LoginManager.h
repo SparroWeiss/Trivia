@@ -1,6 +1,7 @@
 #pragma once
 #include "IDataBase.h"
 #include <vector>
+#include <mutex>
 
 class LoggedUser
 {

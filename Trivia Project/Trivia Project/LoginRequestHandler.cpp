@@ -38,12 +38,6 @@ RequestResult LoginRequestHandler::handleRequest(RequestInfo info)
 	{
 		return login(info);
 	}
-	/*
-	else if (info.id == SIGNUPCODE)
-	{
-		return signup(info);
-	}
-	*/
 	return signup(info); // the only two options available are signin or signup
 }
 

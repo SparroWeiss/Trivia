@@ -80,6 +80,7 @@ bool SqliteDatabase::doesUserExist(std::string name)
 {
 	std::string query = "SELECT * FROM USERS WHERE NAME LIKE '" + name + "';";
 	_rows.clear(); // remove the previous data
+	std::lock_guard<std::mutex> locker(_using_db);
 	sqlite3_exec(_db, query.c_str(), callback, &_rows, nullptr);
 	return !_rows.empty();
 }
@@ -107,6 +108,7 @@ bool SqliteDatabase::addNewUser(std::string name, std::string password, std::str
 		return false;
 	}
 	std::string query = "INSERT INTO USERS(NAME, PASSWORD, EMAIL) VALUES ('" + name + "', '" + password + "', '" + email + "');";
+	std::lock_guard<std::mutex> locker(_using_db);
 	sqlite3_exec(_db, query.c_str(), nullptr, nullptr, nullptr);
 	return true;
 }

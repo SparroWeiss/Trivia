@@ -19,5 +19,6 @@ private:
 	sqlite3* _db;
 	std::vector<SignupRequest> _rows;
 	friend int callback(void* data, int size, char** argv, char** colName);
-
+	
+	std::mutex _using_db;
 };

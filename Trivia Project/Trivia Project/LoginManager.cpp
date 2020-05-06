@@ -1,6 +1,9 @@
 #include "LoginManager.h"
 #include "SqliteDatabase.h"
 
+std::mutex _mutex_loggedUsers;
+std::mutex _mutex_db;
+
 /*
 constructor initialize the variables of the object
 */
@@ -25,11 +28,16 @@ output: true - signed up, false - invalid name
 */
 bool LoginManager::signup(std::string name, std::string password, std::string email)
 {
-	if (m_database->addNewUser(name, password, email))
-	{ // if the user's specs are valid
+	std::unique_lock<std::mutex> locker1(_mutex_db);
+	if (m_database->addNewUser(name, password, email)) // if the user's specs are valid
+	{
+		locker1.unlock();
+		std::unique_lock<std::mutex> locker2(_mutex_loggedUsers);
 		m_loggedUsers.push_back(LoggedUser(name));
+		locker2.unlock();
 		return true;
 	}
+	locker1.unlock();
 	return false;
 }
 
@@ -40,13 +48,19 @@ output: true - logged in, false - something went wrong
 */
 bool LoginManager::login(std::string name, std::string password)
 {
-	if (m_database->doesPasswordMatch(name, password))
+	std::unique_lock<std::mutex> locker1(_mutex_db);
+	bool pass_match = m_database->doesPasswordMatch(name, password);
+	locker1.unlock();
+	if (pass_match)
 	{ // if the password matches the username
+		std::unique_lock<std::mutex> locker2(_mutex_loggedUsers);
 		if (findUsername(name) == m_loggedUsers.end())
 		{//didn't find the user 
 			m_loggedUsers.push_back(LoggedUser(name));
+			locker2.unlock();
 			return true;
 		}
+		locker2.unlock();
 	}
 	return false;
 }
@@ -58,14 +72,20 @@ output: true - logged out, false - something went wrong
 */
 bool LoginManager::logout(std::string name)
 {
-	if (m_database->doesUserExist(name))
+	std::unique_lock<std::mutex> locker1(_mutex_db);
+	bool user_exist = m_database->doesUserExist(name);
+	locker1.unlock();
+	if (user_exist)
 	{ // if the user is in the data base
+		std::unique_lock<std::mutex> locker2(_mutex_loggedUsers);
 		std::vector<LoggedUser>::iterator iter = findUsername(name);
 		if (iter != m_loggedUsers.end())
 		{
 			m_loggedUsers.erase(iter);
+			locker2.unlock();
 			return true;
 		}
+		locker2.unlock();
 	}
 	return false;
 }
@@ -79,7 +99,7 @@ std::vector<LoggedUser>::iterator LoginManager::findUsername(std::string usernam
 {
 	for (std::vector<LoggedUser>::iterator i = m_loggedUsers.begin(); i != m_loggedUsers.end(); ++i)
 	{
-		if ((*i).getUsername() != username)
+		if (i->getUsername() == username)
 		{ // if the name matches
 			return i;
 		}
