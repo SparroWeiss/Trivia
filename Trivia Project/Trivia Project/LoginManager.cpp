@@ -43,7 +43,7 @@ LoginManager::~LoginManager()
 
 /*
 function signs up a new user
-input: user's specs: username, password, email
+input: user's specs: username, password, email, address, phone, birthdate
 output: true - signed up, false - invalid name
 */
 bool LoginManager::signup(std::string name, std::string password, std::string email, std::string address, std::string phone, std::string birthdate)

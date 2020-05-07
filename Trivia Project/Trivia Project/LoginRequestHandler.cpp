@@ -69,10 +69,48 @@ RequestResult LoginRequestHandler::signup(RequestInfo info)
 	SignupRequest signReq = JsonRequestPacketDeserializer::deserializeSignupRequest(info.buffer);
 	IRequestHandler* newHandle = this; // if the login request isn't valid, stay in same handler
 	SignupResponse signRes = { 0 }; // status: 0
-	if (m_loginManager->signup(signReq.username, signReq.password, signReq.email, signReq.address, signReq.phone, signReq.birthdate))
-	{ // if the login request is valid
-		signRes = { 1 }; // status: 1
-		newHandle = new MenuRequestHandler(); // pointer to the next handle : menu
+	if (signupValidation(signReq.password, signReq.email, signReq.address, signReq.phone, signReq.birthdate)) // if parameters are valid
+	{
+		if (m_loginManager->signup(signReq.username, signReq.password, signReq.email, signReq.address, signReq.phone, signReq.birthdate))
+		{ // if the login request is valid
+			signRes = { 1 }; // status: 1
+			newHandle = new MenuRequestHandler(); // pointer to the next handle : menu
+		}
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(signRes), newHandle };
+}
+
+/*
+This function checks a signup req parameters are valid 
+Input: parameters to check
+Output: bool
+*/
+bool LoginRequestHandler::signupValidation(std::string password, std::string email, std::string address, std::string phone, std::string birthdate)
+{
+	if (!std::regex_match(password, PASSWORD_REGEX)) // Password must be 8 chars, and contain at least one:
+	{												 // uppercase letter, lowercase letter, digit, special character
+		return false;
+	}
+	
+	if (!std::regex_match(email, EMAIL_REGEX)) // Email must be in the format:
+	{										   // <email-prefix>@<domain>
+		return false;
+	}
+	
+	if (!std::regex_match(address, ADDRESS_REGEX)) // Address must be in format:
+	{											   // <street>, <apartment-number>, <city>
+		return false;
+	}
+	
+	if (!std::regex_match(phone, PHONE_REGEX)) // Phone must be in format:
+	{										   // <phone-prefix>-<phone-number(7 digits)>
+		return false;
+	}
+	
+	if (!std::regex_match(birthdate, BIRTHDATE_REGEX)) // Birthdate must be in format:
+	{												   // DD.MM.YYYY or DD/MM/YYYY
+		return false;
+	}
+
+	return true;
 }
