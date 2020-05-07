@@ -23,7 +23,7 @@ Server* Server::getInstence()
 	{
 		instance = new Server();
 	}
-
+	instances++;
 	return instance;
 }
 /*
@@ -32,7 +32,11 @@ frees allocated memory, the only new allocated memory in the class is the instan
 */
 Server::~Server()
 {
-	delete instance;
+	instances--;
+	if (instances == 0)
+	{
+		delete instance;
+	}
 }
 
 /*

@@ -18,6 +18,7 @@ public:
 private:
 	SqliteDatabase();
 	static SqliteDatabase* instance;
+	static int instances;
 
 	sqlite3* _db;
 	std::vector<SignupRequest> _rows;

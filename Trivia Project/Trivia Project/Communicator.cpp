@@ -23,7 +23,7 @@ Communicator* Communicator::getInstance()
 	{
 		instance = new Communicator();
 	}
-
+	instances++;
 	return instance;
 }
 /*
@@ -32,11 +32,15 @@ frees allocated memory, the only new allocated memory in the class is the instan
 */
 Communicator::~Communicator()
 {
-	delete instance;
-	for (std::map<SOCKET, IRequestHandler*>::iterator i = m_clients.begin(); i != m_clients.end(); ++i)
+	instances--;
+	if (instances == 0)
 	{
-		closesocket((*i).first);
-		delete (*i).second;
+		for (std::map<SOCKET, IRequestHandler*>::iterator i = m_clients.begin(); i != m_clients.end(); ++i)
+		{
+			closesocket((*i).first);
+			delete (*i).second;
+		}
+		delete instance;
 	}
 }
 
@@ -146,7 +150,11 @@ void Communicator::handleNewClient(SOCKET client_socket)
 			{
 				RequestResult currResult = m_clients[client_socket]->handleRequest(currRequest); // deserialize request
 				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(currResult.response)); // send serialized response to client
-				m_clients[client_socket] = currResult.newHandler; // in this version: LoginHandler // updating client state
+				if (m_clients[client_socket] != currResult.newHandler)
+				{
+					delete m_clients[client_socket];
+					m_clients[client_socket] = currResult.newHandler; // updating client state
+				}
 				locker.unlock();
 				if (!loggedIn) //not enter to this block more than once
 				{
@@ -179,6 +187,7 @@ void Communicator::handleNewClient(SOCKET client_socket)
 		catch (const std::exception & e)
 		{
 			std::cout << "Error with socket: " << client_socket << ". client " << name << " disconnected." << std::endl; // When using 'test.py' client socket
+			delete m_clients[client_socket];
 			std::unique_lock<std::mutex> locker(_using_clients);
 			m_clients.erase(client_socket); // are automatically closed, and that causes an exception
 			locker.unlock();

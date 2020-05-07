@@ -22,7 +22,7 @@ RequestHandlerFactory* RequestHandlerFactory::getInstance()
 	{
 		instance = new RequestHandlerFactory();
 	}
-
+	instances++;
 	return instance;
 }
 /*
@@ -31,7 +31,11 @@ frees allocated memory, the only new allocated memory in the class is the instan
 */
 RequestHandlerFactory::~RequestHandlerFactory()
 {
-	delete instance;
+	instances--;
+	if (instances == 0)
+	{
+		delete instance;
+	}
 }
 /*
 function creates new Login request handler

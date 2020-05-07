@@ -71,7 +71,7 @@ SqliteDatabase* SqliteDatabase::getInstance()
 	{
 		instance = new SqliteDatabase();
 	}
-
+	instances++;
 	return instance;
 }
 
@@ -81,10 +81,14 @@ frees allocated memory, the only new allocated memory in the class is the instan
 */
 SqliteDatabase::~SqliteDatabase()
 {
-	sqlite3_close(_db);
-	_db = nullptr;
-	_rows.clear();
-	delete instance;
+	instances--;
+	if (instances == 0)
+	{
+		sqlite3_close(_db);
+		_db = nullptr;
+		_rows.clear();
+		delete instance;
+	}
 }
 
 /*
