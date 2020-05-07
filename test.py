@@ -82,9 +82,9 @@ def main():
         quit()
     print("socket has connected")
 
-    sign_in = {"username": "user1", "password": "1234", "email": "user1@gmail.com"}
+    sign_up = {"username": "user1", "password": "1234", "email": "user1@gmail.com"}
     try:
-        sock.sendall(create_msg(SIGNUP_CODE, sign_in))
+        sock.sendall(create_msg(SIGNUP_CODE, sign_up))
     except Exception as e:
         print("ERROR -", e)
         sock.close()
@@ -92,7 +92,7 @@ def main():
 
     try:
         msg_code, server_msg = get_msg_from_server(sock)
-        print("sign in: ", msg_code, server_msg)
+        print("sign up: ", msg_code, server_msg)
     except Exception as e:
         print("ERROR -", e)
         sock.close()
