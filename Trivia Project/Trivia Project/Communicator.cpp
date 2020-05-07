@@ -103,10 +103,12 @@ void Communicator::startHandleRequests()
 {
 	SOCKET client_socket, listening_socket = bindAndListen();
 
+	std::cout << "server is listening" << std::endl;
+	std::cout << "Waiting for client connection request" << std::endl;
+
 	while (true)
 	{
-		std::cout << "server is listening" << std::endl;
-		std::cout << "Waiting for client connection request" << std::endl;
+		
 		
 		client_socket = ::accept(listening_socket, NULL, NULL);
 		if (client_socket == INVALID_SOCKET)
@@ -115,7 +117,7 @@ void Communicator::startHandleRequests()
 			continue;
 		}
 	
-		std::cout << "Client accepted. Server and client can speak" << std::endl;
+		//std::cout << "Client accepted. Server and client can speak" << std::endl;
 		
 		std::unique_lock<std::mutex> locker(_using_clients);
 		m_clients.insert({ client_socket, m_handlerFactory->createLoginRequestHandler() });
@@ -131,7 +133,7 @@ output: none
 */
 void Communicator::handleNewClient(SOCKET client_socket)
 {
-	std::string name = "";
+	std::string name = "%didn't signed up%";
 	bool loggedIn = false;
 	while (true)
 	{
@@ -146,17 +148,17 @@ void Communicator::handleNewClient(SOCKET client_socket)
 				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(currResult.response)); // send serialized response to client
 				m_clients[client_socket] = currResult.newHandler; // in this version: LoginHandler // updating client state
 				locker.unlock();
-				if (!loggedIn)
+				if (!loggedIn) //not enter to this block more than once
 				{
 					try
 					{
 						json j = json::parse(JsonRequestPacketDeserializer::bytesToString(currResult.response).substr(5));
-						LoginResponse loginRes = j.get<LoginResponse>();
-						if (loginRes.status == 1)
+						LoginResponse loginRes = j.get<LoginResponse>(); // extracting the login response from the result of the user's action 
+						if (loginRes.status == 1) // the user logged in into the server
 						{
 							name = JsonRequestPacketDeserializer::deserializeLoginRequest(currRequest.buffer).username;
-							std::cout << name << " joined" << std::endl;
-							loggedIn = true;
+							std::cout << "### "<< name << " joined" << std::endl; // remembering the name for the thread
+							loggedIn = true; // there is no need to enter this block again, we got what we need
 						}
 					}
 					catch (const std::exception& e)
@@ -181,7 +183,7 @@ void Communicator::handleNewClient(SOCKET client_socket)
 			m_clients.erase(client_socket); // are automatically closed, and that causes an exception
 			locker.unlock();
 			m_handlerFactory->getLoginManager()->logout(name);
-			closesocket(client_socket); // it is ok!!
+			closesocket(client_socket); 
 			return;
 		}
 	}
