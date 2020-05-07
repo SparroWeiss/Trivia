@@ -82,8 +82,8 @@ def main():
         quit()
     print("socket has connected")
 
-    sign_up = {"username": "user1", "password": "1234", "email": "user1@gmail.com",
-               "address": "street, 1, city", "phone": "050-0000000", "birthdate": "01/01/2010"}
+    sign_up = {"username": "user1", "password": "aaAA11!!", "email": "user1@gmail.com",
+               "address": "street, 1, city", "phone": "050-0000000", "birthdate": "01.01.2010"}
     try:
         sock.sendall(create_msg(SIGNUP_CODE, sign_up))
     except Exception as e:
