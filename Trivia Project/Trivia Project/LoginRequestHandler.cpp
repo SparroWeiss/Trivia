@@ -69,7 +69,7 @@ RequestResult LoginRequestHandler::signup(RequestInfo info)
 	SignupRequest signReq = JsonRequestPacketDeserializer::deserializeSignupRequest(info.buffer);
 	IRequestHandler* newHandle = this; // if the login request isn't valid, stay in same handler
 	SignupResponse signRes = { 0 }; // status: 0
-	if (m_loginManager->signup(signReq.username, signReq.password, signReq.email))
+	if (m_loginManager->signup(signReq.username, signReq.password, signReq.email, signReq.address, signReq.phone, signReq.birthdate))
 	{ // if the login request is valid
 		signRes = { 1 }; // status: 1
 		newHandle = new MenuRequestHandler(); // pointer to the next handle : menu

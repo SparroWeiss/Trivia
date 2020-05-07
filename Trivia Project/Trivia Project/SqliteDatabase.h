@@ -13,7 +13,7 @@ public:
 	~SqliteDatabase();
 	bool doesUserExist(std::string name);
 	bool doesPasswordMatch(std::string name, std::string password);
-	bool addNewUser(std::string name, std::string password, std::string email);
+	bool addNewUser(std::string name, std::string password, std::string email, std::string address, std::string phone, std::string birthdate);
 
 private:
 	SqliteDatabase();

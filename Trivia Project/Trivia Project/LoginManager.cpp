@@ -46,10 +46,10 @@ function signs up a new user
 input: user's specs: username, password, email
 output: true - signed up, false - invalid name
 */
-bool LoginManager::signup(std::string name, std::string password, std::string email)
+bool LoginManager::signup(std::string name, std::string password, std::string email, std::string address, std::string phone, std::string birthdate)
 {
 	std::unique_lock<std::mutex> locker1(_mutex_db);
-	if (m_database->addNewUser(name, password, email)) // if the user's specs are valid
+	if (m_database->addNewUser(name, password, email, address, phone, birthdate)) // if the user's specs are valid
 	{
 		locker1.unlock();
 		std::unique_lock<std::mutex> locker2(_mutex_loggedUsers);
