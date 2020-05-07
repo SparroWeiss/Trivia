@@ -77,13 +77,14 @@ SqliteDatabase* SqliteDatabase::getInstance()
 
 /*
 distructor
-it deletes any allocated variables and closes open resources
+frees allocated memory, the only new allocated memory in the class is the instance
 */
 SqliteDatabase::~SqliteDatabase()
 {
 	sqlite3_close(_db);
 	_db = nullptr;
 	_rows.clear();
+	delete instance;
 }
 
 /*

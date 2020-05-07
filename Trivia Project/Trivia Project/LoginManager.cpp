@@ -29,10 +29,12 @@ LoginManager* LoginManager::getInstance()
 }
 
 /*
-distructor frees allocated memory
+distructor
+frees allocated memory
 */
 LoginManager::~LoginManager()
 {
+	// nothing to free
 }
 
 /*

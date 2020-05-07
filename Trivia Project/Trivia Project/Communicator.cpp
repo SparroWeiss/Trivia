@@ -19,16 +19,25 @@ output: pointer of the only instance
 */
 Communicator* Communicator::getInstance()
 {
-	if (!instance)
+	if (instance == 0)
 	{
 		instance = new Communicator();
 	}
 
 	return instance;
 }
-
+/*
+distructor
+frees allocated memory, the only new allocated memory in the class is the instance
+*/
 Communicator::~Communicator()
 {
+	delete instance;
+	for (std::map<SOCKET, IRequestHandler*>::iterator i = m_clients.begin(); i != m_clients.end(); ++i)
+	{
+		closesocket((*i).first);
+		delete (*i).second;
+	}
 }
 
 /*
@@ -109,7 +118,7 @@ void Communicator::startHandleRequests()
 		std::cout << "Client accepted. Server and client can speak" << std::endl;
 		
 		std::unique_lock<std::mutex> locker(_using_clients);
-		m_clients.insert({ client_socket, &(m_handlerFactory->createLoginRequestHandler()) });
+		m_clients.insert({ client_socket, m_handlerFactory->createLoginRequestHandler() });
 		locker.unlock();
 		std::thread(&Communicator::handleNewClient, this, client_socket).detach();
 	}

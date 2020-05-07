@@ -25,18 +25,22 @@ RequestHandlerFactory* RequestHandlerFactory::getInstance()
 
 	return instance;
 }
-
+/*
+distructor
+frees allocated memory, the only new allocated memory in the class is the instance
+*/
 RequestHandlerFactory::~RequestHandlerFactory()
 {
+	delete instance;
 }
 /*
 function creates new Login request handler
 input: none
 output: Login request handler
 */
-LoginRequestHandler RequestHandlerFactory::createLoginRequestHandler()
+LoginRequestHandler* RequestHandlerFactory::createLoginRequestHandler()
 {
-	return LoginRequestHandler();
+	return new LoginRequestHandler();
 }
 /*
 MenuRequestHandler RequestHandlerFactory::createMenuRequestHandler()

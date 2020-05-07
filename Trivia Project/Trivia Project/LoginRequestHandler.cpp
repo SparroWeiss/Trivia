@@ -14,6 +14,7 @@ LoginRequestHandler::LoginRequestHandler()
 
 LoginRequestHandler::~LoginRequestHandler()
 {
+	// there is nothing to free
 }
 
 /*

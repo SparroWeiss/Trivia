@@ -26,9 +26,13 @@ Server* Server::getInstence()
 
 	return instance;
 }
-
+/*
+distructor
+frees allocated memory, the only new allocated memory in the class is the instance
+*/
 Server::~Server()
 {
+	delete instance;
 }
 
 /*

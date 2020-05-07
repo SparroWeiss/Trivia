@@ -10,7 +10,7 @@ public:
 	
 	static RequestHandlerFactory* getInstance();
 	~RequestHandlerFactory();
-	LoginRequestHandler createLoginRequestHandler();
+	LoginRequestHandler* createLoginRequestHandler();
 	LoginManager* getLoginManager() const;
 
 private:
