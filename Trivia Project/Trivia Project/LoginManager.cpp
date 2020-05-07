@@ -7,18 +7,38 @@ std::mutex _mutex_db;
 /*
 constructor initialize the variables of the object
 */
-LoginManager::LoginManager() : LoginManager(nullptr){}
-LoginManager::LoginManager(IDataBase * db)
+LoginManager::LoginManager() 
 {
-	m_database = db;
+	m_database = SqliteDatabase::getInstance();
 	m_loggedUsers = std::vector<LoggedUser>();
 }
 
 /*
-distructor frees allocated memory
+function make sure that there is only one instance of the object
+input: none
+output: pointer of the only instance
+*/
+LoginManager* LoginManager::getInstance()
+{
+	if (instance == 0)
+	{
+		instance = new LoginManager();
+	}
+	instances++;
+	return instance;
+}
+
+/*
+distructor
+frees allocated memory
 */
 LoginManager::~LoginManager()
 {
+	instances--;
+	if (instances == 0)
+	{
+		delete instance;
+	}
 }
 
 /*

@@ -1,13 +1,27 @@
 #include "Server.h"
+#include "SqliteDatabase.h"
+
+Server* Server::instance = 0;
+Communicator* Communicator::instance = 0;
+LoginManager* LoginManager::instance = 0;
+RequestHandlerFactory* RequestHandlerFactory::instance = 0;
+SqliteDatabase* SqliteDatabase::instance = 0;
+
+int Server::instances = 0;
+int Communicator::instances = 0;
+int LoginManager::instances = 0;
+int RequestHandlerFactory::instances = 0;
+int SqliteDatabase::instances = 0;
 
 int main()
 {
-	Server server;
+
+	Server* server = server->getInstence();
 
 	try
 	{
 		WSAInitializer wsaInit;
-		server.run();
+		server->run();
 	}
 	catch (const std::exception& e)
 	{

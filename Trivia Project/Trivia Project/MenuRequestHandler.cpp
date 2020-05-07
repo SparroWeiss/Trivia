@@ -1,11 +1,9 @@
 #include "MenuRequestHandler.h"
 
-MenuRequestHandler::MenuRequestHandler() : MenuRequestHandler(nullptr){}
-
-MenuRequestHandler::MenuRequestHandler(LoginRequestHandler* login)
+MenuRequestHandler::MenuRequestHandler()
 {
-	m_login = login;
 }
+
 
 MenuRequestHandler::~MenuRequestHandler()
 {

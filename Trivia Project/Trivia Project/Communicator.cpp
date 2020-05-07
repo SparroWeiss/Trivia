@@ -3,20 +3,45 @@
 
 std::mutex _using_clients;
 
-Communicator::Communicator() : Communicator(nullptr) {}
-
 /*
 constructor
-function sets the map of clients and the handler factory 
+function sets the map of clients and the handler factory
 */
-Communicator::Communicator(RequestHandlerFactory handleFactory)
+Communicator::Communicator()
 {
 	m_clients = std::map<SOCKET, IRequestHandler*>();
-	m_handlerFactory = handleFactory;
+	m_handlerFactory = m_handlerFactory->getInstance();
 }
-
+/*
+function make sure that there is only one instance of the object
+input: none
+output: pointer of the only instance
+*/
+Communicator* Communicator::getInstance()
+{
+	if (instance == 0)
+	{
+		instance = new Communicator();
+	}
+	instances++;
+	return instance;
+}
+/*
+distructor
+frees allocated memory, the only new allocated memory in the class is the instance
+*/
 Communicator::~Communicator()
 {
+	instances--;
+	if (instances == 0)
+	{
+		for (std::map<SOCKET, IRequestHandler*>::iterator i = m_clients.begin(); i != m_clients.end(); ++i)
+		{
+			closesocket((*i).first);
+			delete (*i).second;
+		}
+		delete instance;
+	}
 }
 
 /*
@@ -82,10 +107,12 @@ void Communicator::startHandleRequests()
 {
 	SOCKET client_socket, listening_socket = bindAndListen();
 
+	std::cout << "server is listening" << std::endl;
+	std::cout << "Waiting for client connection request" << std::endl;
+
 	while (true)
 	{
-		std::cout << "server is listening" << std::endl;
-		std::cout << "Waiting for client connection request" << std::endl;
+		
 		
 		client_socket = ::accept(listening_socket, NULL, NULL);
 		if (client_socket == INVALID_SOCKET)
@@ -94,10 +121,10 @@ void Communicator::startHandleRequests()
 			continue;
 		}
 	
-		std::cout << "Client accepted. Server and client can speak" << std::endl;
+		//std::cout << "Client accepted. Server and client can speak" << std::endl;
 		
 		std::unique_lock<std::mutex> locker(_using_clients);
-		m_clients.insert({ client_socket, &(m_handlerFactory.createLoginRequestHandler()) });
+		m_clients.insert({ client_socket, m_handlerFactory->createLoginRequestHandler() });
 		locker.unlock();
 		std::thread(&Communicator::handleNewClient, this, client_socket).detach();
 	}
@@ -110,7 +137,7 @@ output: none
 */
 void Communicator::handleNewClient(SOCKET client_socket)
 {
-	std::string name = "";
+	std::string name = "%didn't signed up%";
 	bool loggedIn = false;
 	while (true)
 	{
@@ -123,19 +150,23 @@ void Communicator::handleNewClient(SOCKET client_socket)
 			{
 				RequestResult currResult = m_clients[client_socket]->handleRequest(currRequest); // deserialize request
 				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(currResult.response)); // send serialized response to client
-				m_clients[client_socket] = currResult.newHandler; // in this version: LoginHandler // updating client state
+				if (m_clients[client_socket] != currResult.newHandler)
+				{
+					delete m_clients[client_socket];
+					m_clients[client_socket] = currResult.newHandler; // updating client state
+				}
 				locker.unlock();
-				if (!loggedIn)
+				if (!loggedIn) //not enter to this block more than once
 				{
 					try
 					{
 						json j = json::parse(JsonRequestPacketDeserializer::bytesToString(currResult.response).substr(5));
-						LoginResponse loginRes = j.get<LoginResponse>();
-						if (loginRes.status == 1)
+						LoginResponse loginRes = j.get<LoginResponse>(); // extracting the login response from the result of the user's action 
+						if (loginRes.status == 1) // the user logged in into the server
 						{
 							name = JsonRequestPacketDeserializer::deserializeLoginRequest(currRequest.buffer).username;
-							std::cout << name << " joined" << std::endl;
-							loggedIn = true;
+							std::cout << "### "<< name << " joined" << std::endl; // remembering the name for the thread
+							loggedIn = true; // there is no need to enter this block again, we got what we need
 						}
 					}
 					catch (const std::exception& e)
@@ -156,11 +187,12 @@ void Communicator::handleNewClient(SOCKET client_socket)
 		catch (const std::exception & e)
 		{
 			std::cout << "Error with socket: " << client_socket << ". client " << name << " disconnected." << std::endl; // When using 'test.py' client socket
+			delete m_clients[client_socket];
 			std::unique_lock<std::mutex> locker(_using_clients);
 			m_clients.erase(client_socket); // are automatically closed, and that causes an exception
 			locker.unlock();
-			m_handlerFactory.getLoginManager().logout(name);
-			closesocket(client_socket); // it is ok!!
+			m_handlerFactory->getLoginManager()->logout(name);
+			closesocket(client_socket); 
 			return;
 		}
 	}

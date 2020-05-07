@@ -7,13 +7,36 @@ sets the database, the request handler factory and the communicator
 */
 Server::Server()
 {
-	m_database = new SqliteDatabase();
-	m_RequestHandlerFactory = RequestHandlerFactory(m_database);
-	m_communicator = Communicator(m_RequestHandlerFactory);
+	m_database = SqliteDatabase::getInstance();
+	m_RequestHandlerFactory = m_RequestHandlerFactory->getInstance();
+	m_communicator = m_communicator->getInstance();
 }
 
+/*
+function make sure that there is only one instance of the object
+input: none
+output: pointer of the only instance
+*/
+Server* Server::getInstence()
+{
+	if (instance == 0)
+	{
+		instance = new Server();
+	}
+	instances++;
+	return instance;
+}
+/*
+distructor
+frees allocated memory, the only new allocated memory in the class is the instance
+*/
 Server::~Server()
 {
+	instances--;
+	if (instances == 0)
+	{
+		delete instance;
+	}
 }
 
 /*

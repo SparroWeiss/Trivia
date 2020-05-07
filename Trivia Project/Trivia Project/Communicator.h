@@ -36,15 +36,18 @@ enum messageCode
 class Communicator
 {
 public:
-	Communicator();
-	Communicator(RequestHandlerFactory handleFactory);
+	static Communicator* getInstance();
 	~Communicator();
 	SOCKET bindAndListen();
 	void startHandleRequests();
 
 private:
+	Communicator();
+	static Communicator* instance;//singleton
+	static int instances;
+
 	std::map<SOCKET, IRequestHandler*> m_clients;
-	RequestHandlerFactory m_handlerFactory;
+	RequestHandlerFactory* m_handlerFactory;
 	
 	void handleNewClient(SOCKET client_socket);
 	void send_data(SOCKET, std::string);

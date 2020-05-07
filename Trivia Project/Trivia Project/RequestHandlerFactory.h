@@ -7,13 +7,16 @@ class LoginRequestHandler;
 class RequestHandlerFactory
 {
 public:
-	RequestHandlerFactory();
-	RequestHandlerFactory(IDataBase* db);
+	static RequestHandlerFactory* getInstance();
 	~RequestHandlerFactory();
-	LoginRequestHandler createLoginRequestHandler();
-	LoginManager getLoginManager() const;
+	LoginRequestHandler* createLoginRequestHandler();
+	LoginManager* getLoginManager() const;
 
 private:
-	LoginManager m_loginManager;
+	RequestHandlerFactory();
+	static RequestHandlerFactory* instance;
+	static int instances;
+
+	LoginManager* m_loginManager;
 	IDataBase* m_database;
 };

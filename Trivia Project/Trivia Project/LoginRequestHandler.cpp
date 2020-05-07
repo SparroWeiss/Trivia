@@ -2,19 +2,19 @@
 #include "Communicator.h"
 #include "MenuRequestHandler.h"
 
-LoginRequestHandler::LoginRequestHandler() : m_handlerFactory(nullptr), m_loginManager(LoginManager()){}
 /*
 constructor
 sets the handler factory and the login manager
 */
-LoginRequestHandler::LoginRequestHandler(RequestHandlerFactory* handleFactory)
+LoginRequestHandler::LoginRequestHandler()
 {
-	m_handlerFactory = handleFactory;
+	m_handlerFactory = m_handlerFactory->getInstance();
 	m_loginManager = m_handlerFactory->getLoginManager();
 }
 
 LoginRequestHandler::~LoginRequestHandler()
 {
+	// there is nothing to free
 }
 
 /*
@@ -51,10 +51,10 @@ RequestResult LoginRequestHandler::login(RequestInfo info)
 	LoginRequest loginReq = JsonRequestPacketDeserializer::deserializeLoginRequest(info.buffer);
 	IRequestHandler* newHandle = this; // if the login request isn't valid, stay in same handler
 	LoginResponse loginRes = { 0 }; // status: 0
-	if (m_loginManager.login(loginReq.username, loginReq.password))
+	if (m_loginManager->login(loginReq.username, loginReq.password))
 	{ // if the login request is valid
 		loginRes = { 1 }; // status: 1
-		newHandle = new MenuRequestHandler(this); // pointer to the next handle : menu
+		newHandle = new MenuRequestHandler(); // pointer to the next handle : menu
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(loginRes), newHandle };
 }
@@ -69,10 +69,10 @@ RequestResult LoginRequestHandler::signup(RequestInfo info)
 	SignupRequest signReq = JsonRequestPacketDeserializer::deserializeSignupRequest(info.buffer);
 	IRequestHandler* newHandle = this; // if the login request isn't valid, stay in same handler
 	SignupResponse signRes = { 0 }; // status: 0
-	if (m_loginManager.signup(signReq.username, signReq.password, signReq.email))
+	if (m_loginManager->signup(signReq.username, signReq.password, signReq.email))
 	{ // if the login request is valid
 		signRes = { 1 }; // status: 1
-		newHandle = new MenuRequestHandler(this); // pointer to the next handle : menu
+		newHandle = new MenuRequestHandler(); // pointer to the next handle : menu
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(signRes), newHandle };
 }

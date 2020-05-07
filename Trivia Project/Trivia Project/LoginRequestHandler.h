@@ -9,13 +9,12 @@ class LoginRequestHandler : public IRequestHandler
 {
 public:
 	LoginRequestHandler();
-	LoginRequestHandler(RequestHandlerFactory * handleFactory);
 	~LoginRequestHandler();
 	bool isRequestRelevent(RequestInfo);
 	RequestResult handleRequest(RequestInfo);
 
 private:
-	LoginManager m_loginManager;
+	LoginManager* m_loginManager;
 	RequestHandlerFactory* m_handlerFactory;
 
 	RequestResult login(RequestInfo info);

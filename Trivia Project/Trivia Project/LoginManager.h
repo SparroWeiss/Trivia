@@ -30,14 +30,17 @@ private:
 class LoginManager
 {
 public:
-	LoginManager();
-	LoginManager(IDataBase * db);
+	static LoginManager* getInstance();
 	~LoginManager();
 	bool signup(std::string, std::string, std::string);
 	bool login(std::string, std::string);
 	bool logout(std::string);
 
 private:
+	LoginManager();
+	static LoginManager* instance;
+	static int instances;
+
 	IDataBase* m_database;
 	std::vector<LoggedUser> m_loggedUsers;
 	std::vector<LoggedUser>::iterator findUsername(std::string username);

@@ -61,14 +61,34 @@ SqliteDatabase::SqliteDatabase()
 }
 
 /*
+function make sure that there is only one instance of the object
+input: none
+output: pointer of the only instance
+*/
+SqliteDatabase* SqliteDatabase::getInstance()
+{
+	if (instance == 0)
+	{
+		instance = new SqliteDatabase();
+	}
+	instances++;
+	return instance;
+}
+
+/*
 distructor
-it deletes any allocated variables and closes open resources
+frees allocated memory, the only new allocated memory in the class is the instance
 */
 SqliteDatabase::~SqliteDatabase()
 {
-	sqlite3_close(_db);
-	_db = nullptr;
-	_rows.clear();
+	instances--;
+	if (instances == 0)
+	{
+		sqlite3_close(_db);
+		_db = nullptr;
+		_rows.clear();
+		delete instance;
+	}
 }
 
 /*
