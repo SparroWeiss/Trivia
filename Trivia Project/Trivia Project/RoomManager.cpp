@@ -3,6 +3,10 @@
 std::mutex _mutex_rooms;
 std::mutex _mutex_curr_id;
 
+/*
+constructor
+initialize the variables of the class
+*/
 RoomManager::RoomManager()
 {
 	m_rooms = std::map<unsigned int, Room>();
