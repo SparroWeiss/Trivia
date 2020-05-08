@@ -25,6 +25,7 @@ RequestHandlerFactory* RequestHandlerFactory::getInstance()
 	instances++;
 	return instance;
 }
+
 /*
 distructor
 frees allocated memory, the only new allocated memory in the class is the instance
@@ -37,6 +38,7 @@ RequestHandlerFactory::~RequestHandlerFactory()
 		delete instance;
 	}
 }
+
 /*
 function creates new Login request handler
 input: none
@@ -46,12 +48,7 @@ LoginRequestHandler* RequestHandlerFactory::createLoginRequestHandler()
 {
 	return new LoginRequestHandler();
 }
-/*
-MenuRequestHandler RequestHandlerFactory::createMenuRequestHandler()
-{
-	return MenuRequestHandler(this);
-}
-*/
+
 /*
 function returns the Login Manager
 input: none

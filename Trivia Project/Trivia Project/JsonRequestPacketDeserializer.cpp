@@ -31,7 +31,8 @@ Output: none
 */
 void to_json(json& j, const SignupRequest& signup)
 {
-	j = json{ {"username", signup.username}, {"password", signup.password}, {"email", signup.email} };
+	j = json{ {"username", signup.username}, {"password", signup.password}, {"email", signup.email},
+		{"address", signup.address}, {"phone", signup.phone}, {"birthdate", signup.birthdate} };
 }
 
 /*
@@ -44,6 +45,9 @@ void from_json(const json& j, SignupRequest& signup)
 	j.at("username").get_to(signup.username);
 	j.at("password").get_to(signup.password);
 	j.at("email").get_to(signup.email);
+	j.at("address").get_to(signup.address);
+	j.at("phone").get_to(signup.phone);
+	j.at("birthdate").get_to(signup.birthdate);
 }
 
 

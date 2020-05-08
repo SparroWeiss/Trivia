@@ -32,7 +32,7 @@ class LoginManager
 public:
 	static LoginManager* getInstance();
 	~LoginManager();
-	bool signup(std::string, std::string, std::string);
+	bool signup(std::string, std::string, std::string, std::string, std::string, std::string);
 	bool login(std::string, std::string);
 	bool logout(std::string);
 

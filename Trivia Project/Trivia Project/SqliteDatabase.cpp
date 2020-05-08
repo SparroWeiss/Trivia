@@ -4,6 +4,9 @@
 #define NAME_COLUMN std::string("NAME")
 #define PASSWORD_COLUMN std::string("PASSWORD")
 #define EMAIL_COLUMN std::string("EMAIL")
+#define ADDRESS_COLUMN std::string("ADDRESS")
+#define PHONE_COLUMN std::string("PHONE")
+#define BIRTHDATE_COLUMN std::string("BIRTHDATE")
 
 
 /*
@@ -32,6 +35,18 @@ int callback(void* data, int size, char** argv, char** colName)
 		{
 			temp.email = std::string(argv[i]);
 		}
+		else if (column == ADDRESS_COLUMN)
+		{
+			temp.address = std::string(argv[i]);
+		}
+		else if (column == PHONE_COLUMN)
+		{
+			temp.phone = std::string(argv[i]);
+		}
+		else if (column == BIRTHDATE_COLUMN)
+		{
+			temp.birthdate = std::string(argv[i]);
+		}
 	}
 	static_cast<std::vector<SignupRequest>*>(data)->push_back(temp);
 	return 0;
@@ -54,8 +69,12 @@ SqliteDatabase::SqliteDatabase()
 	{ // file doesn't exists
 		std::string query = "CREATE TABLE USERS(" + NAME_COLUMN +
 			" TEXT PRIMARY KEY NOT NULL, " + PASSWORD_COLUMN +
-			" TEXT NOT NULL, " + EMAIL_COLUMN + " TEXT NOT NULL);"; // set the tables
-		sqlite3_exec(_db, query.c_str(), nullptr, nullptr, nullptr);
+			" TEXT NOT NULL, " + EMAIL_COLUMN +
+			" TEXT NOT NULL, " + ADDRESS_COLUMN +
+			" TEXT NOT NULL, " + PHONE_COLUMN +
+			" TEXT NOT NULL, " + BIRTHDATE_COLUMN +
+			" TEXT NOT NULL);";
+		sqlite3_exec(_db, query.c_str(), nullptr, nullptr, nullptr); // set users table
 	}
 	_rows = std::vector<SignupRequest>();
 }
@@ -121,13 +140,14 @@ function adds a new user
 input: the user specs: username, password, email
 output: true - the user's specs are valid, false - there is already someone with that username
 */
-bool SqliteDatabase::addNewUser(std::string name, std::string password, std::string email)
+bool SqliteDatabase::addNewUser(std::string name, std::string password, std::string email, std::string address, std::string phone, std::string birthdate)
 {
 	if (doesUserExist(name))
 	{ // can't make two users with the same name
 		return false;
 	}
-	std::string query = "INSERT INTO USERS(NAME, PASSWORD, EMAIL) VALUES ('" + name + "', '" + password + "', '" + email + "');";
+	std::string query = "INSERT INTO USERS(NAME, PASSWORD, EMAIL, ADDRESS, PHONE, BIRTHDATE) VALUES ('" +
+		name + "', '" + password + "', '" + email + "', '" + address + "', '" + phone + "', '" + birthdate +  "');";
 	std::lock_guard<std::mutex> locker(_using_db);
 	sqlite3_exec(_db, query.c_str(), nullptr, nullptr, nullptr);
 	return true;
