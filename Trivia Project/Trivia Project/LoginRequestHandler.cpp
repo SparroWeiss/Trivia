@@ -54,7 +54,7 @@ RequestResult LoginRequestHandler::login(RequestInfo info)
 	if (m_loginManager->login(loginReq.username, loginReq.password))
 	{ // if the login request is valid
 		loginRes = { 1 }; // status: 1
-		newHandle = new MenuRequestHandler(); // pointer to the next handle : menu
+		newHandle = m_handlerFactory->createMenuRequestHandler(); // pointer to the next handle : menu
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(loginRes), newHandle };
 }

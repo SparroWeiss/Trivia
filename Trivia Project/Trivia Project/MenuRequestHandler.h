@@ -14,5 +14,13 @@ public:
 	RequestResult handleRequest(RequestInfo);
 
 private:
-	// for now, we will see what we will do with this class
+	LoggedUser m_user;
+	RequestHandlerFactory* m_handlerFactory;
+
+	RequestResult signout(RequestInfo info);
+	RequestResult getRooms(RequestInfo info);
+	RequestResult getPlayersInRoom(RequestInfo info);
+	RequestResult getStatistics(RequestInfo info);
+	RequestResult joinRoom(RequestInfo info);
+	RequestResult createRoom(RequestInfo info);
 };

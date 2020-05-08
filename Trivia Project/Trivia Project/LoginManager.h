@@ -7,8 +7,9 @@ class LoggedUser
 {
 public:
 	/*
-	constructor
+	constructors
 	*/
+	LoggedUser() : LoggedUser("") {}
 	LoggedUser(std::string name)
 	{
 		m_username = name;

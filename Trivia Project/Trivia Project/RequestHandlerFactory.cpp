@@ -9,6 +9,7 @@ RequestHandlerFactory::RequestHandlerFactory()
 {
 	m_database = SqliteDatabase::getInstance();
 	m_loginManager = m_loginManager->getInstance();
+	m_roomManager = m_roomManager->getInstance();
 }
 
 /*
@@ -50,11 +51,31 @@ LoginRequestHandler* RequestHandlerFactory::createLoginRequestHandler()
 }
 
 /*
+function creates new Menu request handler
+input: none
+output: Menu request handler
+*/
+MenuRequestHandler* RequestHandlerFactory::createMenuRequestHandler()
+{
+	return new MenuRequestHandler();
+}
+
+/*
 function returns the Login Manager
 input: none
 output: Login Manager
 */
-LoginManager* RequestHandlerFactory::getLoginManager() const
+LoginManager* RequestHandlerFactory::getLoginManager()
 {
 	return m_loginManager;
+}
+
+/*
+function returns the Room Manager
+input: none
+output: Room Manager
+*/
+RoomManager* RequestHandlerFactory::getRoomManager()
+{
+	return m_roomManager;
 }
