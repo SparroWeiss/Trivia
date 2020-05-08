@@ -14,7 +14,7 @@ public:
 	RequestResult handleRequest(RequestInfo);
 
 private:
-	LoggedUser* m_user;
+	LoggedUser m_user;
 	RequestHandlerFactory* m_handlerFactory;
 
 	RequestResult signout(RequestInfo info);

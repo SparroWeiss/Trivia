@@ -4,12 +4,11 @@
 MenuRequestHandler::MenuRequestHandler()
 {
 	m_handlerFactory = m_handlerFactory->getInstance();
-	m_user = new LoggedUser(""); // for now, we need to understand how to do it
+	m_user = LoggedUser(); // for now, we need to understand how to do it
 }
 
 MenuRequestHandler::~MenuRequestHandler()
 {
-	delete m_user;
 }
 
 bool MenuRequestHandler::isRequestRelevent(RequestInfo info)
