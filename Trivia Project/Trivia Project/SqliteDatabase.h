@@ -14,6 +14,7 @@ public:
 	bool doesUserExist(std::string name);
 	bool doesPasswordMatch(std::string name, std::string password);
 	bool addNewUser(std::string name, std::string password, std::string email, std::string address, std::string phone, std::string birthdate);
+	virtual std::list<Question> getQuestions(int);
 
 private:
 	SqliteDatabase();
@@ -21,8 +22,13 @@ private:
 	static int instances;
 
 	sqlite3* _db;
-	std::vector<SignupRequest> _rows;
-	friend int callback(void* data, int size, char** argv, char** colName);
+	std::vector<SignupRequest> _usersRows;
+	std::list<Question> _questionsRows;
+
+	void refreshQuestions(int);
+
+	friend int usersCallback(void* data, int size, char** argv, char** colName);
+	friend int questionsCallback(void* data, int size, char** argv, char** colName);
 	
 	std::mutex _using_db;
 };

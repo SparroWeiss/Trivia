@@ -8,6 +8,14 @@
 #define PHONE_COLUMN std::string("PHONE")
 #define BIRTHDATE_COLUMN std::string("BIRTHDATE")
 
+#define QUESTION_COLUMN std::string("QUESTION")
+#define CORRECT_ANSWER_COLUMN std::string("CORRECT_ANSWER")
+#define WRONG_ANSWERS_COLUMN std::string("WRONG_ANSWERS")
+
+#define MAX_QUESTIONS 50
+#define SCRIPT_PATH "python \"..\\Trivia Project\\scripts\\getQuestions.py\" "
+#define DELIMITER "~~~"
+
 
 /*
 this helper function gets the data that the DB returned
@@ -16,7 +24,7 @@ input: data - pointer to the reachable variable, size - number of columns in the
 		argv - array of the data of each column, colName - the name of the column
 output: 0, it doesn't realy matters
 */
-int callback(void* data, int size, char** argv, char** colName)
+int usersCallback(void* data, int size, char** argv, char** colName)
 {
 	SignupRequest temp = SignupRequest();
 	std::string column;
@@ -53,6 +61,47 @@ int callback(void* data, int size, char** argv, char** colName)
 }
 
 /*
+This helper function gets the data that the DB returned
+and transforms it into a reachable variable.
+Input: data - pointer to the reachable variable,
+       size - number of columns in the table,
+       argv - array of the data of each column, colName - the name of the column
+output: 0
+*/
+int questionsCallback(void* data, int size, char** argv, char** colName)
+{
+	Question temp = Question();
+	std::string column;
+	char* tempWrongAnswer;
+
+	for (int i = 0; i < size; i++)
+	{
+		column = std::string(colName[i]);
+		if (column == QUESTION_COLUMN)
+		{
+			temp._question = std::string(argv[i]);
+		}
+		else if (column == CORRECT_ANSWER_COLUMN)
+		{
+			temp._correctAnswer = std::string(argv[i]);
+		}
+		else if (column == WRONG_ANSWERS_COLUMN)
+		{
+			tempWrongAnswer = strtok(argv[i], DELIMITER);
+			while (tempWrongAnswer != NULL)
+			{
+				printf("%s\n", tempWrongAnswer);
+				temp._wrongAnswers.push_back(tempWrongAnswer);
+				tempWrongAnswer = strtok(NULL, DELIMITER);
+			}
+		}
+	}
+
+	static_cast<std::list<Question>*>(data)->push_back(temp);
+	return 0;
+}
+
+/*
 constructor
 it checks if the data base file is initialized
 and if there isn't a file, the function creates a new one
@@ -75,8 +124,16 @@ SqliteDatabase::SqliteDatabase()
 			" TEXT NOT NULL, " + BIRTHDATE_COLUMN +
 			" TEXT NOT NULL);";
 		sqlite3_exec(_db, query.c_str(), nullptr, nullptr, nullptr); // set users table
+
+		query = "CREATE TABLE QUESTIONS(" + QUESTION_COLUMN +
+			" TEXT PRIMARY KEY NOT NULL, " + CORRECT_ANSWER_COLUMN +
+			" TEXT NOT NULL, " + WRONG_ANSWERS_COLUMN +
+			" TEXT NOT NULL);";
+
+		sqlite3_exec(_db, query.c_str(), nullptr, nullptr, nullptr); // set questions table
 	}
-	_rows = std::vector<SignupRequest>();
+	_usersRows = std::vector<SignupRequest>();
+	_questionsRows = std::list<Question>();
 }
 
 /*
@@ -105,7 +162,8 @@ SqliteDatabase::~SqliteDatabase()
 	{
 		sqlite3_close(_db);
 		_db = nullptr;
-		_rows.clear();
+		_usersRows.clear();
+		_questionsRows.clear();
 		delete instance;
 	}
 }
@@ -118,10 +176,10 @@ output: true - the username exists in the DB, false - the username can't be foun
 bool SqliteDatabase::doesUserExist(std::string name)
 {
 	std::string query = "SELECT * FROM USERS WHERE NAME LIKE '" + name + "';";
-	_rows.clear(); // remove the previous data
+	_usersRows.clear(); // remove the previous data
 	std::lock_guard<std::mutex> locker(_using_db);
-	sqlite3_exec(_db, query.c_str(), callback, &_rows, nullptr);
-	return !_rows.empty();
+	sqlite3_exec(_db, query.c_str(), usersCallback, &_usersRows, nullptr);
+	return !_usersRows.empty();
 }
 
 /*
@@ -132,7 +190,7 @@ output: true - the password matches the username, false - the password doesn't m
 bool SqliteDatabase::doesPasswordMatch(std::string name, std::string password)
 {
 	return doesUserExist(name) /*if the user exists*/
-		&& _rows.front().password == password /*if exists, his data is aved in _rows, checks if the password matches*/;
+		&& _usersRows.front().password == password /*if exists, his data is aved in _rows, checks if the password matches*/;
 }
 
 /*
@@ -151,4 +209,50 @@ bool SqliteDatabase::addNewUser(std::string name, std::string password, std::str
 	std::lock_guard<std::mutex> locker(_using_db);
 	sqlite3_exec(_db, query.c_str(), nullptr, nullptr, nullptr);
 	return true;
+}
+
+std::list<Question> SqliteDatabase::getQuestions(int amount)
+{
+	std::string query = "SELECT * FROM QUESTIONS;";
+	_questionsRows.clear(); // remove the previous data
+
+	refreshQuestions(amount); // refreshing DB questions
+
+	std::lock_guard<std::mutex> locker(_using_db);
+	sqlite3_exec(_db, query.c_str(), questionsCallback, &_questionsRows, nullptr);
+
+
+	return std::list<Question>(_questionsRows);
+}
+
+/*
+This function activate a python script that refresh the DB's questions.
+Input: the amount of new questions
+Output: none
+*/
+void SqliteDatabase::refreshQuestions(int amount)
+{
+	STARTUPINFOA info = { sizeof(info) };
+	PROCESS_INFORMATION processInfo;
+
+	if (amount > MAX_QUESTIONS) // opentdb api supports up to 50 questions per request
+	{
+		amount = MAX_QUESTIONS;
+	}
+
+	std::string scriptCommandLine = SCRIPT_PATH + std::to_string(amount) + " \"..\\Trivia Project\\" + DB_NAME + "\"";
+
+	std::lock_guard<std::mutex> locker(_using_db); // python script accessing db
+
+	if (CreateProcessA(NULL, LPSTR(scriptCommandLine.c_str()), NULL, NULL, FALSE, NULL, NULL, NULL, &info, &processInfo))
+	{
+		WaitForSingleObject(processInfo.hProcess, INFINITE);
+		CloseHandle(processInfo.hProcess);
+		CloseHandle(processInfo.hThread);
+	}
+
+	else
+	{
+		std::cout << "Faild to fetch questions. Error " << GetLastError() << std::endl; // should not happen
+	}
 }
