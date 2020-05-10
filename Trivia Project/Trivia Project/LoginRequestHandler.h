@@ -21,7 +21,7 @@ public:
 	RequestResult handleRequest(RequestInfo);
 
 private:
-	LoginManager m_loginManager;
+	LoginManager* m_loginManager;
 	RequestHandlerFactory* m_handlerFactory;
 
 	RequestResult login(RequestInfo info);

@@ -5,11 +5,12 @@
 constructor
 sets the database and login manager
 */
-RequestHandlerFactory::RequestHandlerFactory() : m_loginManager(*m_loginManager.getInstance()),
-												 m_roomManager(*m_roomManager.getInstance()), 
-												 m_statisticsManager(*m_statisticsManager.getInstance())
+RequestHandlerFactory::RequestHandlerFactory()
 {
 	m_database = SqliteDatabase::getInstance();
+	m_loginManager = m_loginManager->getInstance();
+	m_roomManager = m_roomManager->getInstance();
+	m_statisticsManager = m_statisticsManager->getInstance();
 }
 
 /*
@@ -67,7 +68,7 @@ output: Login Manager
 */
 LoginManager& RequestHandlerFactory::getLoginManager()
 {
-	return m_loginManager;
+	return *m_loginManager;
 }
 
 /*
@@ -77,7 +78,7 @@ output: Room Manager
 */
 RoomManager& RequestHandlerFactory::getRoomManager()
 {
-	return m_roomManager;
+	return *m_roomManager;
 }
 
 /*
@@ -87,5 +88,5 @@ output: Statistics Manager
 */
 StatisticsManager& RequestHandlerFactory::getStatisticsManager()
 {
-	return m_statisticsManager;
+	return *m_statisticsManager;
 }

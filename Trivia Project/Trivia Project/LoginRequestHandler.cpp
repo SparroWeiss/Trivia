@@ -6,9 +6,10 @@
 constructor
 sets the handler factory and the login manager
 */
-LoginRequestHandler::LoginRequestHandler() : m_loginManager(m_handlerFactory->getLoginManager())
+LoginRequestHandler::LoginRequestHandler()
 {
 	m_handlerFactory = m_handlerFactory->getInstance();
+	m_loginManager = m_loginManager->getInstance();
 }
 
 LoginRequestHandler::~LoginRequestHandler()
@@ -50,7 +51,7 @@ RequestResult LoginRequestHandler::login(RequestInfo info)
 	LoginRequest loginReq = JsonRequestPacketDeserializer::deserializeLoginRequest(info.buffer);
 	IRequestHandler* newHandle = this; // if the login request isn't valid, stay in same handler
 	LoginResponse loginRes = { 0 }; // status: 0
-	if (m_loginManager.login(loginReq.username, loginReq.password))
+	if (m_loginManager->login(loginReq.username, loginReq.password))
 	{ // if the login request is valid
 		loginRes = { 1 }; // status: 1
 		newHandle = m_handlerFactory->createMenuRequestHandler(); // pointer to the next handle : menu
@@ -70,7 +71,7 @@ RequestResult LoginRequestHandler::signup(RequestInfo info)
 	SignupResponse signRes = { 0 }; // status: 0
 	if (signupValidation(signReq.password, signReq.email, signReq.address, signReq.phone, signReq.birthdate)) // if parameters are valid
 	{
-		if (m_loginManager.signup(signReq.username, signReq.password, signReq.email, signReq.address, signReq.phone, signReq.birthdate))
+		if (m_loginManager->signup(signReq.username, signReq.password, signReq.email, signReq.address, signReq.phone, signReq.birthdate))
 		{ // if the login request is valid
 			signRes = { 1 }; // status: 1
 			newHandle = new MenuRequestHandler(); // pointer to the next handle : menu

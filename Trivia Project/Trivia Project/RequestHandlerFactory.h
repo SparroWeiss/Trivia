@@ -24,8 +24,8 @@ private:
 	static RequestHandlerFactory* instance;
 	static int instances;
 
-	LoginManager m_loginManager;
+	LoginManager* m_loginManager;
 	IDataBase* m_database;
-	RoomManager m_roomManager;
-	StatisticsManager m_statisticsManager;
+	RoomManager* m_roomManager;
+	StatisticsManager* m_statisticsManager;
 };
