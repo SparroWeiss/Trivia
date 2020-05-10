@@ -191,7 +191,7 @@ void Communicator::handleNewClient(SOCKET client_socket)
 			std::unique_lock<std::mutex> locker(_using_clients);
 			m_clients.erase(client_socket); // are automatically closed, and that causes an exception
 			locker.unlock();
-			m_handlerFactory->getLoginManager()->logout(name);
+			m_handlerFactory->getLoginManager().logout(name);
 			closesocket(client_socket); 
 			return;
 		}

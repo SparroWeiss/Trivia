@@ -380,3 +380,20 @@ void SqliteDatabase::getStatistics(std::string name)
 	std::lock_guard<std::mutex> locker2(_using_db);
 	sqlite3_exec(_db, query.c_str(), statisticsCallback, &_statisticsRows, nullptr);
 }
+
+/*
+function gets the statistic of all the users
+input: none
+output: vector of statistics
+*/
+std::vector<Statistic> SqliteDatabase::getStatistics()
+{
+	std::string query = "SELECT * FROM STATISTICS;";
+	std::lock_guard<std::mutex> locker(_mutex_statistics);
+	_statisticsRows.clear();
+	std::lock_guard<std::mutex> locker2(_using_db);
+	sqlite3_exec(_db, query.c_str(), statisticsCallback, &_statisticsRows, nullptr);
+	return std::vector<Statistic>(_statisticsRows);
+}
+
+

@@ -31,5 +31,5 @@ public:
 	virtual int getNumOfCorrectAnswers(std::string name) = 0;
 	virtual int getNumOfTotalAnswers(std::string name) = 0;
 	virtual int getNumOfPlayerGames(std::string name) = 0;
-
+	virtual std::vector<Statistic> getStatistics() = 0;
 };

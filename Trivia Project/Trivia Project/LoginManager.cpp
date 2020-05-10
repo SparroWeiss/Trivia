@@ -111,17 +111,6 @@ bool LoginManager::logout(std::string name)
 }
 
 /*
-function gets the users vector
-input: none
-output: the vector of the logged users
-*/
-std::vector<LoggedUser> LoginManager::getUsers() const
-{
-	std::lock_guard<std::mutex> locker(_mutex_loggedUsers);
-	return std::vector<LoggedUser>(m_loggedUsers);
-}
-
-/*
 helper function finds the iterator of a user by his name
 input: username
 output: if user found - the iterator of the user, if user not found - m_loggedUsers.end()

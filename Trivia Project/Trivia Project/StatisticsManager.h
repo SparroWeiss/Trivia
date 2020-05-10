@@ -29,5 +29,4 @@ private:
 	void getTopPlayers(StatisticsData& data);
 
 	IDataBase* m_database;
-	LoginManager* m_loginManager;
 };

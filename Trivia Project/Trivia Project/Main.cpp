@@ -8,6 +8,7 @@ LoginManager* LoginManager::instance = 0;
 RequestHandlerFactory* RequestHandlerFactory::instance = 0;
 SqliteDatabase* SqliteDatabase::instance = 0;
 RoomManager* RoomManager::instance = 0;
+StatisticsManager* StatisticsManager::instance = 0;
 
 int Server::instances = 0;
 int Communicator::instances = 0;
@@ -15,6 +16,7 @@ int LoginManager::instances = 0;
 int RequestHandlerFactory::instances = 0;
 int SqliteDatabase::instances = 0;
 int RoomManager::instances = 0;
+int StatisticsManager::instances = 0;
 
 int main()
 {

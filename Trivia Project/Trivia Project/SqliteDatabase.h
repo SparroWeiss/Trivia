@@ -19,6 +19,7 @@ public:
 	virtual int getNumOfCorrectAnswers(std::string name);
 	virtual int getNumOfTotalAnswers(std::string name);
 	virtual int getNumOfPlayerGames(std::string name);
+	std::vector<Statistic> getStatistics();
 
 private:
 	SqliteDatabase();

@@ -36,7 +36,6 @@ public:
 	bool signup(std::string, std::string, std::string, std::string, std::string, std::string);
 	bool login(std::string, std::string);
 	bool logout(std::string);
-	std::vector<LoggedUser> getUsers() const;
 
 private:
 	LoginManager();
