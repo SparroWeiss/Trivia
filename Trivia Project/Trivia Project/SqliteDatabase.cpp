@@ -1,6 +1,8 @@
 #include "SqliteDatabase.h"
 
 #define DB_NAME std::string("TriviaDB.sqlite")
+
+// USER
 #define NAME_COLUMN std::string("NAME")
 #define PASSWORD_COLUMN std::string("PASSWORD")
 #define EMAIL_COLUMN std::string("EMAIL")
@@ -8,13 +10,22 @@
 #define PHONE_COLUMN std::string("PHONE")
 #define BIRTHDATE_COLUMN std::string("BIRTHDATE")
 
+// QUESTIONS
 #define QUESTION_COLUMN std::string("QUESTION")
 #define CORRECT_ANSWER_COLUMN std::string("CORRECT_ANSWER")
 #define WRONG_ANSWERS_COLUMN std::string("WRONG_ANSWERS")
 
+// STATISTICS
+#define TOTAL_ANSWERS_COLUMN std::string("TOTAL_ANSWERS")
+#define CORRECT_ANSWERS_COLUMN std::string("CORRECT_ANSWERS")
+#define NUM_OF_GAMES_COLUMN std::string("NUM_OF_GAMES")
+#define ANSWERS_TIME_COLUMN std::string("ANSWERS_TIME") // (summery not average)
+
 #define MAX_QUESTIONS 50
 #define SCRIPT_PATH "python \"..\\Trivia Project\\scripts\\getQuestions.py\" "
 #define DELIMITER "~~~"
+#define NAME_MATCH_CHECK "."
+
 
 
 /*
@@ -90,7 +101,6 @@ int questionsCallback(void* data, int size, char** argv, char** colName)
 			tempWrongAnswer = strtok(argv[i], DELIMITER);
 			while (tempWrongAnswer != NULL)
 			{
-				printf("%s\n", tempWrongAnswer);
 				temp._wrongAnswers.push_back(tempWrongAnswer);
 				tempWrongAnswer = strtok(NULL, DELIMITER);
 			}
@@ -98,6 +108,45 @@ int questionsCallback(void* data, int size, char** argv, char** colName)
 	}
 
 	static_cast<std::list<Question>*>(data)->push_back(temp);
+	return 0;
+}
+
+/*
+this helper function gets the data that the DB returned
+and transforms it into a reachable variable
+input: data - pointer to the reachable variable, size - number of columns in the table,
+		argv - array of the data of each column, colName - the name of the column
+output: 0, it doesn't realy matters
+*/
+int statisticsCallback(void* data, int size, char** argv, char** colName)
+{
+	Statistic temp = Statistic();
+	std::string column;
+	for (int i = 0; i < size; i++)
+	{
+		column = std::string(colName[i]);
+		if (column == NAME_COLUMN)
+		{
+			temp._name = std::string(argv[i]);
+		}
+		else if (column == ANSWERS_TIME_COLUMN)
+		{
+			temp._answersTime = stoi(std::string(argv[i]));
+		}
+		else if (column == CORRECT_ANSWERS_COLUMN)
+		{
+			temp._correctAnswers = stoi(std::string(argv[i]));
+		}
+		else if (column == NUM_OF_GAMES_COLUMN)
+		{
+			temp._numOfGames = stoi(std::string(argv[i]));
+		}
+		else if (column == TOTAL_ANSWERS_COLUMN)
+		{
+			temp._totalAnswers = stoi(std::string(argv[i]));
+		}
+	}
+	static_cast<std::vector<Statistic>*>(data)->push_back(temp);
 	return 0;
 }
 
@@ -131,6 +180,15 @@ SqliteDatabase::SqliteDatabase()
 			" TEXT NOT NULL);";
 
 		sqlite3_exec(_db, query.c_str(), nullptr, nullptr, nullptr); // set questions table
+
+		query = "CREATE TABLE STATISTICS(" + NAME_COLUMN +
+			" TEXT PRIMARY KEY NOT NULL, " + TOTAL_ANSWERS_COLUMN +
+			" INTIGER NOT NULL, " + CORRECT_ANSWERS_COLUMN +
+			" INTIGER NOT NULL, " + NUM_OF_GAMES_COLUMN +
+			" INTIGER NOT NULL, " + ANSWERS_TIME_COLUMN +
+			" INTIGER NOT NULL);";
+
+		sqlite3_exec(_db, query.c_str(), nullptr, nullptr, nullptr); // set statistics table
 	}
 	_usersRows = std::vector<SignupRequest>();
 	_questionsRows = std::list<Question>();
@@ -175,11 +233,7 @@ output: true - the username exists in the DB, false - the username can't be foun
 */
 bool SqliteDatabase::doesUserExist(std::string name)
 {
-	std::string query = "SELECT * FROM USERS WHERE NAME LIKE '" + name + "';";
-	_usersRows.clear(); // remove the previous data
-	std::lock_guard<std::mutex> locker(_using_db);
-	sqlite3_exec(_db, query.c_str(), usersCallback, &_usersRows, nullptr);
-	return !_usersRows.empty();
+	return doesPasswordMatch(name, NAME_MATCH_CHECK);
 }
 
 /*
@@ -189,8 +243,13 @@ output: true - the password matches the username, false - the password doesn't m
 */
 bool SqliteDatabase::doesPasswordMatch(std::string name, std::string password)
 {
-	return doesUserExist(name) /*if the user exists*/
-		&& _usersRows.front().password == password /*if exists, his data is aved in _rows, checks if the password matches*/;
+	std::string query = "SELECT * FROM USERS WHERE NAME LIKE '" + name + "';";
+	std::lock_guard<std::mutex> locker(_mutex_users);
+	_usersRows.clear(); // remove the previous data
+	std::lock_guard<std::mutex> locker2(_using_db);
+	sqlite3_exec(_db, query.c_str(), usersCallback, &_usersRows, nullptr);
+	return !_usersRows.empty() && (password == _usersRows.front().password || password == NAME_MATCH_CHECK);
+	
 }
 
 /*
@@ -211,18 +270,72 @@ bool SqliteDatabase::addNewUser(std::string name, std::string password, std::str
 	return true;
 }
 
+/*
+function gets the questions from the DB
+input: amount of questions
+output: list of questions
+*/
 std::list<Question> SqliteDatabase::getQuestions(int amount)
 {
 	std::string query = "SELECT * FROM QUESTIONS;";
+	std::lock_guard<std::mutex> locker(_using_db); // python script accessing db
+	std::lock_guard<std::mutex> locker2(_mutex_questions);
 	_questionsRows.clear(); // remove the previous data
 
 	refreshQuestions(amount); // refreshing DB questions
 
-	std::lock_guard<std::mutex> locker(_using_db);
 	sqlite3_exec(_db, query.c_str(), questionsCallback, &_questionsRows, nullptr);
 
 
 	return std::list<Question>(_questionsRows);
+}
+
+/*
+function gets the average time per answer
+input: username
+output: the average time for a answer
+*/
+float SqliteDatabase::getPlayerAverageAnswerTime(std::string name)
+{
+	std::lock_guard<std::mutex> locker(_mutex_statistics);
+	getStatistics(name);
+	return  _statisticsRows.front()._answersTime / _statisticsRows.front()._totalAnswers;
+}
+
+/*
+function gets the number of correct answers the user answered
+input: username
+output: the number of correct answers
+*/
+int SqliteDatabase::getNumOfCorrectAnswers(std::string name)
+{
+	std::lock_guard<std::mutex> locker(_mutex_statistics);
+	getStatistics(name);
+	return  _statisticsRows.front()._correctAnswers;
+}
+
+/*
+function gets the number of answers the user answered
+input: username
+output: the number of answers
+*/
+int SqliteDatabase::getNumOfTotalAnswers(std::string name)
+{
+	std::lock_guard<std::mutex> locker(_mutex_statistics);
+	getStatistics(name);
+	return  _statisticsRows.front()._totalAnswers;
+}
+
+/*
+function gets the number of games the user played
+input: username
+output: the number of games
+*/
+int SqliteDatabase::getNumOfPlayerGames(std::string name)
+{
+	std::lock_guard<std::mutex> locker(_mutex_statistics);
+	getStatistics(name);
+	return  _statisticsRows.front()._numOfGames;
 }
 
 /*
@@ -242,8 +355,6 @@ void SqliteDatabase::refreshQuestions(int amount)
 
 	std::string scriptCommandLine = SCRIPT_PATH + std::to_string(amount) + " \"..\\Trivia Project\\" + DB_NAME + "\"";
 
-	std::lock_guard<std::mutex> locker(_using_db); // python script accessing db
-
 	if (CreateProcessA(NULL, LPSTR(scriptCommandLine.c_str()), NULL, NULL, FALSE, NULL, NULL, NULL, &info, &processInfo))
 	{
 		WaitForSingleObject(processInfo.hProcess, INFINITE);
@@ -255,4 +366,17 @@ void SqliteDatabase::refreshQuestions(int amount)
 	{
 		std::cout << "Faild to fetch questions. Error " << GetLastError() << std::endl; // should not happen
 	}
+}
+
+/*
+this function creates a row of statistics info of a user
+input: username
+output: none
+*/
+void SqliteDatabase::getStatistics(std::string name)
+{
+	std::string query = "SELECT * FROM STATISTICS WHERE " + NAME_COLUMN + " LIKE '" + name + "';";
+	_statisticsRows.clear();
+	std::lock_guard<std::mutex> locker2(_using_db);
+	sqlite3_exec(_db, query.c_str(), statisticsCallback, &_statisticsRows, nullptr);
 }
