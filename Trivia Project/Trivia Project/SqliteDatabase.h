@@ -15,6 +15,11 @@ public:
 	bool doesPasswordMatch(std::string name, std::string password);
 	bool addNewUser(std::string name, std::string password, std::string email, std::string address, std::string phone, std::string birthdate);
 	virtual std::list<Question> getQuestions(int);
+	virtual float getPlayerAverageAnswerTime(std::string name);
+	virtual int getNumOfCorrectAnswers(std::string name);
+	virtual int getNumOfTotalAnswers(std::string name);
+	virtual int getNumOfPlayerGames(std::string name);
+	std::vector<Statistic> getStatistics();
 
 private:
 	SqliteDatabase();
@@ -23,12 +28,19 @@ private:
 
 	sqlite3* _db;
 	std::vector<SignupRequest> _usersRows;
+	std::vector<Statistic> _statisticsRows;
 	std::list<Question> _questionsRows;
 
 	void refreshQuestions(int);
+	void getStatistics(std::string name);
 
 	friend int usersCallback(void* data, int size, char** argv, char** colName);
 	friend int questionsCallback(void* data, int size, char** argv, char** colName);
+	friend int statisticsCallback(void* data, int size, char** argv, char** colName);
+
 	
 	std::mutex _using_db;
+	std::mutex _mutex_statistics;
+	std::mutex _mutex_users;
+	std::mutex _mutex_questions;
 };

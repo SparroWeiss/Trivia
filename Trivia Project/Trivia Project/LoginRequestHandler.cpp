@@ -9,7 +9,7 @@ sets the handler factory and the login manager
 LoginRequestHandler::LoginRequestHandler()
 {
 	m_handlerFactory = m_handlerFactory->getInstance();
-	m_loginManager = m_handlerFactory->getLoginManager();
+	m_loginManager = m_loginManager->getInstance();
 }
 
 LoginRequestHandler::~LoginRequestHandler()
