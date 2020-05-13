@@ -276,7 +276,7 @@ Buffer JsonResponsePacketSerializer::serializeResponse(GetPlayersInRoomResponse 
 	json get_playersJson = get_players;
 	Buffer get_playersData = stringToBytes(get_playersJson.dump()), get_playersSize = intToBytes(get_playersJson.dump().size());
 
-	return createResponseBuf(GETROOMS, get_playersSize, get_playersData);
+	return createResponseBuf(GETPLAYERSINROOM, get_playersSize, get_playersData);
 }
 
 /*
@@ -315,7 +315,7 @@ Buffer JsonResponsePacketSerializer::serializeResponse(GetStatisticsResponse get
 	json get_statisticsJson = get_statistics;
 	Buffer get_statisticsData = stringToBytes(get_statisticsJson.dump()), get_statisticsSize = intToBytes(get_statisticsJson.dump().size());
 
-	return createResponseBuf(GETROOMS, get_statisticsSize, get_statisticsData);
+	return createResponseBuf(GETSTATISTICS, get_statisticsSize, get_statisticsData);
 }
 
 /*
