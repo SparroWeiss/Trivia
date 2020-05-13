@@ -2,6 +2,7 @@
 #include "Buffer.h"
 #include "Communicator.h"
 #include "json.hpp"
+#include "Room.h"
 
 using json = nlohmann::json;
 
@@ -24,18 +25,55 @@ struct
 	unsigned int status;
 }typedef SignupResponse;
 
+struct
+{
+	unsigned int status;
+}typedef LogoutResponse;
+
+struct
+{
+	unsigned int status;
+	std::vector<RoomData> rooms;
+}typedef GetRoomResponse;
+
+struct
+{
+	std::vector<std::string> players;
+}typedef GetPlayersInRoomResponse;
+
+struct
+{
+	unsigned int status;
+	std::vector<std::string> statiatics;
+}typedef GetStatisticsResponse;
+
+struct
+{
+	unsigned int status;
+}typedef JoinRoomResponse;
+
+struct
+{
+	unsigned int status;
+}typedef CreateRoomResponse;
+
 class JsonResponsePacketSerializer
 {
 public:
 	static Buffer serializeResponse(ErrorResponse error);
 	static Buffer serializeResponse(LoginResponse login);
 	static Buffer serializeResponse(SignupResponse signup);
+	static Buffer serializeResponse(LogoutResponse logout);
+	static Buffer serializeResponse(GetRoomResponse get_room);
+	static Buffer serializeResponse(GetPlayersInRoomResponse get_players);
+	static Buffer serializeResponse(JoinRoomResponse join_room);
+	static Buffer serializeResponse(CreateRoomResponse create_room);
+	static Buffer serializeResponse(GetStatisticsResponse get_statistics);
 
 	static Buffer intToBytes(int);
 	static Buffer stringToBytes(std::string);
-	static Buffer createResponseBuf(unsigned char, Buffer, Buffer);
-	
 	static Buffer charToBytes(char*, unsigned int);
+	static Buffer createResponseBuf(unsigned char, Buffer, Buffer);
 };
 
 void to_json(json&, const ErrorResponse&);
@@ -46,3 +84,24 @@ void from_json(const json&, LoginResponse&);
 
 void to_json(json&, const SignupResponse&);
 void from_json(const json&, SignupResponse&);
+
+void to_json(json&, const LogoutResponse&);
+void from_json(const json&, LogoutResponse&);
+
+void to_json(json&, const RoomData&);
+void from_json(const json&, RoomData&);
+
+void to_json(json&, const GetRoomResponse&);
+void from_json(const json&, GetRoomResponse&);
+
+void to_json(json&, const GetPlayersInRoomResponse&);
+void from_json(const json&, GetPlayersInRoomResponse&);
+
+void to_json(json&, const JoinRoomResponse&);
+void from_json(const json&, JoinRoomResponse&);
+
+void to_json(json&, const CreateRoomResponse&);
+void from_json(const json&, CreateRoomResponse&);
+
+void to_json(json&, const GetStatisticsResponse&);
+void from_json(const json&, GetStatisticsResponse&);

@@ -1,6 +1,5 @@
 #include "JsonRequestPacketDeserializer.h"
 
-
 /******************** Json Helper Methods ********************/
 
 /*
@@ -12,7 +11,6 @@ void to_json(json& j, const LoginRequest& login)
 {
 	j = json{ {"username", login.username}, {"password", login.password} };
 }
-
 /*
 This is a helper function that enables direct assignment from 'json' to 'LoginRequest'.
 Input: json and LoginRequest objects
@@ -34,7 +32,6 @@ void to_json(json& j, const SignupRequest& signup)
 	j = json{ {"username", signup.username}, {"password", signup.password}, {"email", signup.email},
 		{"address", signup.address}, {"phone", signup.phone}, {"birthdate", signup.birthdate} };
 }
-
 /*
 This is a helper function that enables direct assignment from 'json' to 'SignupRequest'.
 Input: json and SignupRequest objects
@@ -50,6 +47,66 @@ void from_json(const json& j, SignupRequest& signup)
 	j.at("birthdate").get_to(signup.birthdate);
 }
 
+/*
+This is a helper function that enables direct assignment from 'GetPlayersInRoomRequest' to 'json'.
+Input: json and GetPlayersInRoomRequest objects
+Output: none
+*/
+void to_json(json& j, const GetPlayersInRoomRequest& get_players)
+{
+	j = json{ {"roomId", get_players.roomId} };
+}
+/*
+This is a helper function that enables direct assignment from 'json' to 'GetPlayersInRoomRequest'.
+Input: json and GetPlayersInRoomRequest objects
+Output: none
+*/
+void from_json(const json& j, GetPlayersInRoomRequest& get_players)
+{
+	j.at("roomId").get_to(get_players.roomId);
+}
+
+/*
+This is a helper function that enables direct assignment from 'JoinRoomRequest' to 'json'.
+Input: json and JoinRoomRequest objects
+Output: none
+*/
+void to_json(json& j, const JoinRoomRequest& join_room)
+{
+	j = json{ {"roomId", join_room.roomId} };
+}
+/*
+This is a helper function that enables direct assignment from 'json' to 'JoinRoomRequest'.
+Input: json and JoinRoomRequest objects
+Output: none
+*/
+void from_json(const json& j, JoinRoomRequest& join_room)
+{
+	j.at("roomId").get_to(join_room.roomId);
+}
+
+/*
+This is a helper function that enables direct assignment from 'CreateRoomRequest' to 'json'.
+Input: json and CreateRoomRequest objects
+Output: none
+*/
+void to_json(json& j, const CreateRoomRequest& create_room)
+{
+	j = json{ {"roomName", create_room.roomName}, {"maxUsers", create_room.maxUsers},
+		{"questionCount", create_room.questionCount}, {"answerTimeout", create_room.answerTimeout} };
+}
+/*
+This is a helper function that enables direct assignment from 'json' to 'CreateRoomRequest'.
+Input: json and CreateRoomRequest objects
+Output: none
+*/
+void from_json(const json& j, CreateRoomRequest& create_room)
+{
+	j.at("roomName").get_to(create_room.roomName);
+	j.at("maxUsers").get_to(create_room.maxUsers);
+	j.at("questionCount").get_to(create_room.questionCount);
+	j.at("answerTimeout").get_to(create_room.answerTimeout);
+}
 
 /******************** Class Methods ********************/
 
@@ -73,6 +130,39 @@ SignupRequest JsonRequestPacketDeserializer::deserializeSignupRequest(Buffer buf
 {
 	json j = json::parse(bytesToString(buff));
 	return j.get<SignupRequest>();
+}
+
+/*
+This method converts a 'Buffer' struct to a 'GetPlayersInRoomRequest' struct.
+Input: Buffer buff
+Outuput: GetPlayersInRoomRequest
+*/
+GetPlayersInRoomRequest JsonRequestPacketDeserializer::deserializeGetPlayersInRoomRequest(Buffer buff)
+{
+	json j = json::parse(bytesToString(buff));
+	return j.get<GetPlayersInRoomRequest>();
+}
+
+/*
+This method converts a 'Buffer' struct to a 'JoinRoomRequest' struct.
+Input: Buffer buff
+Outuput: JoinRoomRequest
+*/
+JoinRoomRequest JsonRequestPacketDeserializer::deserializeJoinRoomRequest(Buffer buff)
+{
+	json j = json::parse(bytesToString(buff));
+	return j.get<JoinRoomRequest>();
+}
+
+/*
+This method converts a 'Buffer' struct to a 'CreateRoomRequest' struct.
+Input: Buffer buff
+Outuput: CreateRoomRequest
+*/
+CreateRoomRequest JsonRequestPacketDeserializer::deserializeCreateRoomRequest(Buffer buff)
+{
+	json j = json::parse(bytesToString(buff));
+	return j.get<CreateRoomRequest>();
 }
 
 /*
