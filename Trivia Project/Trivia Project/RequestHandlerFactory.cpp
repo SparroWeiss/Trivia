@@ -37,10 +37,6 @@ RequestHandlerFactory::~RequestHandlerFactory()
 	instances--;
 	if (instances == 0)
 	{
-		delete m_database;
-		delete m_loginManager;
-		delete m_roomManager;
-		delete m_statisticsManager;
 		delete instance;
 	}
 }
@@ -50,9 +46,9 @@ function creates new Login request handler
 input: none
 output: Login request handler
 */
-LoginRequestHandler RequestHandlerFactory::createLoginRequestHandler()
+LoginRequestHandler* RequestHandlerFactory::createLoginRequestHandler()
 {
-	return LoginRequestHandler();
+	return new LoginRequestHandler();
 }
 
 /*
@@ -60,9 +56,9 @@ function creates new Menu request handler
 input: none
 output: Menu request handler
 */
-MenuRequestHandler RequestHandlerFactory::createMenuRequestHandler(std::string username)
+MenuRequestHandler* RequestHandlerFactory::createMenuRequestHandler(std::string username)
 {
-	return MenuRequestHandler(username);
+	return new MenuRequestHandler(username);
 }
 
 /*

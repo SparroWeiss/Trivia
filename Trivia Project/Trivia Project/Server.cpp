@@ -36,9 +36,6 @@ Server::~Server()
 	instances--;
 	if (instances == 0)
 	{
-		delete m_database;
-		delete m_RequestHandlerFactory;
-		delete m_communicator;
 		delete instance;
 	}
 }

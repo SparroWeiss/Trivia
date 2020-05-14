@@ -18,8 +18,7 @@ frees allocated memory
 */
 LoginRequestHandler::~LoginRequestHandler()
 {
-	delete m_handlerFactory;
-	delete m_loginManager;
+	
 }
 
 /*
@@ -59,7 +58,7 @@ RequestResult LoginRequestHandler::login(RequestInfo info)
 	if (m_loginManager->login(loginReq.username, loginReq.password))
 	{ // if the login request is valid
 		loginRes = { 1 }; // status: 1
-		newHandle = &m_handlerFactory->createMenuRequestHandler(loginReq.username); // pointer to the next handle : menu
+		newHandle = m_handlerFactory->createMenuRequestHandler(loginReq.username); // pointer to the next handle : menu
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(loginRes), newHandle };
 }
@@ -79,7 +78,7 @@ RequestResult LoginRequestHandler::signup(RequestInfo info)
 		if (m_loginManager->signup(signReq.username, signReq.password, signReq.email, signReq.address, signReq.phone, signReq.birthdate))
 		{ // if the login request is valid
 			signRes = { 1 }; // status: 1
-			newHandle = &m_handlerFactory->createMenuRequestHandler(signReq.username); // pointer to the next handle : menu
+			newHandle = m_handlerFactory->createMenuRequestHandler(signReq.username); // pointer to the next handle : menu
 		}
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(signRes), newHandle };

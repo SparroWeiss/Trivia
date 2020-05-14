@@ -13,8 +13,8 @@ class RequestHandlerFactory
 public:
 	static RequestHandlerFactory* getInstance();
 	~RequestHandlerFactory();
-	LoginRequestHandler createLoginRequestHandler();
-	MenuRequestHandler createMenuRequestHandler(std::string username);
+	LoginRequestHandler* createLoginRequestHandler();
+	MenuRequestHandler* createMenuRequestHandler(std::string username);
 	LoginManager& getLoginManager();
 	RoomManager& getRoomManager();
 	StatisticsManager& getStatisticsManager();

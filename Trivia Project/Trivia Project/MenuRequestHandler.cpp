@@ -18,7 +18,6 @@ frees allocated memory
 */
 MenuRequestHandler::~MenuRequestHandler()
 {
-	delete m_handlerFactory;
 }
 
 /*

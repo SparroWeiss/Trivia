@@ -1,6 +1,8 @@
 #include "Communicator.h"
 #include "MenuRequestHandler.h"
 
+#define SPACE ' '
+
 std::mutex _using_clients;
 
 /*
@@ -42,7 +44,6 @@ Communicator::~Communicator()
 			closesocket((*i).first);
 			delete (*i).second;
 		}
-		delete m_handlerFactory;
 		delete instance;
 	}
 }
@@ -127,7 +128,7 @@ void Communicator::startHandleRequests()
 		//std::cout << "Client accepted. Server and client can speak" << std::endl;
 		
 		std::unique_lock<std::mutex> locker(_using_clients);
-		m_clients.insert({ client_socket, &m_handlerFactory->createLoginRequestHandler() });
+		m_clients.insert({ client_socket, m_handlerFactory->createLoginRequestHandler() });
 		locker.unlock();
 		std::thread(&Communicator::handleNewClient, this, client_socket).detach();
 	}
@@ -178,6 +179,14 @@ void Communicator::handleNewClient(SOCKET client_socket)
 					}
 					
 				}
+				if (m_clients[client_socket] == nullptr)
+				{ // if the user logged out
+					std::cout << "### " << name << " logged out" << std::endl;
+					std::lock_guard<std::mutex> locker(_using_clients);
+					m_clients.erase(client_socket);
+					closesocket(client_socket);
+					return;
+				}
 			}
 			else
 			{
@@ -227,7 +236,7 @@ Buffer Communicator::recv_data(SOCKET sock, int bytes_num)
 	{
 		return Buffer();
 	}
-	char temp = ' ';
+	char temp = SPACE;
 	Buffer bytesOfData;
 	for (int i = 0; i < bytes_num; i++)
 	{
@@ -250,10 +259,15 @@ Output: RequestInfo struct
 RequestInfo Communicator::getRequest(SOCKET client_socket)
 {
 	unsigned int requestCode = recv_data(client_socket, CODE_SIZE).m_buffer[0];
+	
+	if (requestCode == SPACE)
+	{ // the user disconnected
+		throw std::exception("disconnected in the middle of the conversation");
+	}
 
 	int requestSize = JsonRequestPacketDeserializer::bytesToInt(
 		recv_data(client_socket, LENGTH_SIZE));
-	
+
 	Buffer messageData = recv_data(client_socket, requestSize);
 
 	time_t now = time(0);

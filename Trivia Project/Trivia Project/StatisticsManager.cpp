@@ -37,7 +37,6 @@ StatisticsManager::~StatisticsManager()
 	instances--;
 	if (instances == 0)
 	{
-		delete m_database;
 		delete instance;
 	}
 }

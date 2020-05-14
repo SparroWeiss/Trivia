@@ -38,7 +38,6 @@ LoginManager::~LoginManager()
 	instances--;
 	if (instances == 0)
 	{
-		delete m_database;
 		delete instance;
 	}
 }
