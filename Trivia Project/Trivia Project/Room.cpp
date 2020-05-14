@@ -2,9 +2,10 @@
 
 std::mutex _mutex_users;
 std::mutex _mutex_data;
+
 /*
 constructor
-initialize the class's variables
+initializes the variables of the object
 */
 Room::Room()
 {
@@ -13,8 +14,8 @@ Room::Room()
 }
 
 /*
-distructor
-clears the vector
+destructor
+frees allocated memory
 */
 Room::~Room()
 {

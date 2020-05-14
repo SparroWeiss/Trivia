@@ -1,6 +1,7 @@
 #pragma once
 #include "RequestHandlerFactory.h"
 #include "IRequestHandler.h"
+#include "RoomManager.h"
 
 class RequestHandlerFactory;
 
@@ -8,9 +9,9 @@ class RequestHandlerFactory;
 class MenuRequestHandler : public IRequestHandler
 {
 public:
-	MenuRequestHandler();
+	MenuRequestHandler(std::string username);
 	~MenuRequestHandler();
-	bool isRequestRelevent(RequestInfo);
+	bool isRequestRelevant(RequestInfo);
 	RequestResult handleRequest(RequestInfo);
 
 private:
@@ -23,4 +24,6 @@ private:
 	RequestResult getStatistics(RequestInfo info);
 	RequestResult joinRoom(RequestInfo info);
 	RequestResult createRoom(RequestInfo info);
+
+	std::vector<Room>::iterator findRoom(unsigned int id);
 };

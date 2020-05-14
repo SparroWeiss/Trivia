@@ -3,7 +3,7 @@
 
 /*
 constructor
-sets the database and login manager
+initializes the variables of the object
 */
 RequestHandlerFactory::RequestHandlerFactory()
 {
@@ -29,14 +29,18 @@ RequestHandlerFactory* RequestHandlerFactory::getInstance()
 }
 
 /*
-distructor
-frees allocated memory, the only new allocated memory in the class is the instance
+destructor
+frees allocated memory
 */
 RequestHandlerFactory::~RequestHandlerFactory()
 {
 	instances--;
 	if (instances == 0)
 	{
+		delete m_database;
+		delete m_loginManager;
+		delete m_roomManager;
+		delete m_statisticsManager;
 		delete instance;
 	}
 }
@@ -46,9 +50,9 @@ function creates new Login request handler
 input: none
 output: Login request handler
 */
-LoginRequestHandler* RequestHandlerFactory::createLoginRequestHandler()
+LoginRequestHandler RequestHandlerFactory::createLoginRequestHandler()
 {
-	return new LoginRequestHandler();
+	return LoginRequestHandler();
 }
 
 /*
@@ -56,9 +60,9 @@ function creates new Menu request handler
 input: none
 output: Menu request handler
 */
-MenuRequestHandler* RequestHandlerFactory::createMenuRequestHandler()
+MenuRequestHandler RequestHandlerFactory::createMenuRequestHandler(std::string username)
 {
-	return new MenuRequestHandler();
+	return MenuRequestHandler(username);
 }
 
 /*

@@ -5,13 +5,14 @@ std::mutex _using_clients;
 
 /*
 constructor
-function sets the map of clients and the handler factory
+initializes the variables of the object
 */
 Communicator::Communicator()
 {
 	m_clients = std::map<SOCKET, IRequestHandler*>();
 	m_handlerFactory = m_handlerFactory->getInstance();
 }
+
 /*
 function make sure that there is only one instance of the object
 input: none
@@ -26,9 +27,10 @@ Communicator* Communicator::getInstance()
 	instances++;
 	return instance;
 }
+
 /*
-distructor
-frees allocated memory, the only new allocated memory in the class is the instance
+destructor
+frees allocated memory
 */
 Communicator::~Communicator()
 {
@@ -40,6 +42,7 @@ Communicator::~Communicator()
 			closesocket((*i).first);
 			delete (*i).second;
 		}
+		delete m_handlerFactory;
 		delete instance;
 	}
 }
@@ -124,7 +127,7 @@ void Communicator::startHandleRequests()
 		//std::cout << "Client accepted. Server and client can speak" << std::endl;
 		
 		std::unique_lock<std::mutex> locker(_using_clients);
-		m_clients.insert({ client_socket, m_handlerFactory->createLoginRequestHandler() });
+		m_clients.insert({ client_socket, &m_handlerFactory->createLoginRequestHandler() });
 		locker.unlock();
 		std::thread(&Communicator::handleNewClient, this, client_socket).detach();
 	}
@@ -146,17 +149,17 @@ void Communicator::handleNewClient(SOCKET client_socket)
 			RequestInfo currRequest = getRequest(client_socket);
 	
 			std::unique_lock<std::mutex> locker(_using_clients);
-			if (m_clients[client_socket] && m_clients[client_socket]->isRequestRelevent(currRequest))
+			if (m_clients[client_socket] && m_clients[client_socket]->isRequestRelevant(currRequest))
 			{
 				RequestResult currResult = m_clients[client_socket]->handleRequest(currRequest); // deserialize request
 				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(currResult.response)); // send serialized response to client
 				if (m_clients[client_socket] != currResult.newHandler)
-				{
+				{ // if the handler has changed
 					delete m_clients[client_socket];
 					m_clients[client_socket] = currResult.newHandler; // updating client state
 				}
 				locker.unlock();
-				if (!loggedIn) //not enter to this block more than once
+				if (!loggedIn) // not enter to this block more than once
 				{
 					try
 					{
@@ -165,7 +168,7 @@ void Communicator::handleNewClient(SOCKET client_socket)
 						if (loginRes.status == 1) // the user logged in into the server
 						{
 							name = JsonRequestPacketDeserializer::deserializeLoginRequest(currRequest.buffer).username;
-							std::cout << "### "<< name << " joined" << std::endl; // remembering the name for the thread
+							std::cout << "### "<< name << " joined" << std::endl; // rememberring the name for the thread
 							loggedIn = true; // there is no need to enter this block again, we got what we need
 						}
 					}

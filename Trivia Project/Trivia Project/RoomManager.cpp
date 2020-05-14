@@ -5,7 +5,7 @@ std::mutex _mutex_curr_id;
 
 /*
 constructor
-initialize the variables of the class
+initializes the variables of the object
 */
 RoomManager::RoomManager()
 {
@@ -29,16 +29,16 @@ RoomManager* RoomManager::getInstance()
 }
 
 /*
-distructor
-frees allocated memory, the only new allocated memory in the class is the instance
+destructor
+frees allocated memory
 */
 RoomManager::~RoomManager()
 {
 	instances--;
 	if (instances == 0)
 	{
-		delete instance;
 		m_rooms.clear();
+		delete instance;
 	}
 }
 

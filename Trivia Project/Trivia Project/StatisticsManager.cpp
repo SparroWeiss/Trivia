@@ -5,7 +5,8 @@
 #define TOP_PLAYERS 5
 
 /*
-constructor initialize the variables of the object
+constructor
+initializes the variables of the object
 */
 StatisticsManager::StatisticsManager()
 {
@@ -28,7 +29,7 @@ StatisticsManager* StatisticsManager::getInstance()
 }
 
 /*
-distructor
+destructor
 frees allocated memory
 */
 StatisticsManager::~StatisticsManager()
@@ -36,6 +37,7 @@ StatisticsManager::~StatisticsManager()
 	instances--;
 	if (instances == 0)
 	{
+		delete m_database;
 		delete instance;
 	}
 }
