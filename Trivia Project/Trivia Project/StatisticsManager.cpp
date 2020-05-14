@@ -2,7 +2,7 @@
 #include "SqliteDatabase.h"
 #include <algorithm>
 
-#define TOP_PLAYERS 3
+#define TOP_PLAYERS 5
 
 /*
 constructor initialize the variables of the object
