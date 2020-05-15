@@ -32,6 +32,11 @@ bool MenuRequestHandler::isRequestRelevant(RequestInfo info)
 		|| info.id == JOINROOM || info.id == CREATEROOM);
 }
 
+/*
+function gets the result of a request
+input: request info
+output: request result
+*/
 RequestResult MenuRequestHandler::handleRequest(RequestInfo info)
 {
 	switch (info.id)
@@ -53,6 +58,11 @@ RequestResult MenuRequestHandler::handleRequest(RequestInfo info)
 	}
 }
 
+/*
+function signs out a user
+input: request info
+output: request result
+*/
 RequestResult MenuRequestHandler::signout(RequestInfo info)
 {
 	IRequestHandler* newHandle = this; // if the logout request isn't valid, stay in same handler
@@ -65,6 +75,11 @@ RequestResult MenuRequestHandler::signout(RequestInfo info)
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(signOutRes), newHandle };
 }
 
+/*
+function gets the rooms in the server
+input: request info
+output: request result
+*/
 RequestResult MenuRequestHandler::getRooms(RequestInfo info)
 {
 	GetRoomResponse roomsRes = { 1 }; // status: 1
@@ -76,6 +91,11 @@ RequestResult MenuRequestHandler::getRooms(RequestInfo info)
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(roomsRes), this };
 }
 
+/*
+function gets the players in a room
+input: request info
+output: request result
+*/
 RequestResult MenuRequestHandler::getPlayersInRoom(RequestInfo info)
 {
 	GetPlayersInRoomRequest playersReq = JsonRequestPacketDeserializer::deserializeGetPlayersInRoomRequest(info.buffer);
@@ -89,6 +109,11 @@ RequestResult MenuRequestHandler::getPlayersInRoom(RequestInfo info)
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(playersRes), this };
 }
 
+/*
+function gets the statistics of a user
+input: request info
+output: request result
+*/
 RequestResult MenuRequestHandler::getStatistics(RequestInfo info)
 {
 	GetStatisticsResponse statisticsRes = { 1 }; // status: 1
@@ -106,6 +131,11 @@ RequestResult MenuRequestHandler::getStatistics(RequestInfo info)
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(statisticsRes), this };
 }
 
+/*
+function joins a member to a room
+input: request info
+output: request result
+*/
 RequestResult MenuRequestHandler::joinRoom(RequestInfo info)
 {
 	JoinRoomRequest joinRoomReq = JsonRequestPacketDeserializer::deserializeJoinRoomRequest(info.buffer);
@@ -119,11 +149,16 @@ RequestResult MenuRequestHandler::joinRoom(RequestInfo info)
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(joinRoomRes), newHandle };
 }
 
+/*
+function creates room by demand
+input: request info
+output: request result
+*/
 RequestResult MenuRequestHandler::createRoom(RequestInfo info)
 {
 	CreateRoomRequest createRoomReq = JsonRequestPacketDeserializer::deserializeCreateRoomRequest(info.buffer);
 	IRequestHandler* newHandle = this; // if the creating request isn't valid, stey in same handler
-	CreateRoomResponse createRoomRes = { 1 }; // status: 0
+	CreateRoomResponse createRoomRes = { 1 }; // status: 1
 	m_handlerFactory->getRoomManager().createRoom(m_user);
 	newHandle = nullptr; // pointer to the next handle : room admin (will be added in 3.0.0)
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(createRoomRes), newHandle };
@@ -132,6 +167,8 @@ RequestResult MenuRequestHandler::createRoom(RequestInfo info)
 //////////////////////////////////HELPER
 /*
 function finds the room
+input: room id
+output: iterator for the room
 */
 std::vector<Room>::iterator MenuRequestHandler::findRoom(unsigned int id)
 {

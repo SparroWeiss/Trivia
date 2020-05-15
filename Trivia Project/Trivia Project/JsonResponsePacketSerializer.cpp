@@ -199,6 +199,90 @@ void from_json(const json& j, GetStatisticsResponse& get_statistics)
 	j.at("statistics").get_to(get_statistics.statiatics);
 }
 
+/*
+This is a helper function that enables direct assignment from 'CloseRoomResponse' to 'json'.
+Input: json and CloseRoomResponse objects
+Output: none
+*/
+void to_json(json& j, const CloseRoomResponse& close_room)
+{
+	j = json{ {"status", close_room.status} };
+}
+/*
+This is a helper function that enables direct assignment from 'json' to 'CloseRoomResponse'.
+Input: json and CloseRoomResponse objects
+Output: none
+*/
+void from_json(const json& j, CloseRoomResponse& close_room)
+{
+	j.at("status").get_to(close_room.status);
+}
+
+/*
+This is a helper function that enables direct assignment from 'StartGameResponse' to 'json'.
+Input: json and StartGameResponse objects
+Output: none
+*/
+void to_json(json& j, const StartGameResponse& start_game)
+{
+	j = json{ {"status", start_game.status} };
+}
+/*
+This is a helper function that enables direct assignment from 'json' to 'StartGameResponse'.
+Input: json and StartGameResponse objects
+Output: none
+*/
+void from_json(const json& j, StartGameResponse& start_game)
+{
+	j.at("status").get_to(start_game.status);
+}
+
+/*
+This is a helper function that enables direct assignment from 'GetRoomStateResponse' to 'json'.
+Input: json and GetRoomStateResponse objects
+Output: none
+*/
+void to_json(json& j, const GetRoomStateResponse& get_room_state)
+{
+	j = json{ {"status", get_room_state.status},
+		{"answerTimeout", get_room_state.answerTimeout},
+		{"hasGameBegun", get_room_state.hasGameBegun},
+		{"players", get_room_state.players},
+		{"questionCount", get_room_state.questionCount} };
+}
+/*
+This is a helper function that enables direct assignment from 'json' to 'GetRoomStateResponse'.
+Input: json and GetRoomStateResponse objects
+Output: none
+*/
+void from_json(const json& j, GetRoomStateResponse& get_room_state)
+{
+	j.at("status").get_to(get_room_state.status);
+	j.at("answerTimeout").get_to(get_room_state.answerTimeout);
+	j.at("hasGameBegun").get_to(get_room_state.hasGameBegun);
+	j.at("players").get_to(get_room_state.players);
+	j.at("questionCount").get_to(get_room_state.questionCount);
+}
+
+/*
+This is a helper function that enables direct assignment from 'LeaveRoomResponse' to 'json'.
+Input: json and LeaveRoomResponse objects
+Output: none
+*/
+void to_json(json& j, const LeaveRoomResponse& leave_room)
+{
+	j = json{ {"status", leave_room.status} };
+}
+/*
+This is a helper function that enables direct assignment from 'json' to 'LeaveRoomResponse'.
+Input: json and LeaveRoomResponse objects
+Output: none
+*/
+void from_json(const json& j, LeaveRoomResponse& leave_room)
+{
+	j.at("status").get_to(leave_room.status);
+}
+
 /******************** Class Methods ********************/
 
 /*
@@ -316,6 +400,58 @@ Buffer JsonResponsePacketSerializer::serializeResponse(GetStatisticsResponse get
 	Buffer get_statisticsData = stringToBytes(get_statisticsJson.dump()), get_statisticsSize = intToBytes(get_statisticsJson.dump().size());
 
 	return createResponseBuf(GETSTATISTICS, get_statisticsSize, get_statisticsData);
+}
+
+/*
+This method converts an 'CloseRoomResponse' struct to a 'Buffer' struct.
+Input: CloseRoomResponse
+Outuput: Buffer
+*/
+Buffer JsonResponsePacketSerializer::serializeResponse(CloseRoomResponse close_room)
+{
+	json close_roomJson = close_room;
+	Buffer close_roomData = stringToBytes(close_roomJson.dump()), close_roomSize = intToBytes(close_roomJson.dump().size());
+
+	return createResponseBuf(CLOSEROOM, close_roomSize, close_roomData);
+}
+
+/*
+This method converts an 'StartGameResponse' struct to a 'Buffer' struct.
+Input: StartGameResponse
+Outuput: Buffer
+*/
+Buffer JsonResponsePacketSerializer::serializeResponse(StartGameResponse start_game)
+{
+	json start_gameJson = start_game;
+	Buffer start_gameData = stringToBytes(start_gameJson.dump()), start_gameSize = intToBytes(start_gameJson.dump().size());
+
+	return createResponseBuf(CLOSEROOM, start_gameSize, start_gameData);
+}
+
+/*
+This method converts an 'GetRoomStateResponse' struct to a 'Buffer' struct.
+Input: GetRoomStateResponse
+Outuput: Buffer
+*/
+Buffer JsonResponsePacketSerializer::serializeResponse(GetRoomStateResponse get_room_state)
+{
+	json get_room_stateJson = get_room_state;
+	Buffer get_room_stateData = stringToBytes(get_room_stateJson.dump()), get_room_stateSize = intToBytes(get_room_stateJson.dump().size());
+
+	return createResponseBuf(CLOSEROOM, get_room_stateSize, get_room_stateData);
+}
+
+/*
+This method converts an 'LeaveRoomResponse' struct to a 'Buffer' struct.
+Input: LeaveRoomResponse
+Outuput: Buffer
+*/
+Buffer JsonResponsePacketSerializer::serializeResponse(LeaveRoomResponse leave_room)
+{
+	json leave_roomJson = leave_room;
+	Buffer leave_roomData = stringToBytes(leave_roomJson.dump()), leave_roomSize = intToBytes(leave_roomJson.dump().size());
+
+	return createResponseBuf(CLOSEROOM, leave_roomSize, leave_roomData);
 }
 
 /*

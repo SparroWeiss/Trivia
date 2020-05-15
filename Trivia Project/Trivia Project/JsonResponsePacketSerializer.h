@@ -57,6 +57,30 @@ struct
 	unsigned int status;
 }typedef CreateRoomResponse;
 
+struct
+{
+	unsigned int status;
+}typedef CloseRoomResponse;
+
+struct
+{
+	unsigned int status;
+}typedef StartGameResponse;
+
+struct
+{
+	unsigned int status;
+	bool hasGameBegun;
+	std::vector<std::string> players;
+	unsigned int questionCount;
+	unsigned int answerTimeout;
+}typedef GetRoomStateResponse;
+
+struct
+{
+	unsigned int status;
+}typedef LeaveRoomResponse;
+
 class JsonResponsePacketSerializer
 {
 public:
@@ -69,6 +93,10 @@ public:
 	static Buffer serializeResponse(JoinRoomResponse join_room);
 	static Buffer serializeResponse(CreateRoomResponse create_room);
 	static Buffer serializeResponse(GetStatisticsResponse get_statistics);
+	static Buffer serializeResponse(CloseRoomResponse close_room);
+	static Buffer serializeResponse(StartGameResponse start_game);
+	static Buffer serializeResponse(GetRoomStateResponse get_room_state);
+	static Buffer serializeResponse(LeaveRoomResponse leave_room);
 
 	static Buffer intToBytes(int);
 	static Buffer stringToBytes(std::string);
@@ -105,3 +133,15 @@ void from_json(const json&, CreateRoomResponse&);
 
 void to_json(json&, const GetStatisticsResponse&);
 void from_json(const json&, GetStatisticsResponse&);
+
+void to_json(json&, const CloseRoomResponse&);
+void from_json(const json&, CloseRoomResponse&);
+
+void to_json(json&, const StartGameResponse&);
+void from_json(const json&, StartGameResponse&);
+
+void to_json(json&, const GetRoomStateResponse&);
+void from_json(const json&, GetRoomStateResponse&);
+
+void to_json(json&, const LeaveRoomResponse&);
+void from_json(const json&, LeaveRoomResponse&);
