@@ -3,7 +3,7 @@
 
 /*
 constructor
-sets the database, the request handler factory and the communicator
+initializes the variables of the object
 */
 Server::Server()
 {
@@ -26,9 +26,10 @@ Server* Server::getInstence()
 	instances++;
 	return instance;
 }
+
 /*
-distructor
-frees allocated memory, the only new allocated memory in the class is the instance
+destructor
+frees allocated memory
 */
 Server::~Server()
 {

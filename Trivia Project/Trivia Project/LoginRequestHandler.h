@@ -17,7 +17,7 @@ class LoginRequestHandler : public IRequestHandler
 public:
 	LoginRequestHandler();
 	~LoginRequestHandler();
-	bool isRequestRelevent(RequestInfo);
+	bool isRequestRelevant(RequestInfo);
 	RequestResult handleRequest(RequestInfo);
 
 private:

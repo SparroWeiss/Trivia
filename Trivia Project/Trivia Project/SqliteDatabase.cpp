@@ -152,8 +152,7 @@ int statisticsCallback(void* data, int size, char** argv, char** colName)
 
 /*
 constructor
-it checks if the data base file is initialized
-and if there isn't a file, the function creates a new one
+initializes the variables of the object
 */
 SqliteDatabase::SqliteDatabase()
 {
@@ -210,8 +209,8 @@ SqliteDatabase* SqliteDatabase::getInstance()
 }
 
 /*
-distructor
-frees allocated memory, the only new allocated memory in the class is the instance
+destructor
+frees allocated memory
 */
 SqliteDatabase::~SqliteDatabase()
 {

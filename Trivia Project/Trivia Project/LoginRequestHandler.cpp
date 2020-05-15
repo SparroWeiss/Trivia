@@ -4,7 +4,7 @@
 
 /*
 constructor
-sets the handler factory and the login manager
+initializes the variables of the object
 */
 LoginRequestHandler::LoginRequestHandler()
 {
@@ -12,17 +12,21 @@ LoginRequestHandler::LoginRequestHandler()
 	m_loginManager = m_loginManager->getInstance();
 }
 
+/*
+destructor
+frees allocated memory 
+*/
 LoginRequestHandler::~LoginRequestHandler()
 {
-	// there is nothing to free
+	
 }
 
 /*
-function checks if a request is relevent to the handler
+function checks if a request is relevant to the handler
 input: request info
-output: true - request is relevent, false - request isn't relevent
+output: true - request is relevant, false - request isn't relevant
 */
-bool LoginRequestHandler::isRequestRelevent(RequestInfo info)
+bool LoginRequestHandler::isRequestRelevant(RequestInfo info)
 {
 	return (info.id == LOGINCODE || info.id == SIGNUPCODE);
 }
@@ -54,7 +58,7 @@ RequestResult LoginRequestHandler::login(RequestInfo info)
 	if (m_loginManager->login(loginReq.username, loginReq.password))
 	{ // if the login request is valid
 		loginRes = { 1 }; // status: 1
-		newHandle = m_handlerFactory->createMenuRequestHandler(); // pointer to the next handle : menu
+		newHandle = m_handlerFactory->createMenuRequestHandler(loginReq.username); // pointer to the next handle : menu
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(loginRes), newHandle };
 }
@@ -74,7 +78,7 @@ RequestResult LoginRequestHandler::signup(RequestInfo info)
 		if (m_loginManager->signup(signReq.username, signReq.password, signReq.email, signReq.address, signReq.phone, signReq.birthdate))
 		{ // if the login request is valid
 			signRes = { 1 }; // status: 1
-			newHandle = new MenuRequestHandler(); // pointer to the next handle : menu
+			newHandle = m_handlerFactory->createMenuRequestHandler(signReq.username); // pointer to the next handle : menu
 		}
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(signRes), newHandle };

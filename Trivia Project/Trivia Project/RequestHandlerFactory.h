@@ -14,7 +14,7 @@ public:
 	static RequestHandlerFactory* getInstance();
 	~RequestHandlerFactory();
 	LoginRequestHandler* createLoginRequestHandler();
-	MenuRequestHandler* createMenuRequestHandler();
+	MenuRequestHandler* createMenuRequestHandler(std::string username);
 	LoginManager& getLoginManager();
 	RoomManager& getRoomManager();
 	StatisticsManager& getStatisticsManager();

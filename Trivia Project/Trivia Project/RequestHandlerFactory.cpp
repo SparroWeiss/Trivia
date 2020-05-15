@@ -3,7 +3,7 @@
 
 /*
 constructor
-sets the database and login manager
+initializes the variables of the object
 */
 RequestHandlerFactory::RequestHandlerFactory()
 {
@@ -29,8 +29,8 @@ RequestHandlerFactory* RequestHandlerFactory::getInstance()
 }
 
 /*
-distructor
-frees allocated memory, the only new allocated memory in the class is the instance
+destructor
+frees allocated memory
 */
 RequestHandlerFactory::~RequestHandlerFactory()
 {
@@ -56,9 +56,9 @@ function creates new Menu request handler
 input: none
 output: Menu request handler
 */
-MenuRequestHandler* RequestHandlerFactory::createMenuRequestHandler()
+MenuRequestHandler* RequestHandlerFactory::createMenuRequestHandler(std::string username)
 {
-	return new MenuRequestHandler();
+	return new MenuRequestHandler(username);
 }
 
 /*

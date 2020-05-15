@@ -5,7 +5,8 @@ std::mutex _mutex_loggedUsers;
 std::mutex _mutex_db;
 
 /*
-constructor initialize the variables of the object
+constructor
+initializes the variables of the object
 */
 LoginManager::LoginManager() 
 {
@@ -29,7 +30,7 @@ LoginManager* LoginManager::getInstance()
 }
 
 /*
-distructor
+destructor
 frees allocated memory
 */
 LoginManager::~LoginManager()
