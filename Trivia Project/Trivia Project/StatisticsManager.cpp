@@ -86,6 +86,7 @@ void StatisticsManager::getTopPlayers(StatisticsData& data)
 	std::sort(ranks.begin(), ranks.end(), sortByVal); // sorts the vector by the score
 	for (int i = 0; i < ranks.size() && i < TOP_PLAYERS; i++)
 	{
-		data._topPlayers.push_back(ranks[i].first); // insert the first three to the data variables
+		data._topPlayers.push_back(ranks[i].first); // insert the first five to the data variables
+		data._topScores.push_back(ranks[i].second);
 	}
 }

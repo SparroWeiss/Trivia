@@ -124,9 +124,13 @@ RequestResult MenuRequestHandler::getStatistics(RequestInfo info)
 	statisticsRes.statiatics.push_back(std::to_string(data._incorrectAnswers)); // [3] - incorrect answers
 	statisticsRes.statiatics.push_back(std::to_string(data._averageAnswerTime)); // [4] - average time per answer
 	statisticsRes.statiatics.push_back(std::to_string(data._numOfGames)); // [5] - number of games
+
+	std::vector<float>::iterator j = data._topScores.begin();
 	for (std::vector<std::string>::iterator i = data._topPlayers.begin(); i != data._topPlayers.end(); ++i)
 	{
-		statisticsRes.statiatics.push_back((*i)); // [6-10] - number of games
+		statisticsRes.statiatics.push_back((*i)); // [6, 8, 10, 12, 14] - top players
+		statisticsRes.statiatics.push_back(std::to_string(*j)); // [7, 9, 11, 13, 15] - top scores
+		++j;
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(statisticsRes), this };
 }
