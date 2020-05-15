@@ -12,6 +12,7 @@ struct
 	int _numOfGames;
 	float _averageAnswerTime;
 	std::vector<std::string> _topPlayers;
+	std::vector<float> _topScores;
 }typedef StatisticsData;
 
 class StatisticsManager
