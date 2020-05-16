@@ -101,11 +101,8 @@ RequestResult MenuRequestHandler::getPlayersInRoom(RequestInfo info)
 	GetPlayersInRoomRequest playersReq = JsonRequestPacketDeserializer::deserializeGetPlayersInRoomRequest(info.buffer);
 	GetPlayersInRoomResponse playersRes;
 	
-	std::vector<LoggedUser> players = (*findRoom(playersReq.roomId)).getAllUsers();
-	for (std::vector<LoggedUser>::iterator i = players.begin(); i != players.end(); ++i)
-	{
-		playersRes.players.push_back((*i).getUsername());
-	}
+	playersRes.players = (*findRoom(playersReq.roomId)).getAllUsers();
+	
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(playersRes), this };
 }
 
@@ -145,10 +142,11 @@ RequestResult MenuRequestHandler::joinRoom(RequestInfo info)
 	JoinRoomRequest joinRoomReq = JsonRequestPacketDeserializer::deserializeJoinRoomRequest(info.buffer);
 	IRequestHandler* newHandle = this; // if the joining request isn't valid, stey in same handler
 	JoinRoomResponse joinRoomRes = { 0 }; // status: 0
-	if ((*findRoom(joinRoomReq.roomId)).addUser(m_user))
+	Room * room = &(*findRoom(joinRoomReq.roomId));
+	if (room->addUser(m_user))
 	{
 		joinRoomRes.status = 1; // status: 1
-		newHandle = nullptr; // pointer to the next handle : room member (will be added in 3.0.0)
+		newHandle = m_handlerFactory->createRoomMemberRequestHandler(m_user, room); // pointer to the next handle : room member
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(joinRoomRes), newHandle };
 }
@@ -163,8 +161,9 @@ RequestResult MenuRequestHandler::createRoom(RequestInfo info)
 	CreateRoomRequest createRoomReq = JsonRequestPacketDeserializer::deserializeCreateRoomRequest(info.buffer);
 	IRequestHandler* newHandle = this; // if the creating request isn't valid, stey in same handler
 	CreateRoomResponse createRoomRes = { 1 }; // status: 1
-	m_handlerFactory->getRoomManager().createRoom(m_user);
-	newHandle = nullptr; // pointer to the next handle : room admin (will be added in 3.0.0)
+	RoomData data = { 0, createRoomReq.roomName, createRoomReq.maxUsers, createRoomReq.answerTimeout, ActiveMode::WAITING };
+	newHandle = m_handlerFactory->createRoomAdminRequestHandler(m_user, 
+		&(*findRoom(m_handlerFactory->getRoomManager().createRoom(m_user, data)))); // pointer to the next handle : room admin
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(createRoomRes), newHandle };
 }
 

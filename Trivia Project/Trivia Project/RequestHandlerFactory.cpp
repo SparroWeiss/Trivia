@@ -62,6 +62,26 @@ MenuRequestHandler* RequestHandlerFactory::createMenuRequestHandler(std::string 
 }
 
 /*
+function creates new Room Admin handler
+input: logged user, pointer to the room
+output: Room Admin handler
+*/
+RoomAdminRequestHandler* RequestHandlerFactory::createRoomAdminRequestHandler(LoggedUser user, Room* room)
+{
+	return new RoomAdminRequestHandler(user, room);
+}
+
+/*
+function creates new Room Member handler
+input: logged user, pointer to the room
+output: Room Member handler
+*/
+RoomMemberRequestHandler* RequestHandlerFactory::createRoomMemberRequestHandler(LoggedUser user, Room* room)
+{
+	return new RoomMemberRequestHandler(user, room);
+}
+
+/*
 function returns the Login Manager
 input: none
 output: Login Manager

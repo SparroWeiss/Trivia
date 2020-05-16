@@ -24,7 +24,7 @@ public:
 	bool removeUser(std::string name);
 	void setData(RoomData data);
 	RoomData getData() const;
-	std::vector<LoggedUser> getAllUsers() const;
+	std::vector<std::string> getAllUsers();
 private:
 	RoomData m_metaData;
 	std::vector<LoggedUser> m_users;

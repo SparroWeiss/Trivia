@@ -1,6 +1,8 @@
 #pragma once
 #include <map>
 #include "Room.h"
+#include "JsonResponsePacketSerializer.h"
+
 
 #define MAX_PLAYERS 3
 #define TIME_PER_QUE 10 // seconds
@@ -10,7 +12,7 @@ class RoomManager
 public:
 	static RoomManager* getInstance();
 	~RoomManager();
-	void createRoom(LoggedUser first_user);
+	unsigned int createRoom(LoggedUser first_user, RoomData data);
 	bool deleteRoom(unsigned int id);
 	unsigned int getRoomState(unsigned int id);
 	std::vector<Room> getRooms();

@@ -45,17 +45,18 @@ RoomManager::~RoomManager()
 /*
 function creates a new room and inserts it into the map
 input: the user that created the room
-output: none
+output: room id
 */
-void RoomManager::createRoom(LoggedUser first_user)
+unsigned int RoomManager::createRoom(LoggedUser first_user, RoomData data)
 {
 	Room room = Room();
 	room.addUser(first_user);
 	std::unique_lock<std::mutex> locker(_mutex_curr_id); // can't be two rooms with the same id
-	room.setData({ curr_id++, "Room", MAX_PLAYERS, TIME_PER_QUE, ActiveMode::WAITING });
+	room.setData({ curr_id++, data.name, data.maxPlayers, data.timePerQuestion, ActiveMode::WAITING });
 	locker.unlock();
 	std::lock_guard<std::mutex> locker2(_mutex_rooms);
 	m_rooms.insert({ room.getData().id, room });
+	return room.getData().id;
 }
 
 /*

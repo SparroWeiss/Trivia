@@ -26,6 +26,8 @@ class JsonRequestPacketDeserializer;
 #define CODE_SIZE 1
 #define LENGTH_SIZE 4
 
+class RequestHandlerFactory;
+
 enum messageCode
 {
 	ERRORCODE = 0,

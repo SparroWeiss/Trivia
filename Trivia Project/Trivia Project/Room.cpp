@@ -92,7 +92,13 @@ function gets the list of users
 input: none
 output: vector of the users
 */
-std::vector<LoggedUser> Room::getAllUsers() const
+std::vector<std::string> Room::getAllUsers()
 {
-	return std::vector<LoggedUser>(m_users);
+	std::vector<std::string> names;
+	std::lock_guard<std::mutex> locker(_mutex_users);
+	for (std::vector<LoggedUser>::iterator i = m_users.begin(); i != m_users.end(); ++i)
+	{
+		names.push_back((*i).getUsername());
+	}
+	return names;
 }
