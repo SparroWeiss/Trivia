@@ -24,3 +24,5 @@ private:
 	RequestResult getRoomState(RequestInfo info);
 
 };
+
+static std::mutex _mutex_room;

@@ -1,6 +1,7 @@
 #include "RoomMemberRequestHandler.h"
 #include "Communicator.h"
 
+
 /*
 constructor
 initializes the variables of the object
@@ -52,11 +53,15 @@ RequestResult RoomMemberRequestHandler::leaveRoom(RequestInfo info)
 {
 	IRequestHandler* newHandle = this; // if the leave room request isn't valid, stay in same handler
 	LeaveRoomResponse leaveRoomRes = { 0 }; // status: 0
+	std::unique_lock<std::mutex> locker(_mutex_room);
 	if (m_room.removeUser(m_user.getUsername()))
 	{
-		leaveRoomRes = { 1 }; // status: 1
+		locker.unlock();
+		leaveRoomRes = { ActiveMode::DONE }; // status: 3
 		newHandle = m_handlerFactory->createMenuRequestHandler(m_user.getUsername()); // pointer to the previous handle : menu
 	}
+	else
+		locker.unlock();
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(leaveRoomRes), newHandle };
 }
 
@@ -67,10 +72,28 @@ output: request result
 */
 RequestResult RoomMemberRequestHandler::getRoomState(RequestInfo info)
 {
-	GetRoomStateResponse getStateRes = { 1 }; // status: 1
+	std::unique_lock<std::mutex> locker(_mutex_room);
+	if (m_room.getData().isActive == ActiveMode::DONE)
+	{ // room has been closed by the admin
+		locker.unlock();
+		return leaveRoom({ LEAVEROOM });
+	}
+	if (m_room.getData().isActive == ActiveMode::PLAYING)
+	{ // game has started by the admin
+		// TODO : change the handler to a game handler (4.0.0)
+		locker.unlock();
+		return  RequestResult{ JsonResponsePacketSerializer::serializeResponse(
+			StartGameResponse{ ActiveMode::PLAYING }) /* status: 2 */, nullptr };
+	}
+
+	GetRoomStateResponse getStateRes;
 	getStateRes.answerTimeout = m_room.getData().timePerQuestion;
-	getStateRes.hasGameBegun = m_room.getData().isActive == ActiveMode::PLAYING;
 	getStateRes.players = m_room.getAllUsers();
-	getStateRes.questionCount = 0; // ? (get it later)
+	locker.unlock();
+
+	getStateRes.status = ActiveMode::WAITING;  // status: 1
+	getStateRes.hasGameBegun = false;
+	getStateRes.questionCount = 0; // what?
+
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(getStateRes), this };
 }

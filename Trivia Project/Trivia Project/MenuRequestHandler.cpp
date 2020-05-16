@@ -2,6 +2,8 @@
 #include "Communicator.h"
 #include <string>
 
+std::mutex _mutex_room_vector;
+
 /*
 constructor
 initializes the variables of the object
@@ -83,7 +85,11 @@ output: request result
 RequestResult MenuRequestHandler::getRooms(RequestInfo info)
 {
 	GetRoomResponse roomsRes = { 1 }; // status: 1
+
+	std::unique_lock<std::mutex> locker(_mutex_room_vector);
 	std::vector<Room> rooms = m_handlerFactory->getRoomManager().getRooms();
+	locker.unlock();
+
 	for (std::vector<Room>::iterator i = rooms.begin(); i != rooms.end(); ++i)
 	{
 		roomsRes.rooms.push_back((*i).getData());
@@ -162,8 +168,10 @@ RequestResult MenuRequestHandler::createRoom(RequestInfo info)
 	IRequestHandler* newHandle = this; // if the creating request isn't valid, stey in same handler
 	CreateRoomResponse createRoomRes = { 1 }; // status: 1
 	RoomData data = { 0, createRoomReq.roomName, createRoomReq.maxUsers, createRoomReq.answerTimeout, ActiveMode::WAITING };
+	std::unique_lock<std::mutex> locker(_mutex_room_vector);
 	newHandle = m_handlerFactory->createRoomAdminRequestHandler(m_user, 
 		&(*findRoom(m_handlerFactory->getRoomManager().createRoom(m_user, data)))); // pointer to the next handle : room admin
+	locker.unlock();
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(createRoomRes), newHandle };
 }
 
@@ -175,7 +183,10 @@ output: iterator for the room
 */
 std::vector<Room>::iterator MenuRequestHandler::findRoom(unsigned int id)
 {
+	std::unique_lock<std::mutex> locker(_mutex_room_vector);
 	std::vector<Room> rooms = m_handlerFactory->getRoomManager().getRooms();
+	locker.unlock();
+
 	for (std::vector<Room>::iterator i = rooms.begin(); i != rooms.end(); ++i)
 	{
 		if ((*i).getData().id == id)

@@ -135,6 +135,16 @@ void Communicator::startHandleRequests()
 }
 
 /*
+function will help the room admin
+input: none
+output: map of the users
+*/
+std::map<SOCKET, IRequestHandler*> Communicator::getClients()
+{
+	return m_clients;
+}
+
+/*
 this function "talk" with the client
 input: the client socket
 output: none

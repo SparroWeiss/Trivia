@@ -35,11 +35,6 @@ bool Room::addUser(LoggedUser user)
 	if (m_metaData.maxPlayers > m_users.size())
 	{ // the room isn't full
 		m_users.push_back(user);
-		if (m_metaData.maxPlayers == m_users.size())
-		{ // the room is now full
-			std::lock_guard<std::mutex> locker2(_mutex_data);
-			m_metaData.isActive = ActiveMode::PLAYING;
-		}
 		return true;
 	}
 	return false;

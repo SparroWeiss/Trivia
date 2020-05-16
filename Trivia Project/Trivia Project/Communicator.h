@@ -52,6 +52,7 @@ public:
 	~Communicator();
 	SOCKET bindAndListen();
 	void startHandleRequests();
+	std::map<SOCKET, IRequestHandler*> getClients();
 
 private:
 	Communicator();
