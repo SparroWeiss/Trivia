@@ -9,7 +9,7 @@ RoomAdminRequestHandler::RoomAdminRequestHandler(LoggedUser user, Room* room)
 {
 	m_handlerFactory = m_handlerFactory->getInstance();
 	m_user = user;
-	m_room = *room;
+	m_room = room;
 }
 
 /*
@@ -60,28 +60,20 @@ output: request result
 */
 RequestResult RoomAdminRequestHandler::closeRoom(RequestInfo info)
 {
-	RoomMemberRequestHandler* handler = new RoomMemberRequestHandler(m_user, &m_room);
+	RoomMemberRequestHandler* handler = new RoomMemberRequestHandler(m_user, m_room);
 	RequestInfo leaveReq = { LEAVEROOM };
 	
-	RoomData data = m_room.getData();
+	RoomData data = m_room->getData();
 	data.isActive = ActiveMode::DONE;
 
 	std::unique_lock<std::mutex> locker(_mutex_room);
-	m_room.setData(data); // set the data to inform the players that the room is closed
+	m_room->setData(data); // set the data to inform the players that the room is closed
 	locker.unlock();
 
 	RequestResult res = handler->handleRequest(leaveReq); // leaving the room
 	delete handler;
 
-	locker.lock();
-	while (m_room.getAllUsers().size() != 0)
-	{ // locker for checking the size of the room's user vector
-		locker.unlock();
-		locker.lock();
-	} 
-	locker.unlock();
-	// delete the room only when the room is empty
-	m_handlerFactory->getRoomManager().deleteRoom(m_room.getData().id);
+	m_handlerFactory->getRoomManager().deleteRoom(m_room->getData().id);
 	return res;
 }
 
@@ -95,13 +87,13 @@ RequestResult RoomAdminRequestHandler::startGame(RequestInfo info)
 	IRequestHandler* newHandle = this; // if the starting request isn't valid, stay in same handler
 	StartGameResponse startRes = { 0 }; // status: 0
 	std::lock_guard<std::mutex> locker(_mutex_room);
-	if (m_room.getAllUsers().size() > 1)
+	if (m_room->getAllUsers().size() > 1)
 	{
 		startRes = { 1 }; // status: 1
 		newHandle = nullptr; // pointer to the next handle : Game
-		RoomData data = m_room.getData();
+		RoomData data = m_room->getData();
 		data.isActive = ActiveMode::PLAYING;
-		m_room.setData(data);
+		m_room->setData(data);
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(startRes), newHandle };
 }
@@ -113,7 +105,7 @@ output: request result
 */
 RequestResult RoomAdminRequestHandler::getRoomState(RequestInfo info)
 {
-	RoomMemberRequestHandler* handler = new RoomMemberRequestHandler(m_user, &m_room);
+	RoomMemberRequestHandler* handler = new RoomMemberRequestHandler(m_user, m_room);
 	RequestResult res = handler->handleRequest(info);
 	delete handler;
 	return res;

@@ -15,7 +15,7 @@ public:
 	RequestResult handleRequest(RequestInfo info);
 
 private:
-	Room m_room;
+	Room* m_room;
 	LoggedUser m_user;
 	RequestHandlerFactory* m_handlerFactory;
 

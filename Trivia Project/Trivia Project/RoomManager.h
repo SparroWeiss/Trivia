@@ -12,15 +12,15 @@ class RoomManager
 public:
 	static RoomManager* getInstance();
 	~RoomManager();
-	unsigned int createRoom(LoggedUser first_user, RoomData data);
+	Room* createRoom(LoggedUser first_user, RoomData data);
 	bool deleteRoom(unsigned int id);
 	unsigned int getRoomState(unsigned int id);
-	std::vector<Room> getRooms();
+	std::vector<Room*> getRooms();
 private:
 	RoomManager();
 	static RoomManager* instance;
 	static int instances;
 
-	std::map<unsigned int, Room> m_rooms;
+	std::map<unsigned int, Room*> m_rooms;
 	unsigned int curr_id;
 };

@@ -9,7 +9,7 @@ initializes the variables of the object
 */
 RoomManager::RoomManager()
 {
-	m_rooms = std::map<unsigned int, Room>();
+	m_rooms = std::map<unsigned int, Room*>();
 	curr_id = 1;
 }
 
@@ -47,16 +47,17 @@ function creates a new room and inserts it into the map
 input: the user that created the room
 output: room id
 */
-unsigned int RoomManager::createRoom(LoggedUser first_user, RoomData data)
+Room* RoomManager::createRoom(LoggedUser first_user, RoomData data)
 {
-	Room room = Room();
-	room.addUser(first_user);
+	Room* room = new Room();
 	std::unique_lock<std::mutex> locker(_mutex_curr_id); // can't be two rooms with the same id
-	room.setData({ curr_id++, data.name, data.maxPlayers, data.timePerQuestion, ActiveMode::WAITING });
+	room->setData({ curr_id++, data.name, data.maxPlayers, data.timePerQuestion, ActiveMode::WAITING });
 	locker.unlock();
-	std::lock_guard<std::mutex> locker2(_mutex_rooms);
-	m_rooms.insert({ room.getData().id, room });
-	return room.getData().id;
+	room->addUser(first_user);
+	std::unique_lock<std::mutex> locker2(_mutex_rooms);
+	m_rooms.insert({ room->getData().id, room });
+	locker2.unlock();
+	return room;
 }
 
 /*
@@ -67,7 +68,7 @@ output: true - room deleted, false - room couldn't be found
 bool RoomManager::deleteRoom(unsigned int id)
 {
 	std::lock_guard<std::mutex> locker(_mutex_rooms);
-	std::map<unsigned int, Room>::iterator iter = m_rooms.find(id);
+	std::map<unsigned int, Room*>::iterator iter = m_rooms.find(id);
 	if (iter == m_rooms.end())
 	{
 		return false;
@@ -84,12 +85,12 @@ output: the state of a room
 unsigned int RoomManager::getRoomState(unsigned int id)
 {
 	std::lock_guard<std::mutex> locker(_mutex_rooms);
-	std::map<unsigned int, Room>::iterator iter = m_rooms.find(id);
+	std::map<unsigned int, Room*>::iterator iter = m_rooms.find(id);
 	if (iter == m_rooms.end())
 	{
 		return ActiveMode::DONE; // room not found
 	}
-	return (*iter).second.getData().isActive;
+	return (*iter).second->getData().isActive;
 }
 
 /*
@@ -97,11 +98,11 @@ function gets a list of the rooms
 input: none
 output: vector of the rooms in the server
 */
-std::vector<Room> RoomManager::getRooms()
+std::vector<Room*> RoomManager::getRooms()
 {
 	std::lock_guard<std::mutex> locker(_mutex_rooms);
-	std::vector<Room> rooms = std::vector<Room>();
-	for (std::map<unsigned int, Room>::iterator i = m_rooms.begin(); i != m_rooms.end(); ++i)
+	std::vector<Room*> rooms = std::vector<Room*>();
+	for (std::map<unsigned int, Room*>::iterator i = m_rooms.begin(); i != m_rooms.end(); ++i)
 	{
 		rooms.push_back((*i).second);
 	}

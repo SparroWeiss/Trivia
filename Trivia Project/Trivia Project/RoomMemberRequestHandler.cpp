@@ -8,7 +8,7 @@ initializes the variables of the object
 */
 RoomMemberRequestHandler::RoomMemberRequestHandler(LoggedUser user, Room * room) : m_handlerFactory(m_handlerFactory->getInstance())
 {
-	m_room = *room;
+	m_room = room;
 	m_user = user;
 }
 
@@ -54,7 +54,7 @@ RequestResult RoomMemberRequestHandler::leaveRoom(RequestInfo info)
 	IRequestHandler* newHandle = this; // if the leave room request isn't valid, stay in same handler
 	LeaveRoomResponse leaveRoomRes = { 0 }; // status: 0
 	std::unique_lock<std::mutex> locker(_mutex_room);
-	if (m_room.removeUser(m_user.getUsername()))
+	if (m_room->removeUser(m_user.getUsername()))
 	{
 		locker.unlock();
 		leaveRoomRes = { ActiveMode::DONE }; // status: 3
@@ -73,12 +73,12 @@ output: request result
 RequestResult RoomMemberRequestHandler::getRoomState(RequestInfo info)
 {
 	std::unique_lock<std::mutex> locker(_mutex_room);
-	if (m_room.getData().isActive == ActiveMode::DONE)
+	if (m_room->getData().isActive == ActiveMode::DONE)
 	{ // room has been closed by the admin
 		locker.unlock();
 		return leaveRoom({ LEAVEROOM });
 	}
-	if (m_room.getData().isActive == ActiveMode::PLAYING)
+	if (m_room->getData().isActive == ActiveMode::PLAYING)
 	{ // game has started by the admin
 		// TODO : change the handler to a game handler (4.0.0)
 		locker.unlock();
@@ -87,8 +87,8 @@ RequestResult RoomMemberRequestHandler::getRoomState(RequestInfo info)
 	}
 
 	GetRoomStateResponse getStateRes;
-	getStateRes.answerTimeout = m_room.getData().timePerQuestion;
-	getStateRes.players = m_room.getAllUsers();
+	getStateRes.answerTimeout = m_room->getData().timePerQuestion;
+	getStateRes.players = m_room->getAllUsers();
 	locker.unlock();
 
 	getStateRes.status = ActiveMode::WAITING;  // status: 1

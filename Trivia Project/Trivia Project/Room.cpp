@@ -10,7 +10,7 @@ initializes the variables of the object
 Room::Room()
 {
 	m_users = std::vector<LoggedUser>();
-	m_metaData = { 0, "Room", 0, 0, ActiveMode::DONE };
+	m_metaData = new RoomData{ 0, "Room", 0, 0, ActiveMode::DONE };
 }
 
 /*
@@ -32,7 +32,7 @@ bool Room::addUser(LoggedUser user)
 {
 	std::lock_guard<std::mutex> locker(_mutex_users);
 	// prevents few people to enter in the same time into a full room
-	if (m_metaData.maxPlayers > m_users.size())
+	if (m_metaData->maxPlayers > m_users.size())
 	{ // the room isn't full
 		m_users.push_back(user);
 		return true;
@@ -53,7 +53,6 @@ bool Room::removeUser(std::string name)
 		if (name == (*i).getUsername())
 		{
 			m_users.erase(i);
-			m_metaData.isActive = ActiveMode::WAITING;
 			return true;
 		}
 	}
@@ -68,7 +67,7 @@ output: none
 void Room::setData(RoomData data)
 {
 	std::lock_guard<std::mutex> locker(_mutex_data);
-	m_metaData = RoomData(data);
+	m_metaData = new RoomData(data);
 }
 
 /*
@@ -79,7 +78,7 @@ output: room data
 RoomData Room::getData() const
 {
 	std::lock_guard<std::mutex> locker(_mutex_data);
-	return m_metaData;
+	return *m_metaData;
 }
 
 /*

@@ -25,5 +25,5 @@ private:
 	RequestResult joinRoom(RequestInfo info);
 	RequestResult createRoom(RequestInfo info);
 
-	std::vector<Room>::iterator findRoom(unsigned int id);
+	Room* findRoom(unsigned int id);
 };
