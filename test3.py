@@ -4,6 +4,8 @@ import json
 ERROR_CODE = 0
 SIGNUP_CODE = 1
 LOGIN_CODE = 2
+CREATE_ROOM_CODE = 8
+CLOSE_ROOM_CODE = 9
 
 CODE_SIZE = 1
 LEN_SIZE = 4
@@ -70,10 +72,10 @@ def main():
                 print("port is invalid!")
                 quit()
     """
-
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     print("socket has created")
     server_address = (server_ip, server_port)
+
     try:
         sock.connect(server_address)
     except Exception as e:
@@ -82,10 +84,9 @@ def main():
         quit()
     print("socket has connected")
 
-    sign_up = {"username": "user2", "password": "aaAA11!!", "email": "user1@gmail.com",
-               "address": "street, 1, city", "phone": "050-0000000", "birthdate": "01.01.2010"}
+    login = {"username": "user1", "password": "aaAA11!!"}
     try:
-        sock.sendall(create_msg(SIGNUP_CODE, sign_up))
+        sock.sendall(create_msg(LOGIN_CODE, login))
     except Exception as e:
         print("ERROR -", e)
         sock.close()
@@ -93,13 +94,47 @@ def main():
 
     try:
         msg_code, server_msg = get_msg_from_server(sock)
-        print("sign up: ", msg_code, server_msg)
+        print("login:", msg_code, server_msg)
     except Exception as e:
         print("ERROR -", e)
         sock.close()
         quit()
+
     aa = input("press to continue")
 
+    room = {"roomName":"room", "maxUsers":4, "questionCount":5, "answerTimeout": 50}
+    try:
+        sock.sendall(create_msg(CREATE_ROOM_CODE, room))
+    except Exception as e:
+        print("ERROR -", e)
+        sock.close()
+        quit()
+
+    try:
+        msg_code, server_msg = get_msg_from_server(sock)
+        print("room:", msg_code, server_msg)
+    except Exception as e:
+        print("ERROR -", e)
+        sock.close()
+        quit()
+
+    aa = input("press to continue")
+
+    close = {}
+    try:
+        sock.sendall(create_msg(CLOSE_ROOM_CODE, close))
+    except Exception as e:
+        print("ERROR -", e)
+        sock.close()
+        quit()
+
+    try:
+        msg_code, server_msg = get_msg_from_server(sock)
+        print("close:", msg_code, server_msg)
+    except Exception as e:
+        print("ERROR -", e)
+        sock.close()
+        quit()
 
     sock.close()  # client 2 Login Req
 

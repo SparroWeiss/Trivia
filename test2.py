@@ -4,6 +4,9 @@ import json
 ERROR_CODE = 0
 SIGNUP_CODE = 1
 LOGIN_CODE = 2
+GET_ROOMS_CODE = 4
+JOIN_ROOM_CODE = 7
+GET_STATE_CODE = 11
 
 CODE_SIZE = 1
 LEN_SIZE = 4
@@ -49,9 +52,9 @@ def get_msg_from_server(sock):
 
 
 def main():
-    server_ip = ""
-    server_port = 0
-
+    server_ip = "127.0.0.1"
+    server_port = 8998
+    """
     config = 0
     try:
         config = open(CONFIG_PATH, 'r')
@@ -69,7 +72,7 @@ def main():
             if server_port < MIN_PORT or server_port > MAX_PORT:
                 print("port is invalid!")
                 quit()
-
+    """
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     print("socket has created")
     server_address = (server_ip, server_port)
@@ -82,7 +85,7 @@ def main():
         quit()
     print("socket has connected")
 
-    login = {"username": "user1", "password": "1234"}
+    login = {"username": "user2", "password": "aaAA11!!"}
     try:
         sock.sendall(create_msg(LOGIN_CODE, login))
     except Exception as e:
@@ -97,7 +100,66 @@ def main():
         print("ERROR -", e)
         sock.close()
         quit()
+
     aa = input("press to continue")
+
+    getroom = {}
+    try:
+        sock.sendall(create_msg(GET_ROOMS_CODE, getroom))
+    except Exception as e:
+        print("ERROR -", e)
+        sock.close()
+        quit()
+
+    try:
+        msg_code, server_msg = get_msg_from_server(sock)
+        print("login:", msg_code, server_msg)
+    except Exception as e:
+        print("ERROR -", e)
+        sock.close()
+        quit()
+
+    aa = input("press to continue")
+
+    room = {"roomId":1}
+    try:
+        sock.sendall(create_msg(JOIN_ROOM_CODE, room))
+    except Exception as e:
+        print("ERROR -", e)
+        sock.close()
+        quit()
+
+    try:
+        msg_code, server_msg = get_msg_from_server(sock)
+        print("room:", msg_code, server_msg)
+    except Exception as e:
+        print("ERROR -", e)
+        sock.close()
+        quit()
+
+    aa = input("press to continue")
+
+    while True:
+        check = {}
+        try:
+            sock.sendall(create_msg(GET_STATE_CODE, check))
+        except Exception as e:
+            print("ERROR -", e)
+            sock.close()
+            quit()
+
+        try:
+            msg_code, server_msg = get_msg_from_server(sock)
+            print("status:", msg_code, server_msg)
+            if ":3}" in server_msg:
+                break
+        except Exception as e:
+            print("ERROR -", e)
+            sock.close()
+            quit()
+
+        aa = input("press to continue")
+
     sock.close()  # client 2 Login Req
 
 
