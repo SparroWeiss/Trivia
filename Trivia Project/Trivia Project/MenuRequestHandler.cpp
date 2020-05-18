@@ -2,6 +2,8 @@
 #include "Communicator.h"
 #include <string>
 
+std::mutex _mutex_room_vector;
+
 /*
 constructor
 initializes the variables of the object
@@ -83,10 +85,14 @@ output: request result
 RequestResult MenuRequestHandler::getRooms(RequestInfo info)
 {
 	GetRoomResponse roomsRes = { 1 }; // status: 1
-	std::vector<Room> rooms = m_handlerFactory->getRoomManager().getRooms();
-	for (std::vector<Room>::iterator i = rooms.begin(); i != rooms.end(); ++i)
+
+	std::unique_lock<std::mutex> locker(_mutex_room_vector);
+	std::vector<Room*> rooms = m_handlerFactory->getRoomManager().getRooms();
+	locker.unlock();
+
+	for (std::vector<Room*>::iterator i = rooms.begin(); i != rooms.end(); ++i)
 	{
-		roomsRes.rooms.push_back((*i).getData());
+		roomsRes.rooms.push_back((*i)->getData());
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(roomsRes), this };
 }
@@ -101,11 +107,8 @@ RequestResult MenuRequestHandler::getPlayersInRoom(RequestInfo info)
 	GetPlayersInRoomRequest playersReq = JsonRequestPacketDeserializer::deserializeGetPlayersInRoomRequest(info.buffer);
 	GetPlayersInRoomResponse playersRes;
 	
-	std::vector<LoggedUser> players = (*findRoom(playersReq.roomId)).getAllUsers();
-	for (std::vector<LoggedUser>::iterator i = players.begin(); i != players.end(); ++i)
-	{
-		playersRes.players.push_back((*i).getUsername());
-	}
+	playersRes.players = findRoom(playersReq.roomId)->getAllUsers();
+	
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(playersRes), this };
 }
 
@@ -145,10 +148,11 @@ RequestResult MenuRequestHandler::joinRoom(RequestInfo info)
 	JoinRoomRequest joinRoomReq = JsonRequestPacketDeserializer::deserializeJoinRoomRequest(info.buffer);
 	IRequestHandler* newHandle = this; // if the joining request isn't valid, stey in same handler
 	JoinRoomResponse joinRoomRes = { 0 }; // status: 0
-	if ((*findRoom(joinRoomReq.roomId)).addUser(m_user))
+	Room * room = findRoom(joinRoomReq.roomId);
+	if (room != nullptr && room->addUser(m_user))
 	{
 		joinRoomRes.status = 1; // status: 1
-		newHandle = nullptr; // pointer to the next handle : room member (will be added in 3.0.0)
+		newHandle = m_handlerFactory->createRoomMemberRequestHandler(m_user, room); // pointer to the next handle : room member
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(joinRoomRes), newHandle };
 }
@@ -163,8 +167,11 @@ RequestResult MenuRequestHandler::createRoom(RequestInfo info)
 	CreateRoomRequest createRoomReq = JsonRequestPacketDeserializer::deserializeCreateRoomRequest(info.buffer);
 	IRequestHandler* newHandle = this; // if the creating request isn't valid, stey in same handler
 	CreateRoomResponse createRoomRes = { 1 }; // status: 1
-	m_handlerFactory->getRoomManager().createRoom(m_user);
-	newHandle = nullptr; // pointer to the next handle : room admin (will be added in 3.0.0)
+	RoomData data = { 0, createRoomReq.roomName, createRoomReq.maxUsers, createRoomReq.answerTimeout, ActiveMode::WAITING, createRoomReq.questionCount };
+	std::unique_lock<std::mutex> locker(_mutex_room_vector);
+	newHandle = m_handlerFactory->createRoomAdminRequestHandler(m_user, 
+		m_handlerFactory->getRoomManager().createRoom(m_user, data)); // pointer to the next handle : room admin
+	locker.unlock();
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(createRoomRes), newHandle };
 }
 
@@ -174,15 +181,18 @@ function finds the room
 input: room id
 output: iterator for the room
 */
-std::vector<Room>::iterator MenuRequestHandler::findRoom(unsigned int id)
+Room* MenuRequestHandler::findRoom(unsigned int id)
 {
-	std::vector<Room> rooms = m_handlerFactory->getRoomManager().getRooms();
-	for (std::vector<Room>::iterator i = rooms.begin(); i != rooms.end(); ++i)
+	std::unique_lock<std::mutex> locker(_mutex_room_vector);
+	std::vector<Room*> rooms = m_handlerFactory->getRoomManager().getRooms();
+	locker.unlock();
+
+	for (int i = 0; i < rooms.size(); i++)
 	{
-		if ((*i).getData().id == id)
+		if (rooms[i]->getData().id == id)
 		{
-			return i;
+			return rooms[i];
 		}
 	}
-	return rooms.end();
+	return nullptr;
 }
