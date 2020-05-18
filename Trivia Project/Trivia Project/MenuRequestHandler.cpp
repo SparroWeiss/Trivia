@@ -167,7 +167,7 @@ RequestResult MenuRequestHandler::createRoom(RequestInfo info)
 	CreateRoomRequest createRoomReq = JsonRequestPacketDeserializer::deserializeCreateRoomRequest(info.buffer);
 	IRequestHandler* newHandle = this; // if the creating request isn't valid, stey in same handler
 	CreateRoomResponse createRoomRes = { 1 }; // status: 1
-	RoomData data = { 0, createRoomReq.roomName, createRoomReq.maxUsers, createRoomReq.answerTimeout, ActiveMode::WAITING };
+	RoomData data = { 0, createRoomReq.roomName, createRoomReq.maxUsers, createRoomReq.answerTimeout, ActiveMode::WAITING, createRoomReq.questionCount };
 	std::unique_lock<std::mutex> locker(_mutex_room_vector);
 	newHandle = m_handlerFactory->createRoomAdminRequestHandler(m_user, 
 		m_handlerFactory->getRoomManager().createRoom(m_user, data)); // pointer to the next handle : room admin

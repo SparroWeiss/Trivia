@@ -13,6 +13,7 @@ struct
 	unsigned int maxPlayers;
 	unsigned int timePerQuestion;
 	unsigned int isActive;
+	unsigned int questionCount;
 }typedef RoomData;
 
 class Room

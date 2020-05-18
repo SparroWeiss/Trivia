@@ -10,7 +10,7 @@ initializes the variables of the object
 Room::Room()
 {
 	m_users = std::vector<LoggedUser>();
-	m_metaData = RoomData{ 0, "Room", 0, 0, ActiveMode::DONE };
+	m_metaData = RoomData{ 0, "Room", 0, 0, ActiveMode::DONE, 0 };
 }
 
 /*

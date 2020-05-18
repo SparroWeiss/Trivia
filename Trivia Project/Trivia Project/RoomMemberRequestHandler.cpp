@@ -89,11 +89,11 @@ RequestResult RoomMemberRequestHandler::getRoomState(RequestInfo info)
 	GetRoomStateResponse getStateRes;
 	getStateRes.answerTimeout = m_room->getData().timePerQuestion;
 	getStateRes.players = m_room->getAllUsers();
+	getStateRes.questionCount = m_room->getData().questionCount;
 	locker.unlock();
 
 	getStateRes.status = ActiveMode::WAITING;  // status: 1
 	getStateRes.hasGameBegun = false;
-	getStateRes.questionCount = 0; // what?
 
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(getStateRes), this };
 }

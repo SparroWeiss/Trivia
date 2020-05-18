@@ -51,7 +51,7 @@ Room* RoomManager::createRoom(LoggedUser first_user, RoomData data)
 {
 	Room* room = new Room();
 	std::unique_lock<std::mutex> locker(_mutex_curr_id); // can't be two rooms with the same id
-	room->setData({ curr_id++, data.name, data.maxPlayers, data.timePerQuestion, ActiveMode::WAITING });
+	room->setData({ curr_id++, data.name, data.maxPlayers, data.timePerQuestion, ActiveMode::WAITING, data.questionCount });
 	locker.unlock();
 	room->addUser(first_user);
 	std::unique_lock<std::mutex> locker2(_mutex_rooms);
