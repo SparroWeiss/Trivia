@@ -26,6 +26,6 @@ public:
 	RoomData getData() const;
 	std::vector<std::string> getAllUsers();
 private:
-	RoomData* m_metaData;
+	RoomData m_metaData;
 	std::vector<LoggedUser> m_users;
 };
