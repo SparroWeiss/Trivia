@@ -44,7 +44,7 @@ namespace Trivia_Client
         {
             InitializeComponent();
 
-            /*connect:
+            connect:
 
                 try
                 {
@@ -64,16 +64,9 @@ namespace Trivia_Client
                         this.Close(); // Exit
                     }
                 }
-            */
+            _currWindow = Windows.ENTRY;
             SetEntryWindow();
         }
-        
-        // Entry                                          // V
-        // Login / Signup                                 // V
-        // Menu (CreateRoom ; JoinRomm ; Statistics)      // V
-        // CreateRoom                                     // V
-        // JoinRoom                                       // V
-        // Statistics (MyStatistics ; HighScores)         // V
 
         private void SetEntryWindow()
         {
@@ -126,9 +119,11 @@ namespace Trivia_Client
             PasswordBox passwordBox = new PasswordBox { Style = (Style)Resources["myPasswordBox"] };
             passwordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, passwordBox));
 
+            List<TextBox> textBoxes = new List<TextBox> { usernameBox };
+
             Button nextButton = new Button { Style = (Style)Resources["darkButton"], Content = "Next",
                HorizontalAlignment = HorizontalAlignment.Right };
-            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU));
+            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, textBoxes, passwordBox));
             
             Button backButton = new Button { Style = (Style)Resources["darkButton"], Content = "Back",
                 HorizontalAlignment = HorizontalAlignment.Left };
@@ -191,9 +186,11 @@ namespace Trivia_Client
             TextBox birthdateBox = new TextBox { Style = (Style)Resources["myTextBox"] };
             birthdateBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(birthdateBlock, birthdateBox));
 
+            List<TextBox> textBoxes = new List<TextBox>{ usernameBox, emailBox, addressBox, phoneBox, birthdateBox };
+
             Button nextButton = new Button { Style = (Style)Resources["darkButton"], Content = "Next",
                 HorizontalAlignment = HorizontalAlignment.Right };
-            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU));
+            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, textBoxes, passwordBox));
             
             Button backButton = new Button { Style = (Style)Resources["darkButton"], Content = "Back",
                 HorizontalAlignment = HorizontalAlignment.Left};
@@ -396,7 +393,7 @@ namespace Trivia_Client
 
             Button startButton, closeButton, leaveButton;
    
-            if ("user0" == "usr0") // if admin
+            if ("user0" == "user0") // if admin
             {
                 startButton = new Button { Style = (Style)Resources["brightButton"], Content = "Start Game", Margin = new Thickness(0, 0, 40, 30),
                     HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Bottom};
@@ -560,47 +557,121 @@ namespace Trivia_Client
             }
         }
 
-        public void HandleButtonClick(Windows nextWindow)
+        public void HandleButtonClick(Windows nextWindow, List<TextBox> textBoxes = null, PasswordBox passwordBox = null)
         {
             switch (nextWindow)
             {
-                case Windows.ENTRY:
+                case Windows.ENTRY:                      // ENTRY V
+                    if (_currWindow == Windows.MENU)
+                    {
+                        try
+                        {
+                            _communicator.logout();
+                            this.Close();
+                        }
+                        catch (Exception e)
+                        {
+                            this.Close();
+                            MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
+                                MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
+                        }
+                    }
+                    _currWindow = Windows.ENTRY;
                     SetEntryWindow();
                     break;
 
-                case Windows.LOGIN:
+                case Windows.LOGIN:                      // LOGIN V
+                    _currWindow = Windows.LOGIN;
                     SetLoginWindow();
                     break;
 
-                case Windows.SIGNUP:
+                case Windows.SIGNUP:                     // SIGNUP V
+                    _currWindow = Windows.SIGNUP;
                     SetSignupWindow();
                     break;
 
                 case Windows.MENU:
-                    SetMenuWindow();
+                    switch (_currWindow)
+                    {
+                        case Windows.LOGIN:
+                            try
+                            {
+                                if (_communicator.login(textBoxes[0].Text, passwordBox.Password))
+                                {
+                                    _username = textBoxes[0].Text;
+                                    _currWindow = Windows.MENU;
+                                    SetMenuWindow();
+                                }
+                                else
+                                {
+                                    MessageBoxResult result = MessageBox.Show("Some details were invalid. \nTry again :)", "Trivia",
+                                        MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                this.Close();
+                                MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
+                                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
+                            }
+                            break;
+
+                        case Windows.SIGNUP:
+                            try
+                            {
+                                if (_communicator.signup(textBoxes[0].Text, passwordBox.Password, textBoxes[1].Text,
+                                    textBoxes[2].Text, textBoxes[3].Text, textBoxes[4].Text))
+                                {
+                                    _username = textBoxes[0].Text;
+                                    _currWindow = Windows.MENU;
+                                    SetMenuWindow();
+                                }
+                                else
+                                {
+                                    MessageBoxResult result = MessageBox.Show("Some details were invalid. \nTry again :)", "Trivia",
+                                        MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                this.Close();
+                                MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
+                                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
                     break;
 
-                case Windows.CREATE_ROOM:
+                case Windows.CREATE_ROOM:                // CREATE ROOM V
+                    _currWindow = Windows.CREATE_ROOM;
                     SetCreateRoomWindow();
                     break;
 
                 case Windows.JOIN_ROOM:
+                    _currWindow = Windows.JOIN_ROOM;
                     SetJoinRoomWindow();
                     break;
 
                 case Windows.ROOM:
+                    _currWindow = Windows.ROOM;
                     SetRoomWindow();
                     break;
 
-                case Windows.STATISTICS:
+                case Windows.STATISTICS:                 // STATISTICS V
+                    _currWindow = Windows.STATISTICS;
                     SetStatisticsWindow();
                     break;
 
                 case Windows.USER_STATISTICS:
+                    _currWindow = Windows.USER_STATISTICS;
                     SetMyStatisticsWindow();
                     break;
 
                 case Windows.HIGH_SCORES:
+                    _currWindow = Windows.HIGH_SCORES;
                     SetHighScoresWindow();
                     break;
 
@@ -609,7 +680,8 @@ namespace Trivia_Client
             }
         }
 
-
+        private string _username;
+        private Windows _currWindow;
         private Communicator _communicator;
     }
 }
