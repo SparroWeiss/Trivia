@@ -641,6 +641,8 @@ namespace Trivia_Client
                             break;
 
                         default:
+                            _currWindow = Windows.MENU;
+                            SetMenuWindow();
                             break;
                     }
                     break;
