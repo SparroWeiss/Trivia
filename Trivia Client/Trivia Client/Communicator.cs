@@ -115,7 +115,6 @@ namespace Trivia_Client
             {
                 throw new Exception(JsonConvert.DeserializeObject<ErrorRes>(System.Text.Encoding.ASCII.GetString(msg)) + " :(");
             }
-
             return JsonConvert.DeserializeObject<Res>(System.Text.Encoding.ASCII.GetString(msg));
         }
 
@@ -150,6 +149,20 @@ namespace Trivia_Client
             send_data(messageCode.SIGNOUTCODE);
             LogoutRes result = recv_data<LogoutRes>();
             return (result.status == 1);
+        }
+
+        public List<string> getUserStatistics()
+        {
+            send_data(messageCode.GETSTATISTICSCODE);
+            GetStatisticsRes result = recv_data<GetStatisticsRes>();
+            if(result.status == 1)
+            {
+                return result.statiatics.Take(5).ToList<string>();
+            }
+            else
+            {
+                return null;
+            }
         }
 
         private Socket _serverSocket;

@@ -448,7 +448,7 @@ namespace Trivia_Client
             MainGrid.Children.Add(buttons);
         }
 
-        private void SetMyStatisticsWindow()
+        private void SetMyStatisticsWindow(List<string> statistics)
         {
             MainGrid.Children.Clear();
             Height = 515;
@@ -457,19 +457,19 @@ namespace Trivia_Client
 
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
-            TextBlock totalAnswersBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Total Answers: " };
+            TextBlock totalAnswersBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Total Answers: " + statistics[1]};
             totalAnswersBlock.Foreground = new SolidColorBrush(Colors.Lavender);
             
-            TextBlock correctAnswersBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Correct Answers: " };
+            TextBlock correctAnswersBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Correct Answers: " + statistics[2] };
             correctAnswersBlock.Foreground = new SolidColorBrush(Colors.Lavender);
             
-            TextBlock incorrectAnswersBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Incorrect Answers: " };
+            TextBlock incorrectAnswersBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Incorrect Answers: "+ statistics[3] };
             incorrectAnswersBlock.Foreground = new SolidColorBrush(Colors.Lavender);
             
-            TextBlock avgTimeBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Avarage Time Per Answer: " };
+            TextBlock avgTimeBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Avarage Time Per Answer: " + statistics[4] };
             avgTimeBlock.Foreground = new SolidColorBrush(Colors.Lavender);
            
-            TextBlock totalGamesBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Total Answers: " };
+            TextBlock totalGamesBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Total Games: " + statistics[5] };
             totalGamesBlock.Foreground = new SolidColorBrush(Colors.Lavender);
 
             Button backButton = new Button { Style = (Style)Resources["brightButton"], Content = "Back" };
@@ -641,6 +641,8 @@ namespace Trivia_Client
                             break;
 
                         default:
+                            _currWindow = Windows.MENU;
+                            SetMenuWindow();
                             break;
                     }
                     break;
@@ -666,8 +668,30 @@ namespace Trivia_Client
                     break;
 
                 case Windows.USER_STATISTICS:
+                    List<string> statistics = null;
+                    statistics = _communicator.getUserStatistics();
+                    try
+                    {
+                        
+                    }
+                    catch (Exception e)
+                    {
+                        this.Close();
+                        MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
+                            MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
+                        break;
+                    }
+
+                    if (statistics == null)
+                    {
+                        MessageBoxResult result = MessageBox.Show("There were some errors (: \nGoing back to menu.", "Trivia",
+                            MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
+                        _currWindow = Windows.MENU;
+                        SetMenuWindow();
+                        break;
+                    }
                     _currWindow = Windows.USER_STATISTICS;
-                    SetMyStatisticsWindow();
+                    SetMyStatisticsWindow(statistics);
                     break;
 
                 case Windows.HIGH_SCORES:
