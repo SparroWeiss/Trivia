@@ -43,8 +43,12 @@ namespace Trivia_Client
         public MainWindow()
         {
             InitializeComponent();
+            background_worker.WorkerSupportsCancellation = true;
+            background_worker.WorkerReportsProgress = true;
+            background_worker.DoWork += getAvailableRooms;
+            background_worker.ProgressChanged += update_ui;
 
-            connect:
+        connect:
 
                 try
                 {
@@ -297,9 +301,11 @@ namespace Trivia_Client
                 Foreground = new SolidColorBrush(Colors.Lavender),  };
             questionTimeBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(questionTimeBlock, questionTimeBox));
 
+            List<TextBox> textBoxes = new List<TextBox> { roomNameBox, userNumBox, questionNumBox, questionTimeBox };
+
             Button nextButton = new Button { Style = (Style)Resources["brightButton"], Content = "Next",
                 Width = 100, HorizontalAlignment = HorizontalAlignment.Right };
-            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.ROOM));
+            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.ROOM, textBoxes));
 
             Button backButton = new Button { Style = (Style)Resources["brightButton"], Content = "Back",
                 Width = 100, HorizontalAlignment = HorizontalAlignment.Left };
@@ -341,11 +347,7 @@ namespace Trivia_Client
                 FontSize = 14, VerticalAlignment = VerticalAlignment.Stretch, Foreground = new SolidColorBrush(Colors.Lavender) };
 
             ListBox roomsListBox = new ListBox { Style = (Style)Resources["roomList"] };
-            roomsListBox.MouseDoubleClick += new MouseButtonEventHandler((sender, args) => HandleButtonClick(Windows.ROOM));
-            for (int i = 0; i < 10; i++)
-            {
-                roomsListBox.Items.Add("Room " + i.ToString());
-            }
+            roomsListBox.MouseDoubleClick += new MouseButtonEventHandler((sender, args) => HandleButtonClick(Windows.ROOM, roomName: roomsListBox.SelectedItem.ToString()));
 
             Button backButton = new Button { Style = (Style)Resources["brightButton"], Content = "Back", Margin = new Thickness(0, 35, 0, 0) };
             backButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU));
@@ -357,19 +359,24 @@ namespace Trivia_Client
             head.Children.Add(backButton);
 
             MainGrid.Children.Add(head);
+
+            background_worker.RunWorkerAsync(argument: roomsListBox);
         }
 
-        private void SetRoomWindow()
+        private void SetRoomWindow(RoomData roomData)
         {
             MainGrid.Children.Clear();
             Height = 550;
             Width = 600;
             MainGrid.Background = new LinearGradientBrush(Colors.Tomato, Colors.DarkRed, 90);
 
+            string roomAdmin = _communicator.getRoomAdmin(roomData.name);
+
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
             TextBlock messageBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Margin = new Thickness(0, 0, 0, 10),
-                Text = "Room Name: " + ", Room Admin: " + ", \nTime Per Qst: " + ", Members Amount: " + ", Qst Amount: ",
+                Text = "Room Name: " + roomData.name +  ", Room Admin: " + roomAdmin +  ", \nTime Per Qst: " + roomData.timePerQuestion +
+                ", Members Amount: "+ roomData.maxPlayers + ", Qst Amount: " + roomData.questionCount,
                 FontSize = 16, VerticalAlignment = VerticalAlignment.Stretch, Foreground = new SolidColorBrush(Colors.Lavender) , Height = 60, Width = 500};
 
 
@@ -378,10 +385,6 @@ namespace Trivia_Client
                  Margin = new Thickness(0, 0, 0, 10) };
 
             ListBox playersListBox = new ListBox { Style = (Style)Resources["roomList"] , Height = 200};
-            for(int i = 0; i < 6; i++)
-            {
-                playersListBox.Items.Add("player" + i.ToString());
-            }
 
             StackPanel head = new StackPanel();
             head.Children.Add(logo);
@@ -393,7 +396,7 @@ namespace Trivia_Client
 
             Button startButton, closeButton, leaveButton;
    
-            if ("user0" == "user0") // if admin
+            if (_username == roomAdmin) // if admin
             {
                 startButton = new Button { Style = (Style)Resources["brightButton"], Content = "Start Game", Margin = new Thickness(0, 0, 40, 30),
                     HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Bottom};
@@ -457,19 +460,19 @@ namespace Trivia_Client
 
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
-            TextBlock totalAnswersBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Total Answers: " + statistics[1]};
+            TextBlock totalAnswersBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Total Answers: " + statistics[0]};
             totalAnswersBlock.Foreground = new SolidColorBrush(Colors.Lavender);
             
-            TextBlock correctAnswersBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Correct Answers: " + statistics[2] };
+            TextBlock correctAnswersBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Correct Answers: " + statistics[1] };
             correctAnswersBlock.Foreground = new SolidColorBrush(Colors.Lavender);
             
-            TextBlock incorrectAnswersBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Incorrect Answers: "+ statistics[3] };
+            TextBlock incorrectAnswersBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Incorrect Answers: " + statistics[2] };
             incorrectAnswersBlock.Foreground = new SolidColorBrush(Colors.Lavender);
             
-            TextBlock avgTimeBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Avarage Time Per Answer: " + statistics[4] };
+            TextBlock avgTimeBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Avg Time Per Answer: " + statistics[3] };
             avgTimeBlock.Foreground = new SolidColorBrush(Colors.Lavender);
            
-            TextBlock totalGamesBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Total Games: " + statistics[5] };
+            TextBlock totalGamesBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Total Games: " + statistics[4] };
             totalGamesBlock.Foreground = new SolidColorBrush(Colors.Lavender);
 
             Button backButton = new Button { Style = (Style)Resources["brightButton"], Content = "Back" };
@@ -490,29 +493,36 @@ namespace Trivia_Client
             MainGrid.Children.Add(blocks);
         }
 
-        private void SetHighScoresWindow()
+        private void SetHighScoresWindow(Dictionary<string, string> highScores)
         {
             MainGrid.Children.Clear();
-            Height = 370;
+            Height = 390;
             Width = 450;
             MainGrid.Background = new LinearGradientBrush(Colors.Tomato, Colors.DarkRed, 90);
 
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
             TextBlock firstScoreBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Foreground = new SolidColorBrush(Colors.Lavender),
-                TextAlignment = TextAlignment.Left, Margin = new Thickness(40, 0, 0, 0), Text = "1. " };
+                TextAlignment = TextAlignment.Left, Margin = new Thickness(40, 0, 0, 0) };
             
             TextBlock secondScoreBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Foreground = new SolidColorBrush(Colors.Lavender),
-                TextAlignment = TextAlignment.Left, Margin = new Thickness(40, 0, 0, 0), Text = "2. " };
+                TextAlignment = TextAlignment.Left, Margin = new Thickness(40, 0, 0, 0) };
             
             TextBlock thirdScoreBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Foreground = new SolidColorBrush(Colors.Lavender),
-                TextAlignment = TextAlignment.Left, Margin = new Thickness(40, 0, 0, 0), Text = "3. " };
+                TextAlignment = TextAlignment.Left, Margin = new Thickness(40, 0, 0, 0) };
             
             TextBlock fourthScoreBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Foreground = new SolidColorBrush(Colors.Lavender),
-                TextAlignment = TextAlignment.Left, Margin = new Thickness(40, 0, 0, 0), Text = "4. " };
+                TextAlignment = TextAlignment.Left, Margin = new Thickness(40, 0, 0, 0) };
             
             TextBlock fifthScoreBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Foreground = new SolidColorBrush(Colors.Lavender),
-                TextAlignment = TextAlignment.Left, Margin = new Thickness(40, 0, 0, 0), Text = "5. " };
+                TextAlignment = TextAlignment.Left, Margin = new Thickness(40, 0, 0, 0) };
+
+            TextBlock[] textBlocks = new TextBlock[5]{ firstScoreBlock, secondScoreBlock, thirdScoreBlock, fourthScoreBlock, fifthScoreBlock};
+
+            for (int i = 0; i < highScores.Count(); i++)
+            {
+                textBlocks[i].Text = (i+1).ToString() + ". " + highScores.ElementAt(i).Key + " --> " + highScores.ElementAt(i).Value;
+            }
 
             Button backButton = new Button { Style = (Style)Resources["brightButton"], Content = "Back",
                 VerticalAlignment = VerticalAlignment.Bottom };
@@ -557,7 +567,7 @@ namespace Trivia_Client
             }
         }
 
-        public void HandleButtonClick(Windows nextWindow, List<TextBox> textBoxes = null, PasswordBox passwordBox = null)
+        public void HandleButtonClick(Windows nextWindow, List<TextBox> textBoxes = null, PasswordBox passwordBox = null, string roomName = null)
         {
             switch (nextWindow)
             {
@@ -658,8 +668,71 @@ namespace Trivia_Client
                     break;
 
                 case Windows.ROOM:
-                    _currWindow = Windows.ROOM;
-                    SetRoomWindow();
+                    switch(_currWindow)
+                    {
+                        case Windows.CREATE_ROOM:
+                            try
+                            {
+                                if (_communicator.createRoom(textBoxes[0].Text, textBoxes[1].Text, textBoxes[2].Text, textBoxes[3].Text))
+                                {
+                                    RoomData temp;
+                                    temp.id = 0;
+                                    temp.name = textBoxes[0].Text;
+                                    temp.maxPlayers = UInt32.Parse(textBoxes[1].Text);
+                                    temp.questionCount = UInt32.Parse(textBoxes[2].Text);
+                                    temp.timePerQuestion = UInt32.Parse(textBoxes[3].Text);
+                                    temp.isActive = (uint)ActiveMode.WAITING;
+
+                                    _currWindow = Windows.ROOM;
+                                    SetRoomWindow(temp);
+                                }
+                                else
+                                {
+                                    MessageBoxResult result = MessageBox.Show("Some details were invalid. \nTry again :)", "Trivia",
+                                        MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                this.Close();
+                                MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
+                                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
+                            }
+                            break;
+                        case Windows.JOIN_ROOM:
+                            try
+                            {
+
+                                RoomData r = _communicator.getRoomData(roomName);
+                                if (r.name != "")
+                                {
+                                    if (_communicator.joinRoom(roomName))
+                                    {
+                                        _currWindow = Windows.ROOM;
+                                        SetRoomWindow(r);
+                                    }
+                                    else
+                                    {
+                                        MessageBoxResult result = MessageBox.Show("Faild to join room. \nTry again :)", "Trivia",
+                                            MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                                    }
+                                }
+                                else
+                                {
+                                    MessageBoxResult result = MessageBox.Show("Faild to join room. \nTry again :)", "Trivia",
+                                        MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                this.Close();
+                                MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
+                                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
                     break;
 
                 case Windows.STATISTICS:                 // STATISTICS V
@@ -668,11 +741,11 @@ namespace Trivia_Client
                     break;
 
                 case Windows.USER_STATISTICS:
-                    List<string> statistics = null;
-                    statistics = _communicator.getUserStatistics();
+                    List<string> userStatistics = null;
+
                     try
                     {
-                        
+                        userStatistics = _communicator.getUserStatistics();
                     }
                     catch (Exception e)
                     {
@@ -682,21 +755,44 @@ namespace Trivia_Client
                         break;
                     }
 
-                    if (statistics == null)
+                    if (userStatistics == null)
                     {
-                        MessageBoxResult result = MessageBox.Show("There were some errors (: \nGoing back to menu.", "Trivia",
+                        MessageBoxResult result = MessageBox.Show("There were some errors ): \nGoing back to menu.", "Trivia",
                             MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
                         _currWindow = Windows.MENU;
                         SetMenuWindow();
                         break;
                     }
                     _currWindow = Windows.USER_STATISTICS;
-                    SetMyStatisticsWindow(statistics);
+                    SetMyStatisticsWindow(userStatistics);
                     break;
 
                 case Windows.HIGH_SCORES:
+                    Dictionary<string, string> highScores = null;
+
+                    try
+                    {
+                        highScores = _communicator.getHighScores();
+                    }
+                    catch (Exception e)
+                    {
+                        this.Close();
+                        MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
+                            MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
+                        break;
+                    }
+
+                    if (highScores == null)
+                    {
+                        MessageBoxResult result = MessageBox.Show("There were some errors ): \nGoing back to menu.", "Trivia",
+                            MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
+                        _currWindow = Windows.MENU;
+                        SetMenuWindow();
+                        break;
+                    }
+
                     _currWindow = Windows.HIGH_SCORES;
-                    SetHighScoresWindow();
+                    SetHighScoresWindow(highScores);
                     break;
 
                 default:
@@ -704,8 +800,48 @@ namespace Trivia_Client
             }
         }
 
+        private void getAvailableRooms(object sender, DoWorkEventArgs e)
+        {
+            while (true)
+            {
+                List<string> roomNames = new List<string>();
+                List<RoomData> currRooms = _communicator.getAvailableRooms();
+
+                foreach (RoomData room in currRooms)
+                {
+                    roomNames.Add(room.name);
+                }
+
+                background_worker.ReportProgress(0, new Tuple<List<string>, ListBox>(roomNames, (ListBox)e.Argument));
+
+                System.Threading.Thread.Sleep(1000);
+
+                if (_currWindow != Windows.JOIN_ROOM)
+                {
+                    break;
+                }
+            }
+        }
+
+        void update_ui(object sender, ProgressChangedEventArgs e)
+        {
+            Tuple<List<string>, ListBox> rooms = (Tuple<List<string>, ListBox>)e.UserState;
+            rooms.Item2.Items.Clear();
+
+            foreach (string room in rooms.Item1)
+            {
+                rooms.Item2.Items.Add(room);
+            }
+        }
+
+        void background_worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            ;
+        }
+
         private string _username;
         private Windows _currWindow;
         private Communicator _communicator;
+        private BackgroundWorker background_worker = new BackgroundWorker();
     }
 }

@@ -115,6 +115,7 @@ namespace Trivia_Client
             {
                 throw new Exception(JsonConvert.DeserializeObject<ErrorRes>(System.Text.Encoding.ASCII.GetString(msg)) + " :(");
             }
+
             return JsonConvert.DeserializeObject<Res>(System.Text.Encoding.ASCII.GetString(msg));
         }
 
@@ -157,12 +158,111 @@ namespace Trivia_Client
             GetStatisticsRes result = recv_data<GetStatisticsRes>();
             if(result.status == 1)
             {
-                return result.statiatics.Take(5).ToList<string>();
+                return result.statistics.Skip(1).Take(5).ToList<string>();
             }
             else
             {
                 return null;
             }
+        }
+
+        public Dictionary<string, string> getHighScores()
+        {
+            send_data(messageCode.GETSTATISTICSCODE);
+            GetStatisticsRes result = recv_data<GetStatisticsRes>();
+            if (result.status == 1)
+            {
+                Dictionary<string, string> res = new Dictionary<string, string>();
+                result.statistics = result.statistics.Skip(6).ToList<string>();
+
+                for (int i = 0; i < result.statistics.Count(); i++)
+                {
+                    res.Add(result.statistics[i], result.statistics[++i]);
+                }
+
+                return res;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public bool createRoom(string roomName, string maxUsers, string questionCount, string answerTimeout)
+        {
+            CreateRoomReq createRoom;
+            createRoom.roomName = roomName;
+
+            try
+            {
+                createRoom.maxUsers = UInt32.Parse(maxUsers);
+                createRoom.questionCount = UInt32.Parse(questionCount);
+                createRoom.answerTimeout = UInt32.Parse(answerTimeout);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            send_data(messageCode.CREATEROOMCODE, JsonConvert.SerializeObject(createRoom));
+            CreateRoomRes result = recv_data<CreateRoomRes>();
+            return (result.status == 1);
+        }
+
+        public bool joinRoom(string roomName)
+        {
+            JoinRoomReq joinRoom;
+            joinRoom.roomId = 0;
+            bool foundRoom = false;
+
+            foreach (RoomData r in getAvailableRooms())
+            {
+                if (r.name == roomName)
+                {
+                    joinRoom.roomId = r.id;
+                    foundRoom = true;
+                    break;
+                }
+            }
+
+            if (foundRoom)
+            {
+                send_data(messageCode.JOINROOMCODE, JsonConvert.SerializeObject(joinRoom));
+                JoinRoomRes result = recv_data<JoinRoomRes>();
+                return (result.status == 1);
+            }
+
+            else
+            {
+                return false;
+            }
+        }
+
+        public RoomData getRoomData(string roomName)
+        {
+            foreach (RoomData r in getAvailableRooms())
+            {
+                if (r.name == roomName)
+                {
+                    return r;
+                }
+            }
+
+            return new RoomData();
+        }
+
+        public List<RoomData> getAvailableRooms()
+        {
+            send_data(messageCode.GETROOMSCODE);
+            GetRoomsRes result = recv_data<GetRoomsRes>();
+            return result.rooms;
+        }
+
+        public string getRoomAdmin(string roomName)
+        {
+            send_data(messageCode.GETROOMSTATECODE);
+            GetRoomStateRes result = recv_data<GetRoomStateRes>();
+            return result.players[0];
         }
 
         private Socket _serverSocket;

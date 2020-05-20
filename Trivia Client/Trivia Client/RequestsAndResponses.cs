@@ -14,6 +14,7 @@ namespace Trivia_Client
         public uint maxPlayers;
         public uint timePerQuestion;
         public uint isActive;
+        public uint questionCount;
     }
 
     struct ErrorRes
@@ -85,7 +86,7 @@ namespace Trivia_Client
         public uint status;
     }
 
-    struct GetRoomRes
+    struct GetRoomsRes
     {
         public uint status;
         public List<RoomData> rooms;
@@ -94,7 +95,7 @@ namespace Trivia_Client
     struct GetStatisticsRes
     {
         public uint status;
-        public List<string> statiatics;
+        public List<string> statistics;
     }
 
     struct CloseRoomRes

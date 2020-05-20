@@ -86,7 +86,7 @@ Output: none
 void to_json(json& j, const RoomData& room_data)
 {
 	j = json{ {"id", room_data.id} , {"name", room_data.name}, {"maxPlayers", room_data.maxPlayers},
-		{"timePerQuestion", room_data.timePerQuestion}, {"isActive", room_data.isActive} };
+		{"timePerQuestion", room_data.timePerQuestion}, {"isActive", room_data.isActive}, {"questionCount", room_data.questionCount} };
 }
 /*
 This is a helper function that enables direct assignment from 'json' to 'RoomData'.
@@ -100,6 +100,7 @@ void from_json(const json& j, RoomData& room_data)
 	j.at("maxPlayers").get_to(room_data.maxPlayers);
 	j.at("timePerQuestion").get_to(room_data.timePerQuestion);
 	j.at("isActive").get_to(room_data.isActive);
+	j.at("questionCount").get_to(room_data.questionCount);
 }
 
 /*
