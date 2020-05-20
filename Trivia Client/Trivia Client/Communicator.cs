@@ -32,7 +32,7 @@ namespace Trivia_Client
     {
         private string SERVER_IP;
         private int SERVER_PORT;
-        private const string CONFIG_PATH = "..\\..\\..\\config.txt";
+        private const string CONFIG_PATH = "config.txt";
 
         public Communicator()
         {
@@ -258,11 +258,32 @@ namespace Trivia_Client
             return result.rooms;
         }
 
-        public string getRoomAdmin(string roomName)
+        public string getRoomAdmin()
         {
             send_data(messageCode.GETROOMSTATECODE);
             GetRoomStateRes result = recv_data<GetRoomStateRes>();
             return result.players[0];
+        }
+
+        public GetRoomStateRes getRoomState()
+        {
+            send_data(messageCode.GETROOMSTATECODE);
+            GetRoomStateRes result = recv_data<GetRoomStateRes>();
+            return result;
+        }
+
+        public bool closeRoom()
+        {
+            send_data(messageCode.CLOSEROOMCODE);
+            CloseRoomRes result = recv_data<CloseRoomRes>();
+            return (result.status == 1);
+        }
+
+        public bool leaveRoom()
+        {
+            send_data(messageCode.LEAVEROOMCODE);
+            LeaveRoomRes result = recv_data<LeaveRoomRes>();
+            return (result.status == 1);
         }
 
         private Socket _serverSocket;

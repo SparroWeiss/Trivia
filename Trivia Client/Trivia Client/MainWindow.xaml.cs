@@ -43,10 +43,15 @@ namespace Trivia_Client
         public MainWindow()
         {
             InitializeComponent();
-            background_worker.WorkerSupportsCancellation = true;
-            background_worker.WorkerReportsProgress = true;
-            background_worker.DoWork += getAvailableRooms;
-            background_worker.ProgressChanged += update_ui;
+            _available_rooms_worker.WorkerSupportsCancellation = true;
+            _available_rooms_worker.WorkerReportsProgress = true;
+            _available_rooms_worker.DoWork += getAvailableRooms;
+            _available_rooms_worker.ProgressChanged += update_rooms_list;
+            
+            _room_state_worker.WorkerSupportsCancellation = true;
+            _room_state_worker.WorkerReportsProgress = true;
+            _room_state_worker.DoWork += checkRoomState;
+            _room_state_worker.ProgressChanged += update_room_window;
 
         connect:
 
@@ -360,7 +365,7 @@ namespace Trivia_Client
 
             MainGrid.Children.Add(head);
 
-            background_worker.RunWorkerAsync(argument: roomsListBox);
+            _available_rooms_worker.RunWorkerAsync(argument: roomsListBox);
         }
 
         private void SetRoomWindow(RoomData roomData)
@@ -370,7 +375,7 @@ namespace Trivia_Client
             Width = 600;
             MainGrid.Background = new LinearGradientBrush(Colors.Tomato, Colors.DarkRed, 90);
 
-            string roomAdmin = _communicator.getRoomAdmin(roomData.name);
+            string roomAdmin = _communicator.getRoomAdmin();
 
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
@@ -395,24 +400,26 @@ namespace Trivia_Client
             MainGrid.Children.Add(head);
 
             Button startButton, closeButton, leaveButton;
-   
+            leaveButton = new Button { Style = (Style)Resources["brightButton"], Content = "Leave Room", Margin = new Thickness(0, 30, 0, 0) };
+            leaveButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, close_room: false));
+
+            _room_state_worker.RunWorkerAsync(argument: new Tuple<ListBox, Button, bool>(playersListBox, leaveButton, _username == roomAdmin));
+
             if (_username == roomAdmin) // if admin
             {
                 startButton = new Button { Style = (Style)Resources["brightButton"], Content = "Start Game", Margin = new Thickness(0, 0, 40, 30),
                     HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Bottom};
-                startButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.ENTRY));
+                //startButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick()); // for now no start game option
 
                 closeButton = new Button { Style = (Style)Resources["brightButton"], Content = "Close Room", Margin = new Thickness(40, 0, 0, 30),
                     HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Bottom };
-                closeButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU));
+                closeButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, close_room:true));
 
                 MainGrid.Children.Add(startButton);
                 MainGrid.Children.Add(closeButton);
             }
             else // if not admin
             {
-                leaveButton = new Button { Style = (Style)Resources["brightButton"], Content = "Leave Room", Margin = new Thickness(0, 30, 0, 0) };
-                leaveButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU));
                 head.Children.Add(leaveButton);
             }
         }
@@ -567,7 +574,7 @@ namespace Trivia_Client
             }
         }
 
-        public void HandleButtonClick(Windows nextWindow, List<TextBox> textBoxes = null, PasswordBox passwordBox = null, string roomName = null)
+        public void HandleButtonClick(Windows nextWindow, List<TextBox> textBoxes = null, PasswordBox passwordBox = null, string roomName = null, bool close_room = true)
         {
             switch (nextWindow)
             {
@@ -648,6 +655,29 @@ namespace Trivia_Client
                                 MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
                                     MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
                             }
+                            break;
+
+                        case Windows.ROOM:
+                            if (close_room)
+                            {
+                                if (!_communicator.closeRoom())
+                                {
+                                    MessageBoxResult result = MessageBox.Show("Failed to close room", "Trivia",
+                                        MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                if (!_communicator.leaveRoom())
+                                {
+                                    MessageBoxResult result = MessageBox.Show("Failed to leave room", "Trivia",
+                                        MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                                    break;
+                                }
+                            }
+                            _currWindow = Windows.MENU;
+                            SetMenuWindow();
                             break;
 
                         default:
@@ -812,7 +842,7 @@ namespace Trivia_Client
                     roomNames.Add(room.name);
                 }
 
-                background_worker.ReportProgress(0, new Tuple<List<string>, ListBox>(roomNames, (ListBox)e.Argument));
+                _available_rooms_worker.ReportProgress(0, new Tuple<List<string>, ListBox>(roomNames, (ListBox)e.Argument));
 
                 System.Threading.Thread.Sleep(1000);
 
@@ -823,7 +853,7 @@ namespace Trivia_Client
             }
         }
 
-        void update_ui(object sender, ProgressChangedEventArgs e)
+        private void update_rooms_list(object sender, ProgressChangedEventArgs e)
         {
             Tuple<List<string>, ListBox> rooms = (Tuple<List<string>, ListBox>)e.UserState;
             rooms.Item2.Items.Clear();
@@ -834,14 +864,43 @@ namespace Trivia_Client
             }
         }
 
-        void background_worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void checkRoomState(object sender, DoWorkEventArgs e)
         {
-            ;
+            while (_currWindow == Windows.ROOM)
+            {
+                GetRoomStateRes state = _communicator.getRoomState();
+                Tuple<ListBox, Button, bool> tmp = (Tuple<ListBox, Button, bool>)e.Argument;
+                Tuple<ListBox, Button, bool, GetRoomStateRes> args = new Tuple<ListBox, Button, bool, GetRoomStateRes>(tmp.Item1, tmp.Item2, tmp.Item3, state);
+
+                _room_state_worker.ReportProgress(0, args);
+                System.Threading.Thread.Sleep(1000);
+            }
+        }
+
+        private void update_room_window(object sender, ProgressChangedEventArgs e)
+        {
+            Tuple<ListBox, Button, bool, GetRoomStateRes> args = (Tuple<ListBox, Button, bool, GetRoomStateRes>)e.UserState;
+
+            if (args.Item4.status == (uint)ActiveMode.DONE && !args.Item3) // room mode is done and user is not admin
+            {
+                args.Item2.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                MessageBoxResult result = MessageBox.Show("Admin closed the room :(", "Trivia",
+                    MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                return;
+            }
+
+            args.Item1.Items.Clear();
+
+            foreach (string player in args.Item4.players)
+            {
+                args.Item1.Items.Add(player);
+            }
         }
 
         private string _username;
         private Windows _currWindow;
         private Communicator _communicator;
-        private BackgroundWorker background_worker = new BackgroundWorker();
+        private BackgroundWorker _available_rooms_worker = new BackgroundWorker();
+        private BackgroundWorker _room_state_worker = new BackgroundWorker();
     }
 }

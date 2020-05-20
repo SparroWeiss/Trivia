@@ -452,7 +452,7 @@ Buffer JsonResponsePacketSerializer::serializeResponse(LeaveRoomResponse leave_r
 	json leave_roomJson = leave_room;
 	Buffer leave_roomData = stringToBytes(leave_roomJson.dump()), leave_roomSize = intToBytes(leave_roomJson.dump().size());
 
-	return createResponseBuf(CLOSEROOM, leave_roomSize, leave_roomData);
+	return createResponseBuf(LEAVEROOM, leave_roomSize, leave_roomData);
 }
 
 /*

@@ -1,8 +1,6 @@
 #include "Communicator.h"
 #include "MenuRequestHandler.h"
 
-#define SPACE ' '
-
 std::mutex _using_clients;
 
 /*
@@ -56,24 +54,8 @@ output: the listening socket
 */
 SOCKET Communicator::bindAndListen()
 {
-	int port = 0;
 	SOCKET listening_socket;
 	struct sockaddr_in sa = { 0 };
-
-	std::ifstream config;
-	std::string line = "";
-
-	//get listening port from config file
-	config.open(CONFIG_PATH);
-	while (getline(config, line))
-	{
-		if (line.find("port=") != std::string::npos)
-		{
-			port = atoi(line.substr(5).c_str());
-			break;
-		}
-	}
-	config.close();
 
 	listening_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (listening_socket == INVALID_SOCKET)
@@ -82,7 +64,7 @@ SOCKET Communicator::bindAndListen()
 		exit(-1);
 	}
 
-	sa.sin_port = htons(port);
+	sa.sin_port = htons(LISTENING_PORT);
 	sa.sin_family = AF_INET;
 	sa.sin_addr.s_addr = INADDR_ANY;
 
@@ -151,7 +133,7 @@ output: none
 */
 void Communicator::handleNewClient(SOCKET client_socket)
 {
-	std::string name = "%didn't signed up%";
+	std::string name = "%unknown%";
 	bool loggedIn = false;
 	while (true)
 	{
@@ -208,6 +190,14 @@ void Communicator::handleNewClient(SOCKET client_socket)
 		}
 		catch (const std::exception & e)
 		{
+			if (m_clients[client_socket]->isRequestRelevant(RequestInfo{ CLOSEROOM, "", Buffer() }))
+			{
+				m_clients[client_socket]->handleRequest(RequestInfo{ CLOSEROOM, "", Buffer() });
+			}
+			else if (m_clients[client_socket]->isRequestRelevant(RequestInfo{ LEAVEROOM, "", Buffer() }))
+			{
+				m_clients[client_socket]->handleRequest(RequestInfo{ LEAVEROOM, "", Buffer() });
+			}
 			std::cout << "Error with socket: " << client_socket << ". client " << name << " disconnected." << std::endl; // When using 'test.py' client socket
 			delete m_clients[client_socket];
 			std::unique_lock<std::mutex> locker(_using_clients);

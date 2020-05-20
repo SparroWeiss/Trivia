@@ -57,7 +57,7 @@ RequestResult RoomMemberRequestHandler::leaveRoom(RequestInfo info)
 	if (m_room->removeUser(m_user.getUsername()))
 	{
 		locker.unlock();
-		leaveRoomRes = { ActiveMode::DONE }; // status: 3
+		leaveRoomRes = { 1 }; 
 		newHandle = m_handlerFactory->createMenuRequestHandler(m_user.getUsername()); // pointer to the previous handle : menu
 	}
 	else
@@ -73,27 +73,15 @@ output: request result
 RequestResult RoomMemberRequestHandler::getRoomState(RequestInfo info)
 {
 	std::unique_lock<std::mutex> locker(_mutex_room);
-	if (m_room->getData().isActive == ActiveMode::DONE)
-	{ // room has been closed by the admin
-		locker.unlock();
-		return leaveRoom({ LEAVEROOM });
-	}
-	if (m_room->getData().isActive == ActiveMode::PLAYING)
-	{ // game has started by the admin
-		// TODO : change the handler to a game handler (4.0.0)
-		locker.unlock();
-		return  RequestResult{ JsonResponsePacketSerializer::serializeResponse(
-			StartGameResponse{ ActiveMode::PLAYING }) /* status: 2 */, nullptr };
-	}
 
 	GetRoomStateResponse getStateRes;
 	getStateRes.answerTimeout = m_room->getData().timePerQuestion;
 	getStateRes.players = m_room->getAllUsers();
 	getStateRes.questionCount = m_room->getData().questionCount;
+	
+	getStateRes.status = m_room->getData().isActive; 
+	getStateRes.hasGameBegun = m_room->getData().isActive == ActiveMode::PLAYING;
 	locker.unlock();
-
-	getStateRes.status = ActiveMode::WAITING;  // status: 1
-	getStateRes.hasGameBegun = false;
-
+	
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(getStateRes), this };
 }

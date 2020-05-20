@@ -242,7 +242,7 @@ output: true - the password matches the username, false - the password doesn't m
 */
 bool SqliteDatabase::doesPasswordMatch(std::string name, std::string password)
 {
-	std::string query = "SELECT * FROM USERS WHERE NAME LIKE '" + name + "';";
+	std::string query = "SELECT * FROM USERS WHERE NAME = '" + name + "';";
 	std::lock_guard<std::mutex> locker(_mutex_users);
 	_usersRows.clear(); // remove the previous data
 	std::lock_guard<std::mutex> locker2(_using_db);
@@ -381,7 +381,7 @@ output: none
 */
 void SqliteDatabase::getStatistics(std::string name)
 {
-	std::string query = "SELECT * FROM STATISTICS WHERE " + NAME_COLUMN + " LIKE '" + name + "';";
+	std::string query = "SELECT * FROM STATISTICS WHERE " + NAME_COLUMN + " = '" + name + "';";
 	_statisticsRows.clear();
 	std::lock_guard<std::mutex> locker2(_using_db);
 	sqlite3_exec(_db, query.c_str(), statisticsCallback, &_statisticsRows, nullptr);

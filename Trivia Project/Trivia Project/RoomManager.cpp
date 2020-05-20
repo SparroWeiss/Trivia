@@ -11,6 +11,7 @@ RoomManager::RoomManager()
 {
 	m_rooms = std::map<unsigned int, Room*>();
 	curr_id = 1;
+	std::thread(&RoomManager::deleteRoom, this).detach();
 }
 
 /*
@@ -65,16 +66,24 @@ function deletes a room from the map
 input: the room id
 output: true - room deleted, false - room couldn't be found
 */
-bool RoomManager::deleteRoom(unsigned int id)
+void RoomManager::deleteRoom()
 {
-	std::lock_guard<std::mutex> locker(_mutex_rooms);
-	std::map<unsigned int, Room*>::iterator iter = m_rooms.find(id);
-	if (iter == m_rooms.end())
+	while (true)
 	{
-		return false;
+		std::unique_lock<std::mutex> locker(_mutex_rooms);
+		for (std::map<unsigned int, Room*>::iterator it = m_rooms.begin(); it != m_rooms.end(); ++it)
+		{
+			if (it->second->getAllUsers().empty())
+			{
+				Room* tmp = it->second;
+				m_rooms.erase(it);
+				delete tmp;
+				break;
+			}
+		}
+		locker.unlock();
+		Sleep(1000);
 	}
-	m_rooms.erase(iter);
-	return true;
 }
 
 /*
