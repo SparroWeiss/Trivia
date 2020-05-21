@@ -73,7 +73,7 @@ RequestResult RoomAdminRequestHandler::closeRoom(RequestInfo info)
 	RequestResult res = handler->handleRequest(leaveReq); // leaving the room
 	delete handler;
 
-	m_handlerFactory->getRoomManager().deleteRoom(m_room->getData().id);
+	res.newHandler = m_handlerFactory->createMenuRequestHandler(m_user.getUsername());
 	return res;
 }
 
@@ -108,5 +108,6 @@ RequestResult RoomAdminRequestHandler::getRoomState(RequestInfo info)
 	RoomMemberRequestHandler* handler = new RoomMemberRequestHandler(m_user, m_room);
 	RequestResult res = handler->handleRequest(info);
 	delete handler;
+	res.newHandler = this;
 	return res;
 }

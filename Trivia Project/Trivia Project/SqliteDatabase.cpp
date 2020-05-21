@@ -242,7 +242,7 @@ output: true - the password matches the username, false - the password doesn't m
 */
 bool SqliteDatabase::doesPasswordMatch(std::string name, std::string password)
 {
-	std::string query = "SELECT * FROM USERS WHERE NAME LIKE '" + name + "';";
+	std::string query = "SELECT * FROM USERS WHERE NAME = '" + name + "';";
 	std::lock_guard<std::mutex> locker(_mutex_users);
 	_usersRows.clear(); // remove the previous data
 	std::lock_guard<std::mutex> locker2(_using_db);
@@ -265,6 +265,9 @@ bool SqliteDatabase::addNewUser(std::string name, std::string password, std::str
 	std::string query = "INSERT INTO USERS(NAME, PASSWORD, EMAIL, ADDRESS, PHONE, BIRTHDATE) VALUES ('" +
 		name + "', '" + password + "', '" + email + "', '" + address + "', '" + phone + "', '" + birthdate +  "');";
 	std::lock_guard<std::mutex> locker(_using_db);
+	sqlite3_exec(_db, query.c_str(), nullptr, nullptr, nullptr);
+	query = "INSERT INTO STATISTICS(NAME, TOTAL_ANSWERS, CORRECT_ANSWERS, NUM_OF_GAMES, ANSWERS_TIME) VALUES ('" +
+		name + "', 0, 0, 0, 0);";
 	sqlite3_exec(_db, query.c_str(), nullptr, nullptr, nullptr);
 	return true;
 }
@@ -298,7 +301,11 @@ float SqliteDatabase::getPlayerAverageAnswerTime(std::string name)
 {
 	std::lock_guard<std::mutex> locker(_mutex_statistics);
 	getStatistics(name);
-	return  _statisticsRows.front()._answersTime / _statisticsRows.front()._totalAnswers;
+	if (_statisticsRows.front()._totalAnswers)
+	{
+		return  _statisticsRows.front()._answersTime / _statisticsRows.front()._totalAnswers;
+	}
+	return 0;
 }
 
 /*
@@ -374,7 +381,7 @@ output: none
 */
 void SqliteDatabase::getStatistics(std::string name)
 {
-	std::string query = "SELECT * FROM STATISTICS WHERE " + NAME_COLUMN + " LIKE '" + name + "';";
+	std::string query = "SELECT * FROM STATISTICS WHERE " + NAME_COLUMN + " = '" + name + "';";
 	_statisticsRows.clear();
 	std::lock_guard<std::mutex> locker2(_using_db);
 	sqlite3_exec(_db, query.c_str(), statisticsCallback, &_statisticsRows, nullptr);

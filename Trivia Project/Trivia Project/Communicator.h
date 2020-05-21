@@ -19,12 +19,10 @@
 class JsonResponsePacketSerializer;
 class JsonRequestPacketDeserializer;
 
-#define CONFIG_PATH "..\\config.txt"
-#define HELLO_MSG "Hello"
-#define FIRST_MSG_LEN 5
-
 #define CODE_SIZE 1
 #define LENGTH_SIZE 4
+#define SPACE ' '
+#define LISTENING_PORT 8998
 
 class RequestHandlerFactory;
 

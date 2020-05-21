@@ -78,8 +78,12 @@ void StatisticsManager::getTopPlayers(StatisticsData& data)
 	{
 		std::string name = (*i)._name;
 		float score = (*i)._correctAnswers;
-		score /= (*i)._totalAnswers;
-		score /= m_database->getPlayerAverageAnswerTime(name);
+		
+		if ((*i)._totalAnswers)
+		{
+			score /= (*i)._totalAnswers;
+			score /= m_database->getPlayerAverageAnswerTime(name);
+		}
 		ranks.push_back({ name, score });
 		// score value = (CorrectAns/TotalAns) / AverageTimePerAns
 	}
