@@ -183,7 +183,7 @@
               Value="Resources\BrightLogo.png" />
         </Style>
 
-        <Style x:Key="roomList"
+        <Style x:Key="brightListBox"
             TargetType="ListBox" >
             <Setter Property="Margin"
               Value="0, 0, 0, 0" />

@@ -40,9 +40,14 @@ namespace Trivia_Client
             HIGH_SCORES
         }
 
+        /*
+        Constructor - Initializes _communicator and background workers.
+        */
         public MainWindow()
         {
             InitializeComponent();
+
+            // Setting fields
             _available_rooms_worker.WorkerSupportsCancellation = true;
             _available_rooms_worker.WorkerReportsProgress = true;
             _available_rooms_worker.DoWork += getAvailableRooms;
@@ -55,8 +60,8 @@ namespace Trivia_Client
 
             _using_communicator = new Mutex();
 
+            // Creating connection with server
         connect:
-
                 try
                 {
                     _communicator = new Communicator();
@@ -79,13 +84,37 @@ namespace Trivia_Client
             SetEntryWindow();
         }
 
-        private void SetEntryWindow()
+        /*
+        This function sets the window's height, width, and background.
+        Input: height, width, isDark 
+        Output: none
+        */
+        private void SetWindow(int height, int width, bool isDark)
         {
             MainGrid.Children.Clear();
-            Height = 250;
-            Width = 400;
-            MainGrid.Background = new LinearGradientBrush(Colors.Linen, Colors.PaleTurquoise, 90);
+            Height = height;
+            Width = width;
 
+            if (isDark)
+            {
+                MainGrid.Background = new LinearGradientBrush(Colors.Tomato, Colors.DarkRed, 90);
+            }
+            else
+            {
+                MainGrid.Background = new LinearGradientBrush(Colors.Linen, Colors.PaleTurquoise, 90);
+            }
+        }
+
+        /*
+        This function set the 'entry' window.
+        Input: none
+        Output: none
+        */
+        private void SetEntryWindow()
+        {
+            SetWindow(250, 400, false);
+
+            // Creating controls for window
             Image logo = new Image { Style = (Style)Resources["darkLogo"], Width = 300 };
 
             Button loginButton = new Button { Content = "Login", Style = (Style)Resources["darkButton"],
@@ -104,18 +133,22 @@ namespace Trivia_Client
             stack.Children.Add(logo);
             stack.Children.Add(messageBlock);
 
+            // Adding controls to grid
             MainGrid.Children.Add(stack);
             MainGrid.Children.Add(loginButton);
             MainGrid.Children.Add(signupButton);
         }
 
+        /*
+        This function set the 'login' window.
+        Input: none
+        Output: none
+        */
         private void SetLoginWindow()
         {
-            MainGrid.Children.Clear();
-            Height = 350;
-            Width = 400;
-            MainGrid.Background = new LinearGradientBrush(Colors.Linen, Colors.PaleTurquoise, 90);
+            SetWindow(350, 400, false);
 
+            // Creating controls for window
             Image logo = new Image { Style = (Style)Resources["darkLogo"] };
 
             TextBlock usernameBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Username" };
@@ -148,18 +181,22 @@ namespace Trivia_Client
             blocks.Children.Add(passwordBlock);
             blocks.Children.Add(backButton);
 
+            // Adding controls to grid
             MainGrid.Children.Add(logo);
             MainGrid.Children.Add(blocks);
             MainGrid.Children.Add(boxes);
         }
 
+        /*
+        This function set the 'signup' window.
+        Input: none
+        Output: none
+        */
         private void SetSignupWindow()
         {
-            MainGrid.Children.Clear();
-            Height = 600;
-            Width = 400;
-            MainGrid.Background = new LinearGradientBrush(Colors.Linen, Colors.PaleTurquoise, 90);
+            SetWindow(600, 400, false);
 
+            // Creating controls for window
             Image logo = new Image { Style = (Style)Resources["darkLogo"] };
 
             TextBlock messageBlock = new TextBlock { Style = (Style)Resources["darkTitle"], Text = "Enter your details :)" };
@@ -226,18 +263,22 @@ namespace Trivia_Client
             head.Children.Add(logo);
             head.Children.Add(messageBlock);
 
+            // Adding controls to grid
             MainGrid.Children.Add(head);
             MainGrid.Children.Add(blocks);
             MainGrid.Children.Add(boxes);
         }
 
+        /*
+        This function set the 'menu' window.
+        Input: none
+        Output: none
+        */
         private void SetMenuWindow()
         {
-            MainGrid.Children.Clear();
-            Height = 420;
-            Width = 400;
-            MainGrid.Background = new LinearGradientBrush(Colors.Tomato, Colors.DarkRed, 90);
+            SetWindow(420, 400, true);
 
+            // Creating controls for window
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
             TextBlock messageBlock = new TextBlock { Style = (Style)Resources["brightTitle"], Text = "Choose an option :)" };
@@ -264,17 +305,21 @@ namespace Trivia_Client
             head.Children.Add(logo);
             head.Children.Add(messageBlock);
 
+            // Adding controls to grid
             MainGrid.Children.Add(head);
             MainGrid.Children.Add(buttons);
         }
 
+        /*
+        This function set the 'create room' window.
+        Input: none
+        Output: none
+        */
         private void SetCreateRoomWindow() 
         {
-            MainGrid.Children.Clear();
-            Height = 480;
-            Width = 400;
-            MainGrid.Background = new LinearGradientBrush(Colors.Tomato, Colors.DarkRed, 90);
+            SetWindow(480, 400, true);
 
+            // Creating controls for window
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
             TextBlock messageBlock = new TextBlock { Style = (Style)Resources["brightTitle"], Text = "Enter room details :)" };
@@ -327,23 +372,27 @@ namespace Trivia_Client
             head.Children.Add(logo);
             head.Children.Add(messageBlock);
 
+            // Adding controls to grid
             MainGrid.Children.Add(head);
             MainGrid.Children.Add(blocks);
             MainGrid.Children.Add(boxes);
         }
 
+        /*
+        This function set the 'join room' window.
+        Input: none
+        Output: none
+        */
         private void SetJoinRoomWindow()
         {
-            MainGrid.Children.Clear();
-            Height = 550;
-            Width = 400;
-            MainGrid.Background = new LinearGradientBrush(Colors.Tomato, Colors.DarkRed, 90);
+            SetWindow(550, 400, true);
 
+            // Creating controls for window
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
             TextBlock messageBlock = new TextBlock { Style = (Style)Resources["brightTitle"], Text = "Choose a room to play in :)" };
 
-            ListBox roomsListBox = new ListBox { Style = (Style)Resources["roomList"] };
+            ListBox roomsListBox = new ListBox { Style = (Style)Resources["brightListBox"] };
             roomsListBox.MouseDoubleClick += new MouseButtonEventHandler((sender, args) => HandleButtonClick(Windows.ROOM, roomName: roomsListBox.SelectedItem.ToString()));
 
             Button backButton = new Button { Style = (Style)Resources["brightButton"], Content = "Back", Margin = new Thickness(0, 35, 0, 0) };
@@ -355,18 +404,23 @@ namespace Trivia_Client
             head.Children.Add(roomsListBox);
             head.Children.Add(backButton);
 
+            // Adding controls to grid
             MainGrid.Children.Add(head);
 
+            // Activating background worker
             _available_rooms_worker.RunWorkerAsync(argument: roomsListBox);
         }
 
+        /*
+        This function set the 'room' window.
+        Input: room's data
+        Output: none
+        */
         private void SetRoomWindow(RoomData roomData)
         {
-            MainGrid.Children.Clear();
-            Height = 550;
-            Width = 600;
-            MainGrid.Background = new LinearGradientBrush(Colors.Tomato, Colors.DarkRed, 90);
+            SetWindow(550, 600, true);
 
+            // Creating controls for window
             string roomAdmin = "";
             try
             {
@@ -394,7 +448,7 @@ namespace Trivia_Client
             TextBlock playersBlock = new TextBlock { Style = (Style)Resources["brightTitle"], Text = "Room members are: ",
                 FontSize = 16, Margin = new Thickness(0, 0, 0, 10) };
 
-            ListBox playersListBox = new ListBox { Style = (Style)Resources["roomList"] , Height = 200};
+            ListBox playersListBox = new ListBox { Style = (Style)Resources["brightListBox"] , Height = 200};
 
             StackPanel head = new StackPanel();
             head.Children.Add(logo);
@@ -402,12 +456,14 @@ namespace Trivia_Client
             head.Children.Add(playersBlock);
             head.Children.Add(playersListBox);
 
+            // Adding control to grid
             MainGrid.Children.Add(head);
 
             Button startButton, closeButton, leaveButton;
             leaveButton = new Button { Style = (Style)Resources["brightButton"], Content = "Leave Room", Margin = new Thickness(0, 30, 0, 0) };
-            leaveButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, close_room: false));
+            leaveButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, closeRoom: false));
 
+            // Activating background worker
             _room_state_worker.RunWorkerAsync(argument: new Tuple<ListBox, Button, bool>(playersListBox, leaveButton, _username == roomAdmin));
 
             if (_username == roomAdmin) // if admin
@@ -418,7 +474,7 @@ namespace Trivia_Client
 
                 closeButton = new Button { Style = (Style)Resources["brightButton"], Content = "Close Room", Margin = new Thickness(40, 0, 0, 30),
                     HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Bottom };
-                closeButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, close_room:true));
+                closeButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, closeRoom:true));
 
                 MainGrid.Children.Add(startButton);
                 MainGrid.Children.Add(closeButton);
@@ -429,13 +485,16 @@ namespace Trivia_Client
             }
         }
 
+        /*
+        This function set the 'statistics' window.
+        Input: none
+        Output: none
+        */
         private void SetStatisticsWindow()
         {
-            MainGrid.Children.Clear();
-            Height = 350;
-            Width = 400;
-            MainGrid.Background = new LinearGradientBrush(Colors.Tomato, Colors.DarkRed, 90);
+            SetWindow(350, 400, true);
 
+            // Creating controls for window
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
             TextBlock messageBlock = new TextBlock { Style = (Style)Resources["brightTitle"], Text = "Which statistics? :)" };
@@ -458,17 +517,21 @@ namespace Trivia_Client
             head.Children.Add(logo);
             head.Children.Add(messageBlock);
 
+            // Adding controls to grid
             MainGrid.Children.Add(head);
             MainGrid.Children.Add(buttons);
         }
 
+        /*
+        This function set the 'my statistics' window.
+        Input: statistics
+        Output: none
+        */
         private void SetMyStatisticsWindow(List<string> statistics)
         {
-            MainGrid.Children.Clear();
-            Height = 515;
-            Width = 450;
-            MainGrid.Background = new LinearGradientBrush(Colors.Tomato, Colors.DarkRed, 90);
+            SetWindow(515, 450, true);
 
+            // Creating controls for window
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
             TextBlock totalAnswersBlock = new TextBlock { Style = (Style)Resources["brightText"], Text = "Total Answers: " + statistics[0]};
@@ -495,17 +558,21 @@ namespace Trivia_Client
             StackPanel head = new StackPanel();
             head.Children.Add(logo);
 
+            // Adding controls to grid
             MainGrid.Children.Add(head);
             MainGrid.Children.Add(blocks);
         }
 
+        /*
+        This function set the 'high scores' window.
+        Input: Dictionary of top users and their scores
+        Output: none
+        */
         private void SetHighScoresWindow(Dictionary<string, string> highScores)
         {
-            MainGrid.Children.Clear();
-            Height = 390;
-            Width = 450;
-            MainGrid.Background = new LinearGradientBrush(Colors.Tomato, Colors.DarkRed, 90);
+            SetWindow(390, 450, true);
 
+            // Creating controls for window
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
             TextBlock firstScoreBlock = new TextBlock { Style = (Style)Resources["leftBrightText"]};
@@ -539,37 +606,60 @@ namespace Trivia_Client
             StackPanel head = new StackPanel();
             head.Children.Add(logo);
 
+            // Adding controls to grid
             MainGrid.Children.Add(head);
             MainGrid.Children.Add(blocks);
             MainGrid.Children.Add(backButton);
         }
 
+        /*
+        This function handles TextBlocks' visibility,
+         that are in use to help the user with inserting input.
+        Input: the TextBlock to handle, the TextBox to determine visibility.
+        Output: none
+        */
         public void HandleBlockOutput(TextBlock textBlock, TextBox textBox)
         {
-            if (textBox.Text != "")
+            if (textBox.Text != "") // If the user inserts input
             {
                 textBlock.Visibility = Visibility.Hidden;
             }
-            else
+            else // If the input TextBox is empty
             {
                 textBlock.Visibility = Visibility.Visible;
             }
      }
-
+        
+        /*
+        This function handles TextBlocks' visibility,
+         that are in use to help the user with inserting password input.
+        Input: the TextBlock to handle, the PasswordBox to determine visibility.
+        Output: none
+        */
         public void HandleBlockOutput(TextBlock textBlock, PasswordBox passwordBox)
         {
-            if (passwordBox.Password != "")
+            if (passwordBox.Password != "") // If the user inserts password input
             {
                 textBlock.Visibility = Visibility.Hidden;
             }
-            else
+            else // If the input PasswordBox is empty
             {
                 textBlock.Visibility = Visibility.Visible;
             }
         }
 
+        /*
+        This function handles all button clicks, and is the main function to manage ui,
+         and connect between the ui input and the code behind.
+        Input: nextWindow - the next window to set, if the current act will be performed successfully
+               Optionals: textBoxes - list of TextBox to get input values
+                          passwordBox - PasswordBox to get password input values
+                          roomName - string that contains the current room's name
+                          closeRoom - boolean to determine if a request is close/leave room
+        Output: none
+        */
         public void HandleButtonClick(Windows nextWindow, List<TextBox> textBoxes = null, PasswordBox passwordBox = null, 
-            string roomName = null, bool close_room = true)
+            string roomName = null, bool closeRoom = true)
         {
             try
             {
@@ -637,13 +727,13 @@ namespace Trivia_Client
                         }
                         else if (_currWindow == Windows.ROOM)
                         {
-                            if (close_room)
+                            if (closeRoom)
                             {
                                 _using_communicator.WaitOne();
-                                bool closeRoom = _communicator.closeRoom();
+                                bool isRoomClosed = _communicator.closeRoom();
                                 _using_communicator.ReleaseMutex();
 
-                                if (!closeRoom)
+                                if (!isRoomClosed)
                                 {
                                     MessageBoxResult result = MessageBox.Show("Failed to close room", "Trivia",
                                         MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
@@ -796,6 +886,12 @@ namespace Trivia_Client
             }
         }
 
+        /*
+        This function is the 'DoWork' function of '_available_rooms_worker',
+         and it keeps checking for new rooms, by communicating the server.
+        Input: sender, e - the event's args - including ui elements sent from sender
+        Output: none
+        */
         private void getAvailableRooms(object sender, DoWorkEventArgs e)
         {
             try
@@ -814,9 +910,9 @@ namespace Trivia_Client
 
                     _available_rooms_worker.ReportProgress(0, new Tuple<List<string>, ListBox>(roomNames, (ListBox)e.Argument));
 
-                    System.Threading.Thread.Sleep(1000);
+                    System.Threading.Thread.Sleep(1000); // Checks every second
 
-                    if (_currWindow != Windows.JOIN_ROOM)
+                    if (_currWindow != Windows.JOIN_ROOM) // Works only if the rooms list is displayed
                     {
                         break;
                     }
@@ -830,22 +926,34 @@ namespace Trivia_Client
             }
         }
 
+        /*
+        This function is the 'ProgressChanged' function of '_available_rooms_worker',
+         and it updates the ui, by updating the rooms list.
+        Input: sender, e - the event's args - including ui elements sent from sender
+        Output: none
+        */
         private void update_rooms_list(object sender, ProgressChangedEventArgs e)
         {
             Tuple<List<string>, ListBox> rooms = (Tuple<List<string>, ListBox>)e.UserState;
-            rooms.Item2.Items.Clear();
+            rooms.Item2.Items.Clear(); // clears rooms list
 
-            foreach (string room in rooms.Item1)
+            foreach (string room in rooms.Item1) // inserting current rooms
             {
                 rooms.Item2.Items.Add(room);
             }
         }
 
+        /*
+        This function is the 'DoWork' function of '_room_state_worker',
+         and it keeps checking for the current room's state, by communicating the server.
+        Input: sender, e - the event's args - including ui elements sent from sender
+        Output: none
+        */
         private void checkRoomState(object sender, DoWorkEventArgs e)
         {
             try
             {
-                while (_currWindow == Windows.ROOM)
+                while (true)
                 {
                     _using_communicator.WaitOne();
                     GetRoomStateRes state = _communicator.getRoomState();
@@ -855,7 +963,12 @@ namespace Trivia_Client
                     Tuple<ListBox, Button, bool, GetRoomStateRes> args = new Tuple<ListBox, Button, bool, GetRoomStateRes>(tmp.Item1, tmp.Item2, tmp.Item3, state);
 
                     _room_state_worker.ReportProgress(0, args);
-                    System.Threading.Thread.Sleep(1000);
+                    System.Threading.Thread.Sleep(1000); // Checks every second
+
+                    if (_currWindow != Windows.ROOM) // Works only if the user is in a room
+                    {
+                        break;
+                    }
                 }
             }
             catch (Exception ex)
@@ -866,21 +979,27 @@ namespace Trivia_Client
             }
         }
 
+        /*
+        This function is the 'ProgressChanged' function of '_room_state_worker',
+         and it updates the ui, by updating the players list and the window settings.
+        Input: sender, e - the event's args - including ui elements sent from sender
+        Output: none
+        */
         private void update_room_window(object sender, ProgressChangedEventArgs e)
         {
             Tuple<ListBox, Button, bool, GetRoomStateRes> args = (Tuple<ListBox, Button, bool, GetRoomStateRes>)e.UserState;
 
-            if (args.Item4.status == (uint)ActiveMode.DONE && !args.Item3) // room mode is done and user is not admin
+            if (args.Item4.status == (uint)ActiveMode.DONE && !args.Item3) // room was closed by admin
             {
-                args.Item2.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                args.Item2.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // Clicks the 'leaveButton' button and performs leave request
                 MessageBoxResult result = MessageBox.Show("Admin closed the room :(", "Trivia",
                     MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
                 return;
             }
 
-            args.Item1.Items.Clear();
+            args.Item1.Items.Clear(); // clears players list
 
-            foreach (string player in args.Item4.players)
+            foreach (string player in args.Item4.players) // inserting current players
             {
                 args.Item1.Items.Add(player);
             }
