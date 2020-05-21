@@ -198,10 +198,10 @@ void Communicator::handleNewClient(SOCKET client_socket)
 			{
 				m_clients[client_socket]->handleRequest(RequestInfo{ LEAVEROOM, "", Buffer() });
 			}
-			std::cout << "Error with socket: " << client_socket << ". client " << name << " disconnected." << std::endl; // When using 'test.py' client socket
+			std::cout << "Error with socket: " << client_socket << ". client " << name << " disconnected." << std::endl;
 			delete m_clients[client_socket];
 			std::unique_lock<std::mutex> locker(_using_clients);
-			m_clients.erase(client_socket); // are automatically closed, and that causes an exception
+			m_clients.erase(client_socket);
 			locker.unlock();
 			m_handlerFactory->getLoginManager().logout(name);
 			closesocket(client_socket); 

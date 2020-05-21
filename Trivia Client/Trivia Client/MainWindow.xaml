@@ -8,7 +8,7 @@
         Title="Trivia" Height="500" Width="600" Background="White">
 
     <Window.Resources>
-        <Style x:Key="myTextBlock"
+        <Style x:Key="grayText"
            TargetType="TextBlock">
             <Setter Property="FontSize"
               Value="20" />
@@ -26,9 +26,43 @@
               Value="Transparent" />
             <Setter Property="Foreground"
               Value="LightGray" />
+            <Setter Property="VerticalAlignment"
+              Value="Stretch" />
         </Style>
-        
-        <Style x:Key="myTextBox"
+
+        <Style x:Key="brightText" 
+           BasedOn="{StaticResource grayText}" 
+           TargetType="TextBlock">
+            <Setter Property="Foreground"
+              Value="Lavender" />
+        </Style>
+
+        <Style x:Key="leftBrightText" 
+           BasedOn="{StaticResource brightText}" 
+           TargetType="TextBlock">
+            <Setter Property="TextAlignment"
+              Value="Left" />
+            <Setter Property="Margin"
+              Value="40, 0, 0, 0" />
+        </Style>
+
+        <Style x:Key="darkTitle" 
+           BasedOn="{StaticResource grayText}" 
+           TargetType="TextBlock">
+            <Setter Property="FontSize"
+              Value="14" />
+            <Setter Property="Foreground"
+              Value="DarkBlue" />
+        </Style>
+
+        <Style x:Key="brightTitle" 
+           BasedOn="{StaticResource darkTitle}" 
+           TargetType="TextBlock">
+            <Setter Property="Foreground"
+              Value="Lavender" />
+        </Style>
+
+        <Style x:Key="darkTextBox"
            TargetType="TextBox">
             <Setter Property="FontSize"
               Value="20" />
@@ -50,7 +84,16 @@
               Value="DarkBlue" />
         </Style>
 
-        <Style x:Key="myPasswordBox"
+        <Style x:Key="brightTextBox" 
+           BasedOn="{StaticResource darkTextBox}" 
+           TargetType="TextBox">
+            <Setter Property="Foreground"
+              Value="Lavender" />
+            <Setter Property="BorderBrush"
+              Value="Lavender" />
+        </Style>
+
+        <Style x:Key="darkPasswordBox"
            TargetType="PasswordBox">
             <Setter Property="FontSize"
               Value="20" />

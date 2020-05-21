@@ -2,6 +2,8 @@
 
 namespace Trivia_Client
 {
+    /**** Communication Structs and Data Types ****/
+
     enum ActiveMode
     {
         WAITING = 1, PLAYING, DONE

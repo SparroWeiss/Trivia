@@ -53,6 +53,8 @@ namespace Trivia_Client
             _room_state_worker.DoWork += checkRoomState;
             _room_state_worker.ProgressChanged += update_room_window;
 
+            _using_communicator = new Mutex();
+
         connect:
 
                 try
@@ -96,9 +98,7 @@ namespace Trivia_Client
                 HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Bottom };
             signupButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.SIGNUP));
 
-            TextBlock messageBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], 
-                Text = "Do you want to login or sign up? :)", FontSize = 14,
-                VerticalAlignment = VerticalAlignment.Stretch, Foreground = new SolidColorBrush(Colors.DarkBlue) };
+            TextBlock messageBlock = new TextBlock { Style = (Style)Resources["darkTitle"], Text = "Do you want to login or sign up? :)"};
 
             StackPanel stack = new StackPanel();
             stack.Children.Add(logo);
@@ -118,14 +118,14 @@ namespace Trivia_Client
 
             Image logo = new Image { Style = (Style)Resources["darkLogo"] };
 
-            TextBlock usernameBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Username" };
+            TextBlock usernameBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Username" };
 
-            TextBlock passwordBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Password" };
+            TextBlock passwordBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Password" };
 
-            TextBox usernameBox = new TextBox { Style = (Style)Resources["myTextBox"] };
+            TextBox usernameBox = new TextBox { Style = (Style)Resources["darkTextBox"] };
             usernameBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(usernameBlock, usernameBox));
             
-            PasswordBox passwordBox = new PasswordBox { Style = (Style)Resources["myPasswordBox"] };
+            PasswordBox passwordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"] };
             passwordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, passwordBox));
 
             List<TextBox> textBoxes = new List<TextBox> { usernameBox };
@@ -162,37 +162,36 @@ namespace Trivia_Client
 
             Image logo = new Image { Style = (Style)Resources["darkLogo"] };
 
-            TextBlock messageBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Enter your details :)",
-                FontSize = 14, VerticalAlignment = VerticalAlignment.Stretch, Foreground = new SolidColorBrush(Colors.DarkBlue) };
+            TextBlock messageBlock = new TextBlock { Style = (Style)Resources["darkTitle"], Text = "Enter your details :)" };
 
-            TextBlock usernameBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Username" };
+            TextBlock usernameBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Username" };
 
-            TextBlock passwordBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Password" };
+            TextBlock passwordBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Password" };
 
-            TextBlock emailBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Email" };
+            TextBlock emailBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Email" };
 
-            TextBlock addressBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Address (Street, Apt, City)" };
+            TextBlock addressBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Address (Street, Apt, City)" };
 
-            TextBlock phoneBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Phone" };
+            TextBlock phoneBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Phone" };
 
-            TextBlock birthdateBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Birthdate (DD/MM/YYYY)" };
+            TextBlock birthdateBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Birthdate (DD/MM/YYYY)" };
 
-            TextBox usernameBox = new TextBox { Style = (Style)Resources["myTextBox"] };
+            TextBox usernameBox = new TextBox { Style = (Style)Resources["darkTextBox"] };
             usernameBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(usernameBlock, usernameBox));
 
-            PasswordBox passwordBox = new PasswordBox { Style = (Style)Resources["myPasswordBox"] };
+            PasswordBox passwordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"] };
             passwordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, passwordBox));
 
-            TextBox emailBox = new TextBox{ Style = (Style)Resources["myTextBox"] };
+            TextBox emailBox = new TextBox{ Style = (Style)Resources["darkTextBox"] };
             emailBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(emailBlock, emailBox));
             
-            TextBox addressBox = new TextBox { Style = (Style)Resources["myTextBox"] };
+            TextBox addressBox = new TextBox { Style = (Style)Resources["darkTextBox"] };
             addressBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(addressBlock, addressBox));
             
-            TextBox phoneBox = new TextBox { Style = (Style)Resources["myTextBox"] };
+            TextBox phoneBox = new TextBox { Style = (Style)Resources["darkTextBox"] };
             phoneBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(phoneBlock, phoneBox));
             
-            TextBox birthdateBox = new TextBox { Style = (Style)Resources["myTextBox"] };
+            TextBox birthdateBox = new TextBox { Style = (Style)Resources["darkTextBox"] };
             birthdateBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(birthdateBlock, birthdateBox));
 
             List<TextBox> textBoxes = new List<TextBox>{ usernameBox, emailBox, addressBox, phoneBox, birthdateBox };
@@ -241,8 +240,7 @@ namespace Trivia_Client
 
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
-            TextBlock messageBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Choose an option :)",
-                FontSize = 14, VerticalAlignment = VerticalAlignment.Stretch, Foreground = new SolidColorBrush(Colors.Lavender) };
+            TextBlock messageBlock = new TextBlock { Style = (Style)Resources["brightTitle"], Text = "Choose an option :)" };
 
             Button createRoomButton = new Button { Style = (Style)Resources["brightButton"], Content = "Create Room" };
             createRoomButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.CREATE_ROOM));
@@ -279,31 +277,26 @@ namespace Trivia_Client
 
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
-            TextBlock messageBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Enter room details :)",
-                FontSize = 14, VerticalAlignment = VerticalAlignment.Stretch, Foreground = new SolidColorBrush(Colors.Lavender) };
+            TextBlock messageBlock = new TextBlock { Style = (Style)Resources["brightTitle"], Text = "Enter room details :)" };
 
-            TextBlock roomNameBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Room name" };
+            TextBlock roomNameBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Room name" };
 
-            TextBlock userNumBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Number of users" };
+            TextBlock userNumBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Number of users" };
 
-            TextBlock questionNumBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Number of questions" };
+            TextBlock questionNumBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Number of questions" };
 
-            TextBlock questionTimeBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Time for question (sec)" };
+            TextBlock questionTimeBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Time for question (sec)" };
 
-            TextBox roomNameBox = new TextBox { Style = (Style)Resources["myTextBox"], BorderBrush = new SolidColorBrush(Colors.Lavender),
-                Foreground = new SolidColorBrush(Colors.Lavender) };
+            TextBox roomNameBox = new TextBox { Style = (Style)Resources["brightTextBox"] };
             roomNameBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(roomNameBlock, roomNameBox));
 
-            TextBox userNumBox = new TextBox { Style = (Style)Resources["myTextBox"], BorderBrush = new SolidColorBrush(Colors.Lavender),
-                Foreground = new SolidColorBrush(Colors.Lavender) };
+            TextBox userNumBox = new TextBox { Style = (Style)Resources["brightTextBox"] };
             userNumBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(userNumBlock, userNumBox));
 
-            TextBox questionNumBox = new TextBox { Style = (Style)Resources["myTextBox"], BorderBrush = new SolidColorBrush(Colors.Lavender),
-                Foreground = new SolidColorBrush(Colors.Lavender) };
+            TextBox questionNumBox = new TextBox { Style = (Style)Resources["brightTextBox"] };
             questionNumBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(questionNumBlock, questionNumBox));
             
-            TextBox questionTimeBox = new TextBox { Style = (Style)Resources["myTextBox"], BorderBrush = new SolidColorBrush(Colors.Lavender),
-                Foreground = new SolidColorBrush(Colors.Lavender),  };
+            TextBox questionTimeBox = new TextBox { Style = (Style)Resources["brightTextBox"] };
             questionTimeBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(questionTimeBlock, questionTimeBox));
 
             List<TextBox> textBoxes = new List<TextBox> { roomNameBox, userNumBox, questionNumBox, questionTimeBox };
@@ -348,8 +341,7 @@ namespace Trivia_Client
 
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
-            TextBlock messageBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Choose a room to play in :)",
-                FontSize = 14, VerticalAlignment = VerticalAlignment.Stretch, Foreground = new SolidColorBrush(Colors.Lavender) };
+            TextBlock messageBlock = new TextBlock { Style = (Style)Resources["brightTitle"], Text = "Choose a room to play in :)" };
 
             ListBox roomsListBox = new ListBox { Style = (Style)Resources["roomList"] };
             roomsListBox.MouseDoubleClick += new MouseButtonEventHandler((sender, args) => HandleButtonClick(Windows.ROOM, roomName: roomsListBox.SelectedItem.ToString()));
@@ -375,19 +367,32 @@ namespace Trivia_Client
             Width = 600;
             MainGrid.Background = new LinearGradientBrush(Colors.Tomato, Colors.DarkRed, 90);
 
-            string roomAdmin = _communicator.getRoomAdmin();
+            string roomAdmin = "";
+            try
+            {
+                _using_communicator.WaitOne();
+                roomAdmin = _communicator.getRoomAdmin();
+            }
+            catch (Exception e)
+            {
+                this.Close();
+                MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
+                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
+            }
+            finally
+            {
+                _using_communicator.ReleaseMutex();
+            }
 
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
-            TextBlock messageBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Margin = new Thickness(0, 0, 0, 10),
+            TextBlock messageBlock = new TextBlock { Style = (Style)Resources["brightTitle"], Margin = new Thickness(0, 0, 0, 10),
                 Text = "Room Name: " + roomData.name +  ", Room Admin: " + roomAdmin +  ", \nTime Per Qst: " + roomData.timePerQuestion +
                 ", Members Amount: "+ roomData.maxPlayers + ", Qst Amount: " + roomData.questionCount,
-                FontSize = 16, VerticalAlignment = VerticalAlignment.Stretch, Foreground = new SolidColorBrush(Colors.Lavender) , Height = 60, Width = 500};
+                FontSize = 16, Height = 60, Width = 500};
 
-
-            TextBlock playersBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Room members are: ",
-                FontSize = 16, VerticalAlignment = VerticalAlignment.Stretch, Foreground = new SolidColorBrush(Colors.Lavender),
-                 Margin = new Thickness(0, 0, 0, 10) };
+            TextBlock playersBlock = new TextBlock { Style = (Style)Resources["brightTitle"], Text = "Room members are: ",
+                FontSize = 16, Margin = new Thickness(0, 0, 0, 10) };
 
             ListBox playersListBox = new ListBox { Style = (Style)Resources["roomList"] , Height = 200};
 
@@ -433,8 +438,7 @@ namespace Trivia_Client
 
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
-            TextBlock messageBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Which statistics? :)",
-                FontSize = 14, VerticalAlignment = VerticalAlignment.Stretch, Foreground = new SolidColorBrush(Colors.Lavender) };
+            TextBlock messageBlock = new TextBlock { Style = (Style)Resources["brightTitle"], Text = "Which statistics? :)" };
 
             Button personalButton = new Button { Style = (Style)Resources["brightButton"], Content = "My Statistics" };
             personalButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.USER_STATISTICS));
@@ -467,20 +471,15 @@ namespace Trivia_Client
 
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
-            TextBlock totalAnswersBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Total Answers: " + statistics[0]};
-            totalAnswersBlock.Foreground = new SolidColorBrush(Colors.Lavender);
+            TextBlock totalAnswersBlock = new TextBlock { Style = (Style)Resources["brightText"], Text = "Total Answers: " + statistics[0]};
             
-            TextBlock correctAnswersBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Correct Answers: " + statistics[1] };
-            correctAnswersBlock.Foreground = new SolidColorBrush(Colors.Lavender);
+            TextBlock correctAnswersBlock = new TextBlock { Style = (Style)Resources["brightText"], Text = "Correct Answers: " + statistics[1] };
             
-            TextBlock incorrectAnswersBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Incorrect Answers: " + statistics[2] };
-            incorrectAnswersBlock.Foreground = new SolidColorBrush(Colors.Lavender);
+            TextBlock incorrectAnswersBlock = new TextBlock { Style = (Style)Resources["brightText"], Text = "Incorrect Answers: " + statistics[2] };
             
-            TextBlock avgTimeBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Avg Time Per Answer: " + statistics[3] };
-            avgTimeBlock.Foreground = new SolidColorBrush(Colors.Lavender);
+            TextBlock avgTimeBlock = new TextBlock { Style = (Style)Resources["brightText"], Text = "Avg Time Per Answer: " + statistics[3] };
            
-            TextBlock totalGamesBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Text = "Total Games: " + statistics[4] };
-            totalGamesBlock.Foreground = new SolidColorBrush(Colors.Lavender);
+            TextBlock totalGamesBlock = new TextBlock { Style = (Style)Resources["brightText"], Text = "Total Games: " + statistics[4] };
 
             Button backButton = new Button { Style = (Style)Resources["brightButton"], Content = "Back" };
             backButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.STATISTICS));
@@ -509,20 +508,15 @@ namespace Trivia_Client
 
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
 
-            TextBlock firstScoreBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Foreground = new SolidColorBrush(Colors.Lavender),
-                TextAlignment = TextAlignment.Left, Margin = new Thickness(40, 0, 0, 0) };
+            TextBlock firstScoreBlock = new TextBlock { Style = (Style)Resources["leftBrightText"]};
             
-            TextBlock secondScoreBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Foreground = new SolidColorBrush(Colors.Lavender),
-                TextAlignment = TextAlignment.Left, Margin = new Thickness(40, 0, 0, 0) };
+            TextBlock secondScoreBlock = new TextBlock { Style = (Style)Resources["leftBrightText"]};
             
-            TextBlock thirdScoreBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Foreground = new SolidColorBrush(Colors.Lavender),
-                TextAlignment = TextAlignment.Left, Margin = new Thickness(40, 0, 0, 0) };
+            TextBlock thirdScoreBlock = new TextBlock { Style = (Style)Resources["leftBrightText"]};
             
-            TextBlock fourthScoreBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Foreground = new SolidColorBrush(Colors.Lavender),
-                TextAlignment = TextAlignment.Left, Margin = new Thickness(40, 0, 0, 0) };
+            TextBlock fourthScoreBlock = new TextBlock { Style = (Style)Resources["leftBrightText"]};
             
-            TextBlock fifthScoreBlock = new TextBlock { Style = (Style)Resources["myTextBlock"], Foreground = new SolidColorBrush(Colors.Lavender),
-                TextAlignment = TextAlignment.Left, Margin = new Thickness(40, 0, 0, 0) };
+            TextBlock fifthScoreBlock = new TextBlock { Style = (Style)Resources["leftBrightText"]};
 
             TextBlock[] textBlocks = new TextBlock[5]{ firstScoreBlock, secondScoreBlock, thirdScoreBlock, fourthScoreBlock, fifthScoreBlock};
 
@@ -574,93 +568,82 @@ namespace Trivia_Client
             }
         }
 
-        public void HandleButtonClick(Windows nextWindow, List<TextBox> textBoxes = null, PasswordBox passwordBox = null, string roomName = null, bool close_room = true)
+        public void HandleButtonClick(Windows nextWindow, List<TextBox> textBoxes = null, PasswordBox passwordBox = null, 
+            string roomName = null, bool close_room = true)
         {
-            switch (nextWindow)
+            try
             {
-                case Windows.ENTRY:                      // ENTRY V
-                    if (_currWindow == Windows.MENU)
-                    {
-                        try
+                switch (nextWindow)
+                {
+                    case Windows.ENTRY:
+                        if (_currWindow == Windows.MENU)
                         {
+                            _using_communicator.WaitOne();
                             _communicator.logout();
+                            _using_communicator.ReleaseMutex();
                             this.Close();
                         }
-                        catch (Exception e)
+                        _currWindow = Windows.ENTRY;
+                        SetEntryWindow();
+                        break;
+
+                    case Windows.LOGIN:
+                        _currWindow = Windows.LOGIN;
+                        SetLoginWindow();
+                        break;
+
+                    case Windows.SIGNUP:
+                        _currWindow = Windows.SIGNUP;
+                        SetSignupWindow();
+                        break;
+
+                    case Windows.MENU:
+                        if (_currWindow == Windows.LOGIN)
                         {
-                            this.Close();
-                            MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
-                                MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
+                            _using_communicator.WaitOne();
+                            bool login = _communicator.login(textBoxes[0].Text, passwordBox.Password);
+                            _using_communicator.ReleaseMutex();
+
+                            if (login)
+                            {
+                                _username = textBoxes[0].Text;
+                                _currWindow = Windows.MENU;
+                                SetMenuWindow();
+                            }
+                            else
+                            {
+                                MessageBoxResult result = MessageBox.Show("Some details were invalid. \nTry again :)", "Trivia",
+                                    MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                            }
                         }
-                    }
-                    _currWindow = Windows.ENTRY;
-                    SetEntryWindow();
-                    break;
+                        else if (_currWindow == Windows.SIGNUP)
+                        {
+                            _using_communicator.WaitOne();
+                            bool signup = _communicator.signup(textBoxes[0].Text, passwordBox.Password, textBoxes[1].Text,
+                                textBoxes[2].Text, textBoxes[3].Text, textBoxes[4].Text);
+                            _using_communicator.ReleaseMutex();
 
-                case Windows.LOGIN:                      // LOGIN V
-                    _currWindow = Windows.LOGIN;
-                    SetLoginWindow();
-                    break;
-
-                case Windows.SIGNUP:                     // SIGNUP V
-                    _currWindow = Windows.SIGNUP;
-                    SetSignupWindow();
-                    break;
-
-                case Windows.MENU:
-                    switch (_currWindow)
-                    {
-                        case Windows.LOGIN:
-                            try
+                            if (signup)
                             {
-                                if (_communicator.login(textBoxes[0].Text, passwordBox.Password))
-                                {
-                                    _username = textBoxes[0].Text;
-                                    _currWindow = Windows.MENU;
-                                    SetMenuWindow();
-                                }
-                                else
-                                {
-                                    MessageBoxResult result = MessageBox.Show("Some details were invalid. \nTry again :)", "Trivia",
-                                        MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
-                                }
+                                _username = textBoxes[0].Text;
+                                _currWindow = Windows.MENU;
+                                SetMenuWindow();
                             }
-                            catch (Exception e)
+                            else
                             {
-                                this.Close();
-                                MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
-                                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
+                                MessageBoxResult result = MessageBox.Show("Some details were invalid. \nTry again :)", "Trivia",
+                                    MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
                             }
-                            break;
-
-                        case Windows.SIGNUP:
-                            try
-                            {
-                                if (_communicator.signup(textBoxes[0].Text, passwordBox.Password, textBoxes[1].Text,
-                                    textBoxes[2].Text, textBoxes[3].Text, textBoxes[4].Text))
-                                {
-                                    _username = textBoxes[0].Text;
-                                    _currWindow = Windows.MENU;
-                                    SetMenuWindow();
-                                }
-                                else
-                                {
-                                    MessageBoxResult result = MessageBox.Show("Some details were invalid. \nTry again :)", "Trivia",
-                                        MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                this.Close();
-                                MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
-                                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
-                            }
-                            break;
-
-                        case Windows.ROOM:
+                        }
+                        else if (_currWindow == Windows.ROOM)
+                        {
                             if (close_room)
                             {
-                                if (!_communicator.closeRoom())
+                                _using_communicator.WaitOne();
+                                bool closeRoom = _communicator.closeRoom();
+                                _using_communicator.ReleaseMutex();
+
+                                if (!closeRoom)
                                 {
                                     MessageBoxResult result = MessageBox.Show("Failed to close room", "Trivia",
                                         MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
@@ -669,7 +652,11 @@ namespace Trivia_Client
                             }
                             else
                             {
-                                if (!_communicator.leaveRoom())
+                                _using_communicator.WaitOne();
+                                bool leave_room = _communicator.leaveRoom();
+                                _using_communicator.ReleaseMutex();
+
+                                if (!leave_room)
                                 {
                                     MessageBoxResult result = MessageBox.Show("Failed to leave room", "Trivia",
                                         MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
@@ -678,74 +665,66 @@ namespace Trivia_Client
                             }
                             _currWindow = Windows.MENU;
                             SetMenuWindow();
-                            break;
-
-                        default:
+                        }
+                        else
+                        {
                             _currWindow = Windows.MENU;
                             SetMenuWindow();
-                            break;
-                    }
-                    break;
+                        }
+                        break;
 
-                case Windows.CREATE_ROOM:                // CREATE ROOM V
-                    _currWindow = Windows.CREATE_ROOM;
-                    SetCreateRoomWindow();
-                    break;
+                    case Windows.CREATE_ROOM:
+                        _currWindow = Windows.CREATE_ROOM;
+                        SetCreateRoomWindow();
+                        break;
 
-                case Windows.JOIN_ROOM:
-                    _currWindow = Windows.JOIN_ROOM;
-                    SetJoinRoomWindow();
-                    break;
+                    case Windows.JOIN_ROOM:
+                        _currWindow = Windows.JOIN_ROOM;
+                        SetJoinRoomWindow();
+                        break;
 
-                case Windows.ROOM:
-                    switch(_currWindow)
-                    {
-                        case Windows.CREATE_ROOM:
-                            try
+                    case Windows.ROOM:
+                        if (_currWindow == Windows.CREATE_ROOM)
+                        {
+                            _using_communicator.WaitOne();
+                            bool create_room = _communicator.createRoom(textBoxes[0].Text, textBoxes[1].Text, textBoxes[2].Text, textBoxes[3].Text);
+                            _using_communicator.ReleaseMutex();
+                            
+                            if (create_room)
                             {
-                                if (_communicator.createRoom(textBoxes[0].Text, textBoxes[1].Text, textBoxes[2].Text, textBoxes[3].Text))
-                                {
-                                    RoomData temp;
-                                    temp.id = 0;
-                                    temp.name = textBoxes[0].Text;
-                                    temp.maxPlayers = UInt32.Parse(textBoxes[1].Text);
-                                    temp.questionCount = UInt32.Parse(textBoxes[2].Text);
-                                    temp.timePerQuestion = UInt32.Parse(textBoxes[3].Text);
-                                    temp.isActive = (uint)ActiveMode.WAITING;
+                                RoomData temp;
+                                temp.id = 0;
+                                temp.name = textBoxes[0].Text;
+                                temp.maxPlayers = UInt32.Parse(textBoxes[1].Text);
+                                temp.questionCount = UInt32.Parse(textBoxes[2].Text);
+                                temp.timePerQuestion = UInt32.Parse(textBoxes[3].Text);
+                                temp.isActive = (uint)ActiveMode.WAITING;
 
+                                _currWindow = Windows.ROOM;
+                                SetRoomWindow(temp);
+                            }
+                            else
+                            {
+                                MessageBoxResult result = MessageBox.Show("Some details were invalid. \nTry again :)", "Trivia",
+                                    MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                            }
+                        }
+                        else if (_currWindow == Windows.JOIN_ROOM)
+                        {
+                            _using_communicator.WaitOne();
+                            RoomData r = _communicator.getRoomData(roomName);
+                            _using_communicator.ReleaseMutex();
+
+                            if (r.name != "")
+                            {
+                                _using_communicator.WaitOne();
+                                bool join_room = _communicator.joinRoom(roomName);
+                                _using_communicator.ReleaseMutex();
+
+                                if (join_room)
+                                {
                                     _currWindow = Windows.ROOM;
-                                    SetRoomWindow(temp);
-                                }
-                                else
-                                {
-                                    MessageBoxResult result = MessageBox.Show("Some details were invalid. \nTry again :)", "Trivia",
-                                        MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                this.Close();
-                                MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
-                                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
-                            }
-                            break;
-                        case Windows.JOIN_ROOM:
-                            try
-                            {
-
-                                RoomData r = _communicator.getRoomData(roomName);
-                                if (r.name != "")
-                                {
-                                    if (_communicator.joinRoom(roomName))
-                                    {
-                                        _currWindow = Windows.ROOM;
-                                        SetRoomWindow(r);
-                                    }
-                                    else
-                                    {
-                                        MessageBoxResult result = MessageBox.Show("Faild to join room. \nTry again :)", "Trivia",
-                                            MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
-                                    }
+                                    SetRoomWindow(r);
                                 }
                                 else
                                 {
@@ -753,103 +732,101 @@ namespace Trivia_Client
                                         MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
                                 }
                             }
-                            catch (Exception e)
+                            else
                             {
-                                this.Close();
-                                MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
-                                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
+                                MessageBoxResult result = MessageBox.Show("Faild to join room. \nTry again :)", "Trivia",
+                                    MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
                             }
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-
-                case Windows.STATISTICS:                 // STATISTICS V
-                    _currWindow = Windows.STATISTICS;
-                    SetStatisticsWindow();
-                    break;
-
-                case Windows.USER_STATISTICS:
-                    List<string> userStatistics = null;
-
-                    try
-                    {
-                        userStatistics = _communicator.getUserStatistics();
-                    }
-                    catch (Exception e)
-                    {
-                        this.Close();
-                        MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
-                            MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
+                        }
                         break;
-                    }
 
-                    if (userStatistics == null)
-                    {
-                        MessageBoxResult result = MessageBox.Show("There were some errors ): \nGoing back to menu.", "Trivia",
-                            MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
-                        _currWindow = Windows.MENU;
-                        SetMenuWindow();
+                    case Windows.STATISTICS:
+                        _currWindow = Windows.STATISTICS;
+                        SetStatisticsWindow();
                         break;
-                    }
-                    _currWindow = Windows.USER_STATISTICS;
-                    SetMyStatisticsWindow(userStatistics);
-                    break;
 
-                case Windows.HIGH_SCORES:
-                    Dictionary<string, string> highScores = null;
+                    case Windows.USER_STATISTICS:
+                        _using_communicator.WaitOne();
+                        List<string> userStatistics = _communicator.getUserStatistics();
+                        _using_communicator.ReleaseMutex();
 
-                    try
-                    {
-                        highScores = _communicator.getHighScores();
-                    }
-                    catch (Exception e)
-                    {
-                        this.Close();
-                        MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
-                            MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
+                        if (userStatistics == null)
+                        {
+                            MessageBoxResult result = MessageBox.Show("There were some errors ): \nGoing back to menu.", "Trivia",
+                                MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
+                            _currWindow = Windows.MENU;
+                            SetMenuWindow();
+                        }
+                        else
+                        {
+                            _currWindow = Windows.USER_STATISTICS;
+                            SetMyStatisticsWindow(userStatistics);
+                        }
                         break;
-                    }
 
-                    if (highScores == null)
-                    {
-                        MessageBoxResult result = MessageBox.Show("There were some errors ): \nGoing back to menu.", "Trivia",
-                            MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
-                        _currWindow = Windows.MENU;
-                        SetMenuWindow();
+                    case Windows.HIGH_SCORES:
+                        _using_communicator.WaitOne();
+                        Dictionary<string, string> highScores = _communicator.getHighScores();
+                        _using_communicator.ReleaseMutex();
+
+                        if (highScores == null)
+                        {
+                            MessageBoxResult result = MessageBox.Show("There were some errors ): \nGoing back to menu.", "Trivia",
+                                MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
+                            _currWindow = Windows.MENU;
+                            SetMenuWindow();
+                        }
+                        else
+                        {
+                            _currWindow = Windows.HIGH_SCORES;
+                            SetHighScoresWindow(highScores);
+                        }
                         break;
-                    }
 
-                    _currWindow = Windows.HIGH_SCORES;
-                    SetHighScoresWindow(highScores);
-                    break;
-
-                default:
-                    break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                _using_communicator.ReleaseMutex();
+                this.Close();
+                MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
+                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
             }
         }
 
         private void getAvailableRooms(object sender, DoWorkEventArgs e)
         {
-            while (true)
+            try
             {
-                List<string> roomNames = new List<string>();
-                List<RoomData> currRooms = _communicator.getAvailableRooms();
-
-                foreach (RoomData room in currRooms)
+                while (true)
                 {
-                    roomNames.Add(room.name);
+                    List<string> roomNames = new List<string>();
+                    _using_communicator.WaitOne();
+                    List<RoomData> currRooms = _communicator.getAvailableRooms();
+                    _using_communicator.ReleaseMutex();
+
+                    foreach (RoomData room in currRooms)
+                    {
+                        roomNames.Add(room.name);
+                    }
+
+                    _available_rooms_worker.ReportProgress(0, new Tuple<List<string>, ListBox>(roomNames, (ListBox)e.Argument));
+
+                    System.Threading.Thread.Sleep(1000);
+
+                    if (_currWindow != Windows.JOIN_ROOM)
+                    {
+                        break;
+                    }
                 }
-
-                _available_rooms_worker.ReportProgress(0, new Tuple<List<string>, ListBox>(roomNames, (ListBox)e.Argument));
-
-                System.Threading.Thread.Sleep(1000);
-
-                if (_currWindow != Windows.JOIN_ROOM)
-                {
-                    break;
-                }
+            }
+            catch (Exception ex)
+            {
+                _using_communicator.ReleaseMutex();
+                MessageBoxResult result = MessageBox.Show(ex.Message, "Trivia",
+                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
             }
         }
 
@@ -866,14 +843,26 @@ namespace Trivia_Client
 
         private void checkRoomState(object sender, DoWorkEventArgs e)
         {
-            while (_currWindow == Windows.ROOM)
+            try
             {
-                GetRoomStateRes state = _communicator.getRoomState();
-                Tuple<ListBox, Button, bool> tmp = (Tuple<ListBox, Button, bool>)e.Argument;
-                Tuple<ListBox, Button, bool, GetRoomStateRes> args = new Tuple<ListBox, Button, bool, GetRoomStateRes>(tmp.Item1, tmp.Item2, tmp.Item3, state);
+                while (_currWindow == Windows.ROOM)
+                {
+                    _using_communicator.WaitOne();
+                    GetRoomStateRes state = _communicator.getRoomState();
+                    _using_communicator.ReleaseMutex();
 
-                _room_state_worker.ReportProgress(0, args);
-                System.Threading.Thread.Sleep(1000);
+                    Tuple<ListBox, Button, bool> tmp = (Tuple<ListBox, Button, bool>)e.Argument;
+                    Tuple<ListBox, Button, bool, GetRoomStateRes> args = new Tuple<ListBox, Button, bool, GetRoomStateRes>(tmp.Item1, tmp.Item2, tmp.Item3, state);
+
+                    _room_state_worker.ReportProgress(0, args);
+                    System.Threading.Thread.Sleep(1000);
+                }
+            }
+            catch (Exception ex)
+            {
+                _using_communicator.ReleaseMutex();
+                MessageBoxResult result = MessageBox.Show(ex.Message, "Trivia",
+                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
             }
         }
 
@@ -902,5 +891,6 @@ namespace Trivia_Client
         private Communicator _communicator;
         private BackgroundWorker _available_rooms_worker = new BackgroundWorker();
         private BackgroundWorker _room_state_worker = new BackgroundWorker();
+        Mutex _using_communicator;
     }
 }
