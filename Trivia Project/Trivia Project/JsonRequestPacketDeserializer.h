@@ -41,6 +41,11 @@ struct
 	unsigned int answerTimeout;
 }typedef CreateRoomRequest;
 
+struct
+{
+	unsigned int answerId;
+}typedef SubmitAnswerRequest;
+
 class JsonRequestPacketDeserializer
 {
 public:
@@ -49,6 +54,7 @@ public:
 	static GetPlayersInRoomRequest deserializeGetPlayersInRoomRequest(Buffer buff);
 	static JoinRoomRequest deserializeJoinRoomRequest(Buffer buff);
 	static CreateRoomRequest deserializeCreateRoomRequest(Buffer buff);
+	static SubmitAnswerRequest deserializeSubmitAnswerRequest(Buffer buff);
 
 	static unsigned int bytesToInt(Buffer);
 	static std::string bytesToString(Buffer);
@@ -68,3 +74,6 @@ void from_json(const json&, JoinRoomRequest&);
 
 void to_json(json&, const CreateRoomRequest&);
 void from_json(const json&, CreateRoomRequest&);
+
+void to_json(json&, const SubmitAnswerRequest&);
+void from_json(const json&, SubmitAnswerRequest&);

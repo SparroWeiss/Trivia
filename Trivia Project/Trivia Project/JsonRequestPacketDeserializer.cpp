@@ -108,6 +108,25 @@ void from_json(const json& j, CreateRoomRequest& create_room)
 	j.at("answerTimeout").get_to(create_room.answerTimeout);
 }
 
+/*
+This is a helper function that enables direct assignment from 'SubmitAnswerRequest' to 'json'.
+Input: json and SubmitAnswerRequest objects
+Output: none
+*/
+void to_json(json& j, const SubmitAnswerRequest& submit_answer)
+{
+	j = { {"answerId", submit_answer.answerId} };
+}
+/*
+This is a helper function that enables direct assignment from 'json' to 'SubmitAnswerRequest'.
+Input: json and SubmitAnswerRequest objects
+Output: none
+*/
+void from_json(const json& j, SubmitAnswerRequest& submit_answer)
+{
+	j.at("answerId").get_to(submit_answer.answerId);
+}
+
 /******************** Class Methods ********************/
 
 /*
@@ -163,6 +182,17 @@ CreateRoomRequest JsonRequestPacketDeserializer::deserializeCreateRoomRequest(Bu
 {
 	json j = json::parse(bytesToString(buff));
 	return j.get<CreateRoomRequest>();
+}
+
+/*
+This method converts a 'Buffer' struct to a 'SubmitAnswerRequest' struct.
+Input: Buffer buff
+Outuput: SubmitAnswerRequest
+*/
+SubmitAnswerRequest JsonRequestPacketDeserializer::deserializeSubmitAnswerRequest(Buffer buff)
+{
+	json j = json::parse(bytesToString(buff));
+	return j.get<SubmitAnswerRequest>();
 }
 
 /*

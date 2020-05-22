@@ -3,6 +3,54 @@
 /******************** Json Helper Methods ********************/
 
 /*
+This is a helper function that enables direct assignment from 'RoomData' to 'json'.
+Input: json and RoomData objects
+Output: none
+*/
+void to_json(json& j, const RoomData& room_data)
+{
+	j = json{ {"id", room_data.id} , {"name", room_data.name}, {"maxPlayers", room_data.maxPlayers},
+		{"timePerQuestion", room_data.timePerQuestion}, {"isActive", room_data.isActive}, {"questionCount", room_data.questionCount} };
+}
+/*
+This is a helper function that enables direct assignment from 'json' to 'RoomData'.
+Input: json and RoomData objects
+Output: none
+*/
+void from_json(const json& j, RoomData& room_data)
+{
+	j.at("id").get_to(room_data.id);
+	j.at("name").get_to(room_data.name);
+	j.at("maxPlayers").get_to(room_data.maxPlayers);
+	j.at("timePerQuestion").get_to(room_data.timePerQuestion);
+	j.at("isActive").get_to(room_data.isActive);
+	j.at("questionCount").get_to(room_data.questionCount);
+}
+
+/*
+This is a helper function that enables direct assignment from 'PlayerResults' to 'json'.
+Input: json and PlayerResults objects
+Output: none
+*/
+void to_json(json& j, const PlayerResults& player_results)
+{
+	j = json{ {"username", player_results.username}, {"correctAnswerCount", player_results.correctAnswerCount},
+		{"wrongAnswerCount", player_results.wrongAnswerCount}, {"averageAnswerTime", player_results.averageAnswerTime} };
+}
+/*
+This is a helper function that enables direct assignment from 'json' to 'PlayerResults'.
+Input: json and PlayerResults objects
+Output: none
+*/
+void from_json(const json& j, PlayerResults& player_results)
+{
+	j.at("username").get_to(player_results.username);
+	j.at("correctAnswerCount").get_to(player_results.correctAnswerCount);
+	j.at("wrongAnswerCount").get_to(player_results.wrongAnswerCount);
+	j.at("averageAnswerTime").get_to(player_results.averageAnswerTime);
+}
+
+/*
 This is a helper function that enables direct assignment from 'ErrorResponse' to 'json'.
 Input: json and ErrorResponse objects
 Output: none
@@ -76,31 +124,6 @@ Output: none
 void from_json(const json& j, LogoutResponse& logout)
 {
 	j.at("status").get_to(logout.status);
-}
-
-/*
-This is a helper function that enables direct assignment from 'RoomData' to 'json'.
-Input: json and RoomData objects
-Output: none
-*/
-void to_json(json& j, const RoomData& room_data)
-{
-	j = json{ {"id", room_data.id} , {"name", room_data.name}, {"maxPlayers", room_data.maxPlayers},
-		{"timePerQuestion", room_data.timePerQuestion}, {"isActive", room_data.isActive}, {"questionCount", room_data.questionCount} };
-}
-/*
-This is a helper function that enables direct assignment from 'json' to 'RoomData'.
-Input: json and RoomData objects
-Output: none
-*/
-void from_json(const json& j, RoomData& room_data)
-{
-	j.at("id").get_to(room_data.id);
-	j.at("name").get_to(room_data.name);
-	j.at("maxPlayers").get_to(room_data.maxPlayers);
-	j.at("timePerQuestion").get_to(room_data.timePerQuestion);
-	j.at("isActive").get_to(room_data.isActive);
-	j.at("questionCount").get_to(room_data.questionCount);
 }
 
 /*
@@ -284,6 +307,86 @@ void from_json(const json& j, LeaveRoomResponse& leave_room)
 	j.at("status").get_to(leave_room.status);
 }
 
+/*
+This is a helper function that enables direct assignment from 'GetGameResultsResponse' to 'json'.
+Input: json and GetGameResultsResponse objects
+Output: none
+*/
+void to_json(json& j, const GetGameResultsResponse& get_game_results)
+{
+	j = json{ {"status", get_game_results.status}, {"results", get_game_results.results} };
+}
+/*
+This is a helper function that enables direct assignment from 'json' to 'GetGameResultsResponse'.
+Input: json and GetGameResultsResponse objects
+Output: none
+*/
+void from_json(const json& j, GetGameResultsResponse& get_game_results)
+{
+	j.at("status").get_to(get_game_results.status);
+	j.at("results").get_to(get_game_results.results);
+}
+
+/*
+This is a helper function that enables direct assignment from 'SubmitAnswerResponse' to 'json'.
+Input: json and SubmitAnswerResponse objects
+Output: none
+*/
+void to_json(json& j, const SubmitAnswerResponse& submit_answer)
+{
+	j = json{ {"status", submit_answer.status}, {"correctAnswerId", submit_answer.correctAnswerId} };
+}
+/*
+This is a helper function that enables direct assignment from 'json' to 'SubmitAnswerResponse'.
+Input: json and SubmitAnswerResponse objects
+Output: none
+*/
+void from_json(const json& j, SubmitAnswerResponse& submit_answer)
+{
+	j.at("status").get_to(submit_answer.status);
+	j.at("correctAnswerId").get_to(submit_answer.correctAnswerId);
+}
+
+/*
+This is a helper function that enables direct assignment from 'GetQuestionResponse' to 'json'.
+Input: json and GetQuestionResponse objects
+Output: none
+*/
+void to_json(json& j, const GetQuestionResponse& get_question)
+{
+	j = json{ {"status", get_question.status}, {"question", get_question.question}, {"answers", get_question.answers} };
+}
+/*
+This is a helper function that enables direct assignment from 'json' to 'GetQuestionResponse'.
+Input: json and GetQuestionResponse objects
+Output: none
+*/
+void from_json(const json& j, GetQuestionResponse& get_question)
+{
+	j.at("status").get_to(get_question.status);
+	j.at("question").get_to(get_question.question);
+	j.at("answers").get_to(get_question.answers);
+}
+
+/*
+This is a helper function that enables direct assignment from 'LeaveGameResponse' to 'json'.
+Input: json and LeaveGameResponse objects
+Output: none
+*/
+void to_json(json& j, const LeaveGameResponse& leave_game)
+{
+	j = json{ {"status", leave_game.status} };
+}
+/*
+This is a helper function that enables direct assignment from 'json' to 'LeaveGameResponse'.
+Input: json and LeaveGameResponse objects
+Output: none
+*/
+void from_json(const json& j, LeaveGameResponse& leave_game)
+{
+	j.at("status").get_to(leave_game.status);
+}
+
 /******************** Class Methods ********************/
 
 /*
@@ -454,6 +557,59 @@ Buffer JsonResponsePacketSerializer::serializeResponse(LeaveRoomResponse leave_r
 
 	return createResponseBuf(LEAVEROOM, leave_roomSize, leave_roomData);
 }
+
+/*
+This method converts an 'GetGameResultsResponse' struct to a 'Buffer' struct.
+Input: GetGameResultsResponse
+Outuput: Buffer
+*/
+Buffer JsonResponsePacketSerializer::serializeResponse(GetGameResultsResponse get_game_results)
+{
+	json get_game_resultsJson = get_game_results;
+	Buffer get_game_resultsData = stringToBytes(get_game_resultsJson.dump()), get_game_resultsSize = intToBytes(get_game_resultsJson.dump().size());
+
+	return createResponseBuf(GETGAMERESULTS, get_game_resultsSize, get_game_resultsData);
+}
+
+/*
+This method converts an 'SubmitAnswerResponse' struct to a 'Buffer' struct.
+Input: SubmitAnswerResponse
+Outuput: Buffer
+*/
+Buffer JsonResponsePacketSerializer::serializeResponse(SubmitAnswerResponse submit_answer)
+{
+	json submit_answerJson = submit_answer;
+	Buffer submit_answerData = stringToBytes(submit_answerJson.dump()), submit_answerSize = intToBytes(submit_answerJson.dump().size());
+
+	return createResponseBuf(SUBMITANSWER, submit_answerSize, submit_answerData);
+}
+
+/*
+This method converts an 'GetQuestionResponse' struct to a 'Buffer' struct.
+Input: GetQuestionResponse
+Outuput: Buffer
+*/
+Buffer JsonResponsePacketSerializer::serializeResponse(GetQuestionResponse get_question)
+{
+	json get_questionJson = get_question;
+	Buffer get_questionData = stringToBytes(get_questionJson.dump()), get_questionSize = intToBytes(get_questionJson.dump().size());
+
+	return createResponseBuf(GETQUESTION, get_questionSize, get_questionData);
+}
+
+/*
+This method converts an 'LeaveGameResponse' struct to a 'Buffer' struct.
+Input: LeaveGameResponse
+Outuput: Buffer
+*/
+Buffer JsonResponsePacketSerializer::serializeResponse(LeaveGameResponse leave_game)
+{
+	json leave_gameJson = leave_game;
+	Buffer leave_gameData = stringToBytes(leave_gameJson.dump()), leave_gameSize = intToBytes(leave_gameJson.dump().size());
+
+	return createResponseBuf(LEAVEGAME, leave_gameSize, leave_gameData);
+}
+
 
 /*
 This helper method converts 'int' type to 'Buffer' type.
