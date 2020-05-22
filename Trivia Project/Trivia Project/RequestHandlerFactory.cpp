@@ -82,6 +82,16 @@ RoomMemberRequestHandler* RequestHandlerFactory::createRoomMemberRequestHandler(
 }
 
 /*
+function creates new Game handler
+input: logged user, pointer to the room
+output: Game handler
+*/
+GameRequestHandler* RequestHandlerFactory::createGameRequestHandler(LoggedUser user, Room* room)
+{
+	return new GameRequestHandler(user, room);
+}
+
+/*
 function returns the Login Manager
 input: none
 output: Login Manager
@@ -109,4 +119,14 @@ output: Statistics Manager
 StatisticsManager& RequestHandlerFactory::getStatisticsManager()
 {
 	return *m_statisticsManager;
+}
+
+/*
+function returns the Game Manager
+input: none
+output: Game Manager
+*/
+GameManager& RequestHandlerFactory::getGameManager()
+{
+	return *m_gameManager;
 }
