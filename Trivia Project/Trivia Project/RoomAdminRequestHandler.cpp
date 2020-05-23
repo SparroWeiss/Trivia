@@ -90,7 +90,8 @@ RequestResult RoomAdminRequestHandler::startGame(RequestInfo info)
 	if (m_room->getAllUsers().size() > 1)
 	{
 		startRes = { 1 }; // status: 1
-		newHandle = nullptr; // pointer to the next handle : Game
+		m_room->setGame(m_handlerFactory->getGameManager().createGame(*m_room));
+		newHandle = m_handlerFactory->createGameRequestHandler(m_user, m_room); // pointer to the next handle : Game
 		RoomData data = m_room->getData();
 		data.isActive = ActiveMode::PLAYING;
 		m_room->setData(data);

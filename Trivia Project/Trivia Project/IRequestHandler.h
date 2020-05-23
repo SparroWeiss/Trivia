@@ -15,7 +15,7 @@ struct
 struct
 {
 	Buffer response;
-	IRequestHandler* newHandler;
+	IRequestHandler* newHandler = nullptr;
 }typedef RequestResult;
 
 class IRequestHandler

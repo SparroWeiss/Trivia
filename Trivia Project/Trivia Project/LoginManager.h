@@ -22,7 +22,7 @@ public:
 	*/
 	std::string getUsername() const
 	{
-		return std::string(m_username);
+		return m_username;
 	}
 private:
 	std::string m_username;

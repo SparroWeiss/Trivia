@@ -11,6 +11,8 @@ Room::Room()
 {
 	m_users = std::vector<LoggedUser>();
 	m_metaData = RoomData{ 0, "Room", 0, 0, ActiveMode::DONE, 0 };
+
+	m_game = nullptr;
 }
 
 /*
@@ -95,4 +97,25 @@ std::vector<std::string> Room::getAllUsers()
 		names.push_back((*i).getUsername());
 	}
 	return names;
+}
+
+/////////////////////////////Game Helpers
+/*
+function sets the game of the room
+input: pointer to the game
+output: none
+*/
+void Room::setGame(Game* game)
+{
+	m_game = game;
+}
+
+/*
+function gets the game of the room
+input: none
+output: pointer to the game
+*/
+Game* Room::getGame()
+{
+	return m_game;
 }

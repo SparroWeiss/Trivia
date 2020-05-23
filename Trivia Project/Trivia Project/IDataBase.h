@@ -3,13 +3,28 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <map>
 
-struct
+class Question
 {
-	std::string _question;
-	std::string _correctAnswer;
-	std::vector<std::string> _wrongAnswers;
-} typedef Question;
+public:
+	Question();
+	~Question();
+
+	std::string getQuestion();
+	void setQuestion(std::string);
+
+	std::map<unsigned int, std::string> getPossibleAnswers();
+	void addPossibleAnswers(std::string);
+
+	unsigned int getCorrectAnswer();
+	void setCorrectAnswer(std::string);
+private:
+	static unsigned int curr_id;
+	std::string m_question;
+	unsigned int m_correctAnswer;
+	std::map<unsigned int, std::string> m_possibleAnswers;
+};
 
 struct
 {

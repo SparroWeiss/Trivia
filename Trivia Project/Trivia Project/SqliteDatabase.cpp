@@ -90,18 +90,18 @@ int questionsCallback(void* data, int size, char** argv, char** colName)
 		column = std::string(colName[i]);
 		if (column == QUESTION_COLUMN)
 		{
-			temp._question = std::string(argv[i]);
+			temp.setQuestion(std::string(argv[i]));
 		}
 		else if (column == CORRECT_ANSWER_COLUMN)
 		{
-			temp._correctAnswer = std::string(argv[i]);
+			temp.setCorrectAnswer(std::string(argv[i]));
 		}
 		else if (column == WRONG_ANSWERS_COLUMN)
 		{
 			tempWrongAnswer = strtok(argv[i], DELIMITER);
 			while (tempWrongAnswer != NULL)
 			{
-				temp._wrongAnswers.push_back(tempWrongAnswer);
+				temp.addPossibleAnswers(tempWrongAnswer);
 				tempWrongAnswer = strtok(NULL, DELIMITER);
 			}
 		}
