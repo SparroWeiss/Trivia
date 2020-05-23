@@ -1,6 +1,5 @@
 #pragma once
 #include "IDataBase.h"
-#include "JsonResponsePacketSerializer.h"
 #include "LoginManager.h"
 
 
@@ -15,10 +14,11 @@ struct
 class Game
 {
 public:
+	Game();
 	Game(std::vector<LoggedUser> users, std::vector<Question> Questions);
 	~Game();
 	Question getQuestionForUser(LoggedUser& user);
-	unsigned int submitAnswer(unsigned int answerId, LoggedUser& user, Game game, float timeForAnswer);
+	unsigned int submitAnswer(unsigned int answerId, LoggedUser& user, float timeForAnswer);
 	bool removePlayer(LoggedUser& user);
 	std::map<std::string, GameData> getUsersData();
 private:

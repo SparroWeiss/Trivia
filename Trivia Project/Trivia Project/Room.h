@@ -1,5 +1,6 @@
 #pragma once
-#include "LoginManager.h"
+///#include "LoginManager.h"
+#include "Game.h"
 
 enum
 {
@@ -16,6 +17,8 @@ struct
 	unsigned int questionCount;
 }typedef RoomData;
 
+class Game;
+
 class Room
 {
 public:
@@ -26,7 +29,11 @@ public:
 	void setData(RoomData data);
 	RoomData getData() const;
 	std::vector<std::string> getAllUsers();
+
+	void setGame(Game* game); // helper : for the admin
+	Game* getGame(); // helper : for game handler 
 private:
+	Game* m_game; // helper : to notify the member to which game to go
 	RoomData m_metaData;
 	std::vector<LoggedUser> m_users;
 };

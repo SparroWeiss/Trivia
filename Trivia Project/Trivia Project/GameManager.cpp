@@ -42,10 +42,12 @@ GameManager::~GameManager()
 
 Game* GameManager::createGame(Room room)
 {
-	return nullptr; // not my mission
+	// TODO : get the questions from the data base and set the vector of the players
+	return nullptr;
 }
 
 bool GameManager::deleteGame(Game* game)
 {
-	return false; // not my mission
+	// TODO : wait to see if a room is empty and delete it
+	return false;
 }

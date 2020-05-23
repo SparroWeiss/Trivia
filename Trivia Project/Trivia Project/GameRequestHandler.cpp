@@ -3,19 +3,31 @@
 
 std::mutex _mutex_game;
 
-
+/*
+constructor
+initializes the variables of the object
+*/
 GameRequestHandler::GameRequestHandler(LoggedUser user, Room* room)
 {
 	m_user = user;
 	m_gameManager = m_gameManager->getInstance();
-	m_game = m_gameManager->createGame(*room);
+	m_game = room->getGame();
 	m_handlerFactory = m_handlerFactory->getInstance();
 }
 
+/*
+destructor
+frees allocated memory
+*/
 GameRequestHandler::~GameRequestHandler()
 {
 }
 
+/*
+function checks if a request is relevant to the handler
+input : request info
+output : true - request is relevant, false - request isn't relevant
+*/
 bool GameRequestHandler::isRequestRelevant(RequestInfo info)
 {
 	return info.id == LEAVEGAME ||
@@ -24,6 +36,11 @@ bool GameRequestHandler::isRequestRelevant(RequestInfo info)
 		info.id == GETGAMERESULTS;
 }
 
+/*
+function gets the result of a request
+input: request info
+output: request result
+*/
 RequestResult GameRequestHandler::handleRequest(RequestInfo info)
 {
 	switch (info.id)
@@ -41,6 +58,11 @@ RequestResult GameRequestHandler::handleRequest(RequestInfo info)
 	}
 }
 
+/*
+function gets the question of the user
+input: request info
+output: request result
+*/
 RequestResult GameRequestHandler::getQuestion(RequestInfo info)
 {
 	GetQuestionResponse getQuestionRes = { };
@@ -54,32 +76,54 @@ RequestResult GameRequestHandler::getQuestion(RequestInfo info)
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(getQuestionRes), this };
 }
 
+/*
+function submits a user's answer
+input: request info
+output: request result
+*/
 RequestResult GameRequestHandler::submitAnswer(RequestInfo info)
 {
+	float time = float(clock() - m_startTime) / CLOCKS_PER_SEC;
 	SubmitAnswerRequest submitAnsReq = JsonRequestPacketDeserializer::deserializeSubmitAnswerRequest(info.buffer);
 	SubmitAnswerResponse submitAnsRes;
 	submitAnsRes.status = 1;
+	std::unique_lock<std::mutex> locker(_mutex_game);
 	submitAnsRes.correctAnswerId = m_game->submitAnswer(submitAnsReq.answerId,
-		m_user, *m_game, float(clock() - m_startTime) / CLOCKS_PER_SEC);
+		m_user, time);
+	locker.unlock();
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(submitAnsRes), this };
 }
 
+/*
+function gets the results of the game
+input: request info
+output: request result
+*/
 RequestResult GameRequestHandler::getGameResults(RequestInfo info)
 {
 	GetGameResultsResponse getGameRes = { 1 };
+
 	std::unique_lock<std::mutex> locker(_mutex_game);
 	std::map<std::string, GameData> results = m_game->getUsersData();
+	locker.unlock();
+
 	for (std::map<std::string, GameData>::iterator i = results.begin(); i != results.end(); ++i)
 	{
-		getGameRes.results.push_back({ (*i).first,(*i).second.correctAnswersCount, (*i).second.wrongAnswersCount, (*i).second.averageAnswerTime });
+		getGameRes.results.push_back({ i->first, i->second.correctAnswersCount, i->second.wrongAnswersCount, i->second.averageAnswerTime });
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(getGameRes), this };
 }
 
+/*
+function signs out a user from the game
+input: request info
+output: request result
+*/
 RequestResult GameRequestHandler::leaveGame(RequestInfo info)
 {
 	IRequestHandler* newHandle = this; // if the leave game request isn't valid, stay in same handler
 	LeaveGameResponse leaveGameRes = { 0 }; // status: 0
+
 	std::unique_lock<std::mutex> locker(_mutex_game);
 	if (m_game->removePlayer(m_user))
 	{
