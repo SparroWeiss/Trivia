@@ -127,6 +127,10 @@ RequestResult GameRequestHandler::leaveGame(RequestInfo info)
 	std::unique_lock<std::mutex> locker(_mutex_game);
 	if (m_game->removePlayer(m_user))
 	{
+		if (m_game->getUsersAmount() == 0) // If all players left the game
+		{
+			m_gameManager->deleteGame(m_game); // delete the game
+		}
 		locker.unlock();
 		leaveGameRes = { 1 };
 		newHandle = m_handlerFactory->createMenuRequestHandler(m_user.getUsername()); // pointer to the previous handle : menu

@@ -2,15 +2,6 @@
 #include "IDataBase.h"
 #include "LoginManager.h"
 
-
-struct
-{
-	Question currentQuestion;
-	unsigned int correctAnswersCount;
-	unsigned int wrongAnswersCount;
-	unsigned int averageAnswerTime;
-}typedef GameData;
-
 class Game
 {
 public:
@@ -21,6 +12,7 @@ public:
 	unsigned int submitAnswer(unsigned int answerId, LoggedUser& user, float timeForAnswer);
 	bool removePlayer(LoggedUser& user);
 	std::map<std::string, GameData> getUsersData();
+	unsigned int getUsersAmount();
 private:
 	std::map<std::string, GameData> m_players;
 	std::vector<Question> m_questions;

@@ -165,6 +165,11 @@ std::map<std::string, GameData> Game::getUsersData()
 	return m_players;
 }
 
+unsigned int Game::getUsersAmount()
+{
+	return m_players.size();
+}
+
 /////////////////////////HELPER
 
 /*

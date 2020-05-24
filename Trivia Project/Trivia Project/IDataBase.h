@@ -35,6 +35,14 @@ struct
 	int _answersTime;
 }typedef Statistic;
 
+struct
+{
+	Question currentQuestion;
+	unsigned int correctAnswersCount;
+	unsigned int wrongAnswersCount;
+	unsigned int averageAnswerTime;
+}typedef GameData;
+
 class IDataBase
 {
 public:
@@ -47,4 +55,5 @@ public:
 	virtual int getNumOfTotalAnswers(std::string name) = 0;
 	virtual int getNumOfPlayerGames(std::string name) = 0;
 	virtual std::vector<Statistic> getStatistics() = 0;
+	virtual void updateStatistics(std::map<std::string, GameData> usersGameData) = 0;
 };

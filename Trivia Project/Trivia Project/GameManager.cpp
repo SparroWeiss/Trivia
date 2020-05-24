@@ -1,6 +1,8 @@
 #include "GameManager.h"
 #include "SqliteDatabase.h"
 
+std::mutex _using_db;
+
 /*
 constructor
 initializes the variables of the object
@@ -40,14 +42,41 @@ GameManager::~GameManager()
 	}
 }
 
+/*
+This function creates a new game for a room.
+Input: the room that hosts the game
+Output: the new game
+*/
 Game* GameManager::createGame(Room room)
 {
-	// TODO : get the questions from the data base and set the vector of the players
-	return nullptr;
+	std::list<Question> newQuestions = m_database->getQuestions(room.getData().questionCount);
+	std::vector<LoggedUser> gameUsers;
+
+	for (std::string username : room.getAllUsers())
+	{
+		gameUsers.push_back(LoggedUser(username));
+	}
+	m_games.push_back(new Game(gameUsers, std::vector<Question>(newQuestions.begin(), newQuestions.end())));
+	return m_games.back();
 }
 
+/*
+This function deletes a game.
+Input: the game to be deleted
+Output: if the game was deleted - true, else - false
+*/
 bool GameManager::deleteGame(Game* game)
 {
-	// TODO : wait to see if a room is empty and delete it
-	return false;
+	std::vector<Game*>::iterator it = std::find(m_games.begin(), m_games.end(), game);
+
+	if (it != m_games.end())
+	{
+		std::unique_lock<std::mutex> locker(_using_db);
+		m_database->updateStatistics(game->getUsersData());
+		locker.unlock();
+		m_games.erase(it);
+		delete game;
+		return true;
+	}
+	return true;
 }

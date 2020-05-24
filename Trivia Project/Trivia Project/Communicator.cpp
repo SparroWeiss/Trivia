@@ -198,6 +198,10 @@ void Communicator::handleNewClient(SOCKET client_socket)
 			{
 				m_clients[client_socket]->handleRequest(RequestInfo{ LEAVEROOM, "", Buffer() });
 			}
+			else if (m_clients[client_socket]->isRequestRelevant(RequestInfo{ LEAVEGAME, "", Buffer() }))
+			{
+				m_clients[client_socket]->handleRequest(RequestInfo{ LEAVEGAME, "", Buffer() });
+			}
 			std::cout << "Error with socket: " << client_socket << ". client " << name << " disconnected." << std::endl;
 			delete m_clients[client_socket];
 			std::unique_lock<std::mutex> locker(_using_clients);
