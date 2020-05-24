@@ -2,6 +2,7 @@
 #include "SqliteDatabase.h"
 
 std::mutex _using_db;
+std::mutex _using_games;
 
 /*
 constructor
@@ -56,6 +57,8 @@ Game* GameManager::createGame(Room room)
 	{
 		gameUsers.push_back(LoggedUser(username));
 	}
+
+	std::lock_guard<std::mutex> locker(_using_games);
 	m_games.push_back(new Game(gameUsers, std::vector<Question>(newQuestions.begin(), newQuestions.end())));
 	return m_games.back();
 }
@@ -75,8 +78,15 @@ bool GameManager::deleteGame(Game* game)
 		m_database->updateStatistics(game->getUsersData());
 		locker.unlock();
 		m_games.erase(it);
-		delete game;
-		return true;
+		try
+		{
+			delete game;
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
 	}
 	return true;
 }
