@@ -402,4 +402,36 @@ std::vector<Statistic> SqliteDatabase::getStatistics()
 	return std::vector<Statistic>(_statisticsRows);
 }
 
+void SqliteDatabase::updateStatistics(std::map<std::string, GameData> usersGameData)
+{
+	for (Statistic curr : getStatistics())
+	{
+		for (std::pair<std::string, GameData> player : usersGameData)
+		{
+			if (curr._name == player.first)
+			{
+				int gameQuestions = player.second.correctAnswersCount + player.second.wrongAnswersCount;
 
+				updateUserStatistic(Statistic{curr._name,
+					curr._totalAnswers+gameQuestions,
+					curr._correctAnswers + static_cast<int>(player.second.correctAnswersCount),
+					curr._numOfGames+1,
+					static_cast<int>((curr._answersTime*curr._totalAnswers + player.second.averageAnswerTime*gameQuestions)
+					/ curr._totalAnswers + gameQuestions) });
+			}
+		}
+	}
+}
+
+
+void SqliteDatabase::updateUserStatistic(Statistic userStatistic)
+{
+	std::string query = "UPDATE STATISTICS SET " + TOTAL_ANSWERS_COLUMN + " = " + std::to_string(userStatistic._totalAnswers) +
+		", " + CORRECT_ANSWERS_COLUMN + " = " + std::to_string(userStatistic._correctAnswers) + ", " +
+		NUM_OF_GAMES_COLUMN + " = " + std::to_string(userStatistic._numOfGames) + ", " +
+		ANSWERS_TIME_COLUMN + " = " + std::to_string(userStatistic._answersTime) +
+		" WHERE " + NAME_COLUMN + " = " + userStatistic._name + ";";
+
+	std::lock_guard<std::mutex>locker(_using_db);
+	sqlite3_exec(_db, query.c_str(), nullptr, nullptr, nullptr);
+}

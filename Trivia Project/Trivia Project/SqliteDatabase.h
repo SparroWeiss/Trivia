@@ -20,6 +20,7 @@ public:
 	virtual int getNumOfTotalAnswers(std::string name);
 	virtual int getNumOfPlayerGames(std::string name);
 	std::vector<Statistic> getStatistics();
+	void updateStatistics(std::map<std::string, GameData> usersGameData);
 
 private:
 	SqliteDatabase();
@@ -33,6 +34,7 @@ private:
 
 	void refreshQuestions(int);
 	void getStatistics(std::string name);
+	void updateUserStatistic(Statistic userStatistic);
 
 	friend int usersCallback(void* data, int size, char** argv, char** colName);
 	friend int questionsCallback(void* data, int size, char** argv, char** colName);
