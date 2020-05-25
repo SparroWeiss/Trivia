@@ -14,7 +14,7 @@ public:
 	bool doesUserExist(std::string name);
 	bool doesPasswordMatch(std::string name, std::string password);
 	bool addNewUser(std::string name, std::string password, std::string email, std::string address, std::string phone, std::string birthdate);
-	virtual std::list<Question> getQuestions(int);
+	virtual std::vector<Question> getQuestions(int);
 	virtual float getPlayerAverageAnswerTime(std::string name);
 	virtual int getNumOfCorrectAnswers(std::string name);
 	virtual int getNumOfTotalAnswers(std::string name);
@@ -30,7 +30,7 @@ private:
 	sqlite3* _db;
 	std::vector<SignupRequest> _usersRows;
 	std::vector<Statistic> _statisticsRows;
-	std::list<Question> _questionsRows;
+	std::vector<Question> _questionsRows;
 
 	void refreshQuestions(int);
 	void getStatistics(std::string name);

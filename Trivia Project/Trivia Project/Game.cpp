@@ -1,11 +1,13 @@
 #include "Game.h"
+#define NOT_A_QUESTION ""
+
 
 ///////////////////////////////////////Question
 /*
 constructor
 initializes the variables of the object
 */
-Question::Question() : m_correctAnswer(0), m_question("") {}
+Question::Question() : m_correctAnswer(0), m_question(NOT_A_QUESTION) {}
 
 /*
 destructor
@@ -93,7 +95,7 @@ Game::Game(std::vector<LoggedUser> users, std::vector<Question> Questions)
 	m_questions = Questions;
 	for (std::vector<LoggedUser>::iterator i = users.begin(); i != users.end(); ++i)
 	{
-		m_players[(*i).getUsername()] = { m_questions[0], 0, 0, 0 };
+		m_players[(*i).getUsername()] = { m_questions.front(), 0, 0, 0, PlayerMode::PLAYING};
 	}
 }
 
@@ -134,10 +136,15 @@ unsigned int Game::submitAnswer(unsigned int answerId, LoggedUser& user, float t
 	else
 		data.wrongAnswersCount++;
 
-	data.averageAnswerTime = (unsigned int)((answerCount * data.averageAnswerTime + timeForAnswer) / (answerCount + 1));
+	data.averageAnswerTime = (answerCount * data.averageAnswerTime + timeForAnswer) / (answerCount + 1);
+
+	data.currentQuestion = getNextQuestion(data.currentQuestion);
+	if (data.currentQuestion.getQuestion() == NOT_A_QUESTION)
+	{ // finished all questions
+		data.playing = PlayerMode::WAITING_FOR_RESULTS;
+	}
 
 	locker.lock();
-	data.currentQuestion = getNextQuestion(m_players[user.getUsername()].currentQuestion);
 	m_players[user.getUsername()] = data;
 	locker.unlock();
 	return correct;
@@ -151,7 +158,8 @@ output: true - removed, false - couldn't be removed
 bool Game::removePlayer(LoggedUser& user)
 {
 	std::lock_guard<std::mutex> locker(_mutex_players);
-	return m_players.erase(user.getUsername());
+	m_players[user.getUsername()].playing = PlayerMode::LEFT;
+	return true;
 }
 
 /*
@@ -167,7 +175,16 @@ std::map<std::string, GameData> Game::getUsersData()
 
 unsigned int Game::getUsersAmount()
 {
-	return m_players.size();
+	unsigned int sum = 0;
+	std::lock_guard<std::mutex> locker(_mutex_players);
+	for (std::pair<std::string, GameData> curr : m_players)
+	{
+		if (curr.second.playing != PlayerMode::LEFT)
+		{
+			sum++;
+		}
+	}
+	return sum;
 }
 
 /////////////////////////HELPER
@@ -179,10 +196,6 @@ output: next question
 */
 Question Game::getNextQuestion(Question current)
 {
-	if (current.getQuestion() == "")
-	{
-		return m_questions.front(); // get first question
-	}
 	for (std::vector<Question>::iterator i = m_questions.begin(); i != m_questions.end(); ++i)
 	{
 		if (i->getQuestion() == current.getQuestion())

@@ -4,7 +4,7 @@
 
 enum
 {
-	WAITING = 1, PLAYING, DONE
+	WAITING = 1, START_PLAYING, DONE
 }typedef ActiveMode;
 
 struct

@@ -83,13 +83,12 @@ output: request result
 */
 RequestResult GameRequestHandler::submitAnswer(RequestInfo info)
 {
-	float time = float(clock() - m_startTime) / CLOCKS_PER_SEC;
 	SubmitAnswerRequest submitAnsReq = JsonRequestPacketDeserializer::deserializeSubmitAnswerRequest(info.buffer);
 	SubmitAnswerResponse submitAnsRes;
 	submitAnsRes.status = 1;
 	std::unique_lock<std::mutex> locker(_mutex_game);
 	submitAnsRes.correctAnswerId = m_game->submitAnswer(submitAnsReq.answerId,
-		m_user, time);
+		m_user, submitAnsReq.time);
 	locker.unlock();
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(submitAnsRes), this };
 }
@@ -101,7 +100,7 @@ output: request result
 */
 RequestResult GameRequestHandler::getGameResults(RequestInfo info)
 {
-	GetGameResultsResponse getGameRes = { 1 };
+	GetGameResultsResponse getGameRes = { GameMode::FINISHED };
 
 	std::unique_lock<std::mutex> locker(_mutex_game);
 	std::map<std::string, GameData> results = m_game->getUsersData();
@@ -109,6 +108,10 @@ RequestResult GameRequestHandler::getGameResults(RequestInfo info)
 
 	for (std::map<std::string, GameData>::iterator i = results.begin(); i != results.end(); ++i)
 	{
+		if (i->second.playing)
+		{
+			getGameRes.status == GameMode::WAITING_FOR_PLAYERS;
+		}
 		getGameRes.results.push_back({ i->first, i->second.correctAnswersCount, i->second.wrongAnswersCount, i->second.averageAnswerTime });
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(getGameRes), this };
