@@ -50,16 +50,17 @@ Output: the new game
 */
 Game* GameManager::createGame(Room room)
 {
-	std::list<Question> newQuestions = m_database->getQuestions(room.getData().questionCount);
+	std::vector<Question> newQuestions = m_database->getQuestions(room.getData().questionCount);
 	std::vector<LoggedUser> gameUsers;
 
 	for (std::string username : room.getAllUsers())
 	{
+		room.removeUser(username);
 		gameUsers.push_back(LoggedUser(username));
 	}
 
 	std::lock_guard<std::mutex> locker(_using_games);
-	m_games.push_back(new Game(gameUsers, std::vector<Question>(newQuestions.begin(), newQuestions.end())));
+	m_games.push_back(new Game(gameUsers, newQuestions));
 	return m_games.back();
 }
 

@@ -80,7 +80,7 @@ RequestResult RoomMemberRequestHandler::getRoomState(RequestInfo info)
 	getStateRes.questionCount = m_room->getData().questionCount;
 
 	getStateRes.status = m_room->getData().isActive;
-	getStateRes.hasGameBegun = m_room->getData().isActive == ActiveMode::PLAYING;
+	getStateRes.hasGameBegun = m_room->getData().isActive == ActiveMode::START_PLAYING;
 	locker.unlock();
 
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(getStateRes), this };

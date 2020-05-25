@@ -2,6 +2,16 @@
 #include "IDataBase.h"
 #include "LoginManager.h"
 
+enum GameMode
+{
+	FINISHED = 1, WAITING_FOR_PLAYERS
+};
+
+enum PlayerMode
+{
+	LEFT = 1, PLAYING, WAITING_FOR_RESULTS
+};
+
 class Game
 {
 public:

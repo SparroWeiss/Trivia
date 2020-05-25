@@ -107,7 +107,7 @@ int questionsCallback(void* data, int size, char** argv, char** colName)
 		}
 	}
 
-	static_cast<std::list<Question>*>(data)->push_back(temp);
+	static_cast<std::vector<Question>*>(data)->push_back(temp);
 	return 0;
 }
 
@@ -190,7 +190,7 @@ SqliteDatabase::SqliteDatabase()
 		sqlite3_exec(_db, query.c_str(), nullptr, nullptr, nullptr); // set statistics table
 	}
 	_usersRows = std::vector<SignupRequest>();
-	_questionsRows = std::list<Question>();
+	_questionsRows = std::vector<Question>();
 }
 
 /*
@@ -277,7 +277,7 @@ function gets the questions from the DB
 input: amount of questions
 output: list of questions
 */
-std::list<Question> SqliteDatabase::getQuestions(int amount)
+std::vector<Question> SqliteDatabase::getQuestions(int amount)
 {
 	std::string query = "SELECT * FROM QUESTIONS;";
 	std::lock_guard<std::mutex> locker(_using_db); // python script accessing db
@@ -289,7 +289,7 @@ std::list<Question> SqliteDatabase::getQuestions(int amount)
 	sqlite3_exec(_db, query.c_str(), questionsCallback, &_questionsRows, nullptr);
 
 
-	return std::list<Question>(_questionsRows);
+	return std::vector<Question>(_questionsRows);
 }
 
 /*

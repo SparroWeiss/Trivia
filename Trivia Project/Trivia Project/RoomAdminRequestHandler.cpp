@@ -93,7 +93,7 @@ RequestResult RoomAdminRequestHandler::startGame(RequestInfo info)
 		m_room->setGame(m_handlerFactory->getGameManager().createGame(*m_room));
 		newHandle = m_handlerFactory->createGameRequestHandler(m_user, m_room); // pointer to the next handle : Game
 		RoomData data = m_room->getData();
-		data.isActive = ActiveMode::PLAYING;
+		data.isActive = ActiveMode::START_PLAYING;
 		m_room->setData(data);
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(startRes), newHandle };

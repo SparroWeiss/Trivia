@@ -44,6 +44,7 @@ struct
 struct
 {
 	unsigned int answerId;
+	float time;
 }typedef SubmitAnswerRequest;
 
 class JsonRequestPacketDeserializer
