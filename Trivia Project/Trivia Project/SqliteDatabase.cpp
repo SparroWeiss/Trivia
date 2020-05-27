@@ -402,6 +402,11 @@ std::vector<Statistic> SqliteDatabase::getStatistics()
 	return std::vector<Statistic>(_statisticsRows);
 }
 
+/*
+function updates the statistics of the users
+input: the usernames and their data
+output: none
+*/
 void SqliteDatabase::updateStatistics(std::map<std::string, GameData> usersGameData)
 {
 	for (Statistic curr : getStatistics())
@@ -423,7 +428,11 @@ void SqliteDatabase::updateStatistics(std::map<std::string, GameData> usersGameD
 	}
 }
 
-
+/*
+function updates a user's statistics
+input: the statistics of the user
+output: none
+*/
 void SqliteDatabase::updateUserStatistic(Statistic userStatistic)
 {
 	std::string query = "UPDATE STATISTICS SET " + TOTAL_ANSWERS_COLUMN + " = " + std::to_string(userStatistic._totalAnswers) +

@@ -21,7 +21,6 @@ private:
 	LoggedUser m_user;
 	GameManager* m_gameManager;
 	RequestHandlerFactory* m_handlerFactory;
-	clock_t m_startTime;
 
 	RequestResult getQuestion(RequestInfo);
 	RequestResult submitAnswer(RequestInfo);

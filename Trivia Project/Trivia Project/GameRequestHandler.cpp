@@ -72,7 +72,6 @@ RequestResult GameRequestHandler::getQuestion(RequestInfo info)
 	getQuestionRes.answers = current.getPossibleAnswers();
 	getQuestionRes.question = current.getQuestion();
 	getQuestionRes.status = 1;
-	m_startTime = clock();
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(getQuestionRes), this };
 }
 

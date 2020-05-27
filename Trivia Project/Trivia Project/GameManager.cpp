@@ -55,10 +55,9 @@ Game* GameManager::createGame(Room room)
 
 	for (std::string username : room.getAllUsers())
 	{
-		room.removeUser(username);
 		gameUsers.push_back(LoggedUser(username));
 	}
-
+	
 	std::lock_guard<std::mutex> locker(_using_games);
 	m_games.push_back(new Game(gameUsers, newQuestions));
 	return m_games.back();

@@ -1,7 +1,10 @@
 #include "RoomMemberRequestHandler.h"
 #include "Communicator.h"
 
-
+enum LeaveRoomStatus
+{
+	FAILED = 0, LEFT_ROOM, PLAY
+};
 /*
 constructor
 initializes the variables of the object
@@ -52,13 +55,25 @@ output: request result
 RequestResult RoomMemberRequestHandler::leaveRoom(RequestInfo info)
 {
 	IRequestHandler* newHandle = this; // if the leave room request isn't valid, stay in same handler
-	LeaveRoomResponse leaveRoomRes = { 0 }; // status: 0
+	LeaveRoomResponse leaveRoomRes = { LeaveRoomStatus::FAILED }; // status: 0
 	std::unique_lock<std::mutex> locker(_mutex_room);
 	if (m_room->removeUser(m_user.getUsername()))
 	{
+		if (m_room->getData().isActive == ActiveMode::START_PLAYING)
+		{ // if the game has started, the user needs to join the game handler
+			leaveRoomRes = { LeaveRoomStatus::PLAY }; // status: 2
+			newHandle = m_handlerFactory->createGameRequestHandler(m_user, m_room); // pointer to the previous handle : game
+		}
+		else
+		{ // if the game hasn't started yet and the user wants to log out
+			leaveRoomRes = { LeaveRoomStatus::LEFT_ROOM }; // status: 1
+			newHandle = m_handlerFactory->createMenuRequestHandler(m_user.getUsername()); // pointer to the previous handle : menu
+		}
+		if (m_room->getAllUsers().empty())
+		{ // the room is empty
+			m_handlerFactory->getRoomManager().deleteRoom(m_room->getData().id);
+		}
 		locker.unlock();
-		leaveRoomRes = { 1 }; 
-		newHandle = m_handlerFactory->createMenuRequestHandler(m_user.getUsername()); // pointer to the previous handle : menu
 	}
 	else
 		locker.unlock();
