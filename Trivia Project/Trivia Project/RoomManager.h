@@ -16,11 +16,11 @@ public:
 	Room* createRoom(LoggedUser first_user, RoomData data);
 	unsigned int getRoomState(unsigned int id);
 	std::vector<Room*> getRooms();
+	bool deleteRoom(unsigned int id);
 private:
 	RoomManager();
 	static RoomManager* instance;
 	static int instances;
-	void deleteRoom();
 
 	std::map<unsigned int, Room*> m_rooms;
 	unsigned int curr_id;
