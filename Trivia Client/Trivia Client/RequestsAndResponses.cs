@@ -1,13 +1,38 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Trivia_Client
 {
     /**** Communication Structs and Data Types ****/
 
+    public enum Windows
+    {
+        ENTRY,
+        LOGIN,
+        SIGNUP,
+        MENU,
+        CREATE_ROOM,
+        JOIN_ROOM,
+        ROOM,
+        STATISTICS,
+        USER_STATISTICS,
+        HIGH_SCORES
+    }
+
     enum ActiveMode
     {
-        WAITING = 1, PLAYING, DONE
+        WAITING = 1, START_PLAYING, DONE
     }
+
+    enum GameMode
+    {
+        FINISHED = 1, WAITING_FOR_PLAYERS
+    };
+
+    enum PlayerMode
+    {
+        LEFT = 1, PLAYING, WAITING_FOR_RESULTS
+    };
 
     struct RoomData
     {
@@ -17,6 +42,14 @@ namespace Trivia_Client
         public uint timePerQuestion;
         public uint isActive;
         public uint questionCount;
+    }
+
+    struct Question
+    {
+        public uint id;
+        public string question;
+        public uint correct_id;
+        public Dictionary<uint, string> answers;
     }
 
     struct ErrorRes

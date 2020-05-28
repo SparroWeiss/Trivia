@@ -18,6 +18,7 @@ using System.Diagnostics;
 using System.ComponentModel;
 using System.Configuration;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Windows.Threading;
 
 namespace Trivia_Client
 {
@@ -26,27 +27,13 @@ namespace Trivia_Client
     /// </summary>
     public partial class MainWindow : Window
     {
-        public enum Windows
-        {
-            ENTRY,
-            LOGIN,
-            SIGNUP,
-            MENU,
-            CREATE_ROOM,
-            JOIN_ROOM,
-            ROOM,
-            STATISTICS,
-            USER_STATISTICS,
-            HIGH_SCORES
-        }
-
         /*
         Constructor - Initializes _communicator and background workers.
         */
         public MainWindow()
         {
             InitializeComponent();
-
+            /*
             // Setting fields
             _available_rooms_worker.WorkerSupportsCancellation = true;
             _available_rooms_worker.WorkerReportsProgress = true;
@@ -81,7 +68,8 @@ namespace Trivia_Client
                     }
                 }
             _currWindow = Windows.ENTRY;
-            SetEntryWindow();
+            SetEntryWindow();*/
+            SetGameWindow(1, new Question());
         }
 
         /*
@@ -610,6 +598,90 @@ namespace Trivia_Client
             MainGrid.Children.Add(head);
             MainGrid.Children.Add(blocks);
             MainGrid.Children.Add(backButton);
+        }
+
+        private void SetGameWindow(int i, Question currQuestion)
+        {
+            SetWindow(600, 900, true);
+
+            // Creating controls for window
+            Image logo = new Image { Style = (Style)Resources["brightLogo"] };
+            TextBlock gameProgressBlock = new TextBlock
+            {
+                Style = (Style)Resources["brightText"],
+                VerticalAlignment = VerticalAlignment.Top,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Margin = new Thickness(0, 30, 0, 0),
+                FontSize = 40,
+                Height = 60,
+                Text = i.ToString() + "/" + 5.ToString()
+        };
+
+            TextBlock timeBlock = new TextBlock
+            {
+                Style = (Style)Resources["brightText"],
+                VerticalAlignment = VerticalAlignment.Top,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(0, 30, 0, 0),
+                FontSize = 40,
+                Height = 60
+            };
+
+            TextBlock questionBlock = new TextBlock
+            {
+                Style = (Style)Resources["brightText"],
+                Height = 60,
+                Text = "This is some question?",
+                Margin = new Thickness(0, 10, 0, 0),
+                TextWrapping = TextWrapping.Wrap
+            };
+
+            ListBox answersListBox = new ListBox { Style = (Style)Resources["brightListBox"], Width = 810, Height = 300, HorizontalAlignment = HorizontalAlignment.Center };
+            //answersListBox.MouseDoubleClick += new MouseButtonEventHandler((sender, args) => SubmitAnswer(question, ((TextBlock)answersListBox.SelectedItem).Text));
+
+            answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = "Answer 1" + i.ToString(), Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
+            answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = "Answer 2" + i.ToString(), Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
+            answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = "Answer 3" + i.ToString(), Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
+            answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = "Answer 4" + i.ToString(), Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
+
+            Button leaveButton;
+            leaveButton = new Button { Style = (Style)Resources["brightButton"], Content = "Leave Room", VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, 0, 0, 0) };
+            
+            int timeForQue = 10 + 1;
+            timeBlock.Text = (timeForQue - 1).ToString();
+
+            DispatcherTimer timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(1);
+            timer.Tick += (sender, args) =>
+                    {
+                        timeBlock.Text = (timeForQue-1).ToString();
+                        if (timeForQue == 1)
+                        {
+                            timeBlock.Text = "Timeout!";
+                        }
+                        else if (timeForQue == 0)
+                        {
+                            timer.Stop();
+                            if (i < 5)
+                            {
+                                SetGameWindow(i + 1, new Question());
+                            }
+                        }
+                        timeForQue--;
+                    };
+            timer.Start(); // Starting timer for question
+            Thread.Sleep(1500);
+
+            StackPanel head = new StackPanel();
+            head.Children.Add(logo);
+            head.Children.Add(questionBlock);
+            head.Children.Add(answersListBox);
+            head.Children.Add(leaveButton);
+
+            // Adding controls to grid
+            MainGrid.Children.Add(timeBlock);
+            MainGrid.Children.Add(gameProgressBlock);
+            MainGrid.Children.Add(head);
         }
 
         /*

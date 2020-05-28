@@ -324,9 +324,20 @@ namespace Trivia_Client
         */
         public List<RoomData> getAvailableRooms()
         {
+            List<RoomData> availableRooms = new List<RoomData>();
+
             send_data(messageCode.GETROOMSCODE);
             GetRoomsRes result = recv_data<GetRoomsRes>();
-            return result.rooms;
+
+            foreach(RoomData room in result.rooms)
+            {
+                if (room.isActive == (uint)ActiveMode.WAITING)
+                {
+                    availableRooms.Add(room);
+                }
+            }
+
+            return availableRooms;
         }
 
         /*
