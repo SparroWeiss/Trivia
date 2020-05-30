@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Trivia_Client
 {
-    /**** Communication Structs and Data Types ****/
+    /**** Data Types ****/
 
     public enum Windows
     {
@@ -16,8 +16,30 @@ namespace Trivia_Client
         ROOM,
         STATISTICS,
         USER_STATISTICS,
-        HIGH_SCORES
+        HIGH_SCORES,
+        GAME
     }
+
+    enum messageCode
+    {
+        ERRORCODE = 0,
+        SIGNUPCODE,
+        LOGINCODE,
+        SIGNOUTCODE,
+        GETROOMSCODE,
+        GETPLAYERSINROOMCODE,
+        GETSTATISTICSCODE,
+        JOINROOMCODE,
+        CREATEROOMCODE,
+        CLOSEROOMCODE,
+        STARTGAMECODE,
+        GETROOMSTATECODE,
+        LEAVEROOMCODE,
+        GETGAMERESULTSCODE,
+        SUBMITANSWERCODE,
+        GETQUESTIONCODE,
+        LEAVEGAMECODE
+    };
 
     enum ActiveMode
     {
@@ -44,13 +66,15 @@ namespace Trivia_Client
         public uint questionCount;
     }
 
-    struct Question
+    struct PlayerResults
     {
-        public uint id;
-        public string question;
-        public uint correct_id;
-        public Dictionary<uint, string> answers;
+        public string username;
+        public uint correctAnswerCount;
+        public uint wrongAnswerCount;
+        public float averageAnswerTime;
     }
+
+    /**** Communication Structs ****/
 
     struct ErrorRes
     {
@@ -155,5 +179,35 @@ namespace Trivia_Client
     struct LeaveRoomRes
     {
         public uint status;
+    }
+
+    struct SubmitAnswerReq
+    {
+        public uint answerId;
+        public float time;
+    }
+
+    struct SubmitAnswerRes
+    {
+        public uint status;
+        public uint correctAnswerId;
+    }
+
+    struct LeaveGameRes
+    {
+        public uint status;
+    }
+
+    struct GetQuestionRes
+    {
+        public uint status;
+        public string question;
+        public Dictionary<uint, string> answers;
+    }
+
+    struct GetGameResultsRes
+    {
+        public uint status;
+        public List<PlayerResults> results;
     }
 }

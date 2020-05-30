@@ -145,6 +145,7 @@ void Communicator::handleNewClient(SOCKET client_socket)
 			if (m_clients[client_socket] && m_clients[client_socket]->isRequestRelevant(currRequest))
 			{
 				RequestResult currResult = m_clients[client_socket]->handleRequest(currRequest); // deserialize request
+				std::cout << JsonRequestPacketDeserializer::bytesToString(currResult.response) << std::endl;
 				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(currResult.response)); // send serialized response to client
 				if (m_clients[client_socket] != currResult.newHandler)
 				{ // if the handler has changed

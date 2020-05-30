@@ -11,28 +11,12 @@ using Newtonsoft.Json;
 
 namespace Trivia_Client
 {
-    enum messageCode
-    {
-        ERRORCODE = 0,
-        SIGNUPCODE,
-        LOGINCODE,
-        SIGNOUTCODE,
-        GETROOMSCODE,
-        GETPLAYERSINROOMCODE,
-        GETSTATISTICSCODE,
-        JOINROOMCODE,
-        CREATEROOMCODE,
-        CLOSEROOMCODE,
-        STARTGAMECODE,
-        GETROOMSTATECODE,
-        LEAVEROOMCODE
-    };
-
     class Communicator
     {
-        private string SERVER_IP;
-        private int SERVER_PORT;
+        private string _serverIp;
+        private int _serverPort;
         private const string CONFIG_PATH = "config.txt";
+        private Socket _serverSocket;
 
         /*
         constructor:
@@ -48,21 +32,21 @@ namespace Trivia_Client
             {
                 if(line.Contains("port="))
                 {
-                    SERVER_PORT = Int32.Parse(line.Substring(5));
+                    _serverPort = Int32.Parse(line.Substring(5));
                 }
                 else if (line.Contains("server_ip="))
                 {
-                    SERVER_IP = line.Substring(10);
+                    _serverIp = line.Substring(10);
                 }
             }
             file.Close();
 
             _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            IPAddress[] iPs = Dns.GetHostAddresses(SERVER_IP);
+            IPAddress[] iPs = Dns.GetHostAddresses(_serverIp);
 
             try
             {
-                _serverSocket.Connect(iPs, SERVER_PORT);
+                _serverSocket.Connect(iPs, _serverPort);
             }
             catch (Exception)
             {
@@ -133,6 +117,16 @@ namespace Trivia_Client
             if (code[0] == (byte)messageCode.ERRORCODE)
             {
                 throw new Exception(JsonConvert.DeserializeObject<ErrorRes>(System.Text.Encoding.ASCII.GetString(msg)) + " :(");
+            }
+            else if (code[0] == (byte)messageCode.GETQUESTIONCODE)
+            {
+                string message = System.Text.Encoding.ASCII.GetString(msg);
+
+                message = message.Replace("[[", "{").Replace("]]", "}");
+                message = message.Replace("],[", ",");
+                message = message.Replace(",\"", ":\"").Replace("}:\"", "},\"").Replace("\":\"status\"", "\",\"status\"");
+
+                return JsonConvert.DeserializeObject<Res>(message);
             }
 
             return JsonConvert.DeserializeObject<Res>(System.Text.Encoding.ASCII.GetString(msg));
@@ -328,7 +322,7 @@ namespace Trivia_Client
 
             send_data(messageCode.GETROOMSCODE);
             GetRoomsRes result = recv_data<GetRoomsRes>();
-
+            
             foreach(RoomData room in result.rooms)
             {
                 if (room.isActive == (uint)ActiveMode.WAITING)
@@ -347,9 +341,7 @@ namespace Trivia_Client
         */
         public string getRoomAdmin()
         {
-            send_data(messageCode.GETROOMSTATECODE);
-            GetRoomStateRes result = recv_data<GetRoomStateRes>();
-            return result.players[0];
+            return getRoomState().players[0];
         }
 
         /*
@@ -388,6 +380,55 @@ namespace Trivia_Client
             return (result.status == 1);
         }
 
-        private Socket _serverSocket;
+        public bool startGame()
+        {
+            send_data(messageCode.STARTGAMECODE);
+            StartGameRes result = recv_data<StartGameRes>();
+            return (result.status == 1);
+        }
+
+        public uint submitAnswer(uint answer_id, float time)
+        {
+            SubmitAnswerReq submitAnswer;
+            submitAnswer.answerId = answer_id;
+            submitAnswer.time = time;
+
+            send_data(messageCode.SUBMITANSWERCODE, JsonConvert.SerializeObject(submitAnswer));
+            SubmitAnswerRes result = recv_data<SubmitAnswerRes>();
+            if(result.status == 0)
+            {
+                return 0;
+            }
+            return result.correctAnswerId;
+        }
+
+        public List<PlayerResults> getGameResults()
+        {
+            send_data(messageCode.GETGAMERESULTSCODE);
+            GetGameResultsRes result = recv_data<GetGameResultsRes>();
+            if(result.status == 1)
+            {
+                return result.results.OrderBy(o => (1 / o.averageAnswerTime * o.correctAnswerCount / (o.correctAnswerCount + o.wrongAnswerCount))).ToList();
+            }
+            return new List<PlayerResults>();
+        }
+
+        public GetQuestionRes getQuestion()
+        {
+            send_data(messageCode.GETQUESTIONCODE);
+            GetQuestionRes result = recv_data<GetQuestionRes>();
+            if (result.status == 1)
+            {
+                return result;
+            }
+            return new GetQuestionRes();
+        }
+
+        public bool leaveGame()
+        {
+            send_data(messageCode.LEAVEGAMECODE);
+            LeaveGameRes result = recv_data<LeaveGameRes>();
+            return (result.status == 1);
+        }
     }
 }

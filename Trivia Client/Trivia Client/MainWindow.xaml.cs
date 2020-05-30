@@ -20,6 +20,8 @@ using System.Configuration;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows.Threading;
 
+
+using Newtonsoft.Json;
 namespace Trivia_Client
 {
     /// <summary>
@@ -33,7 +35,11 @@ namespace Trivia_Client
         public MainWindow()
         {
             InitializeComponent();
-            /*
+
+            //List<KeyValuePair<uint, string>> test = JsonConvert.DeserializeObject<List<KeyValuePair<uint, string>>>("[[1,\"Five\"],[2,\"Four\"],[3,\"Six\"],[4,\"Eight\"]]");
+            //Dictionary<string, string> test = JsonConvert.DeserializeObject<Dictionary<string, string>>("{'href': '/account/login.aspx','target': '_blank'}");
+            //Dictionary<int, string> test = JsonConvert.DeserializeObject<Dictionary<int, string>>("{1:\"Five\",2:\"Four\",3:\"Six\",4:\"Eight\"}");
+
             // Setting fields
             _available_rooms_worker.WorkerSupportsCancellation = true;
             _available_rooms_worker.WorkerReportsProgress = true;
@@ -68,8 +74,7 @@ namespace Trivia_Client
                     }
                 }
             _currWindow = Windows.ENTRY;
-            SetEntryWindow();*/
-            SetGameWindow(1, new Question());
+            SetEntryWindow();
         }
 
         /*
@@ -458,7 +463,7 @@ namespace Trivia_Client
             {
                 startButton = new Button { Style = (Style)Resources["brightButton"], Content = "Start Game", Margin = new Thickness(0, 0, 40, 30),
                     HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Bottom};
-                //startButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick()); // for now no start game option
+                startButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.GAME));
 
                 closeButton = new Button { Style = (Style)Resources["brightButton"], Content = "Close Room", Margin = new Thickness(40, 0, 0, 30),
                     HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Bottom };
@@ -600,9 +605,13 @@ namespace Trivia_Client
             MainGrid.Children.Add(backButton);
         }
 
-        private void SetGameWindow(int i, Question currQuestion)
+        private void SetGameWindow(uint currQuestionNum, uint questionAmount, uint timeForQue, string question, Dictionary<uint, string> answers)
         {
             SetWindow(600, 900, true);
+
+            uint timePerQuestion = timeForQue;
+            DispatcherTimer timer = new DispatcherTimer();
+            uint selectedId = 0, currTime = timePerQuestion;
 
             // Creating controls for window
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
@@ -614,12 +623,13 @@ namespace Trivia_Client
                 Margin = new Thickness(0, 30, 0, 0),
                 FontSize = 40,
                 Height = 60,
-                Text = i.ToString() + "/" + 5.ToString()
-        };
+                Text = currQuestionNum.ToString() + "/" + questionAmount.ToString()
+            };
 
             TextBlock timeBlock = new TextBlock
             {
                 Style = (Style)Resources["brightText"],
+                Text = (++timeForQue - 1).ToString(),
                 VerticalAlignment = VerticalAlignment.Top,
                 HorizontalAlignment = HorizontalAlignment.Right,
                 Margin = new Thickness(0, 30, 0, 0),
@@ -631,26 +641,44 @@ namespace Trivia_Client
             {
                 Style = (Style)Resources["brightText"],
                 Height = 60,
-                Text = "This is some question?",
+                Width = 790,
+                Text = question,
                 Margin = new Thickness(0, 10, 0, 0),
                 TextWrapping = TextWrapping.Wrap
             };
 
-            ListBox answersListBox = new ListBox { Style = (Style)Resources["brightListBox"], Width = 810, Height = 300, HorizontalAlignment = HorizontalAlignment.Center };
-            //answersListBox.MouseDoubleClick += new MouseButtonEventHandler((sender, args) => SubmitAnswer(question, ((TextBlock)answersListBox.SelectedItem).Text));
+            int[] indexs = { 0, 1, 2, 3 };
+            Random r = new Random();
+            indexs = indexs.OrderBy(x => r.Next()).ToArray();
 
-            answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = "Answer 1" + i.ToString(), Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
-            answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = "Answer 2" + i.ToString(), Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
-            answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = "Answer 3" + i.ToString(), Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
-            answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = "Answer 4" + i.ToString(), Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
+            ListBox answersListBox = new ListBox { Style = (Style)Resources["brightListBox"], Width = 810, Height = 300, HorizontalAlignment = HorizontalAlignment.Center };
+            answersListBox.MouseUp += (sender, args) =>
+                {
+                    if (timeForQue > 1)
+                    {
+                        for (int i = 0; i < 4; i++)
+                        {
+                            if (((TextBlock)answersListBox.SelectedItem).Text == answers.ElementAt(i).Value)
+                            {
+                                selectedId = answers.ElementAt(i).Key;
+                                break;
+                            }
+                        }
+                        currTime = timePerQuestion - timeForQue;
+                        timeForQue = 1;
+                    }
+                };
+
+            
+            answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = answers.ElementAt(indexs[0]).Value, Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
+            answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = answers.ElementAt(indexs[1]).Value, Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
+            answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = answers.ElementAt(indexs[2]).Value, Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
+            answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = answers.ElementAt(indexs[3]).Value, Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
 
             Button leaveButton;
-            leaveButton = new Button { Style = (Style)Resources["brightButton"], Content = "Leave Room", VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, 0, 0, 0) };
-            
-            int timeForQue = 10 + 1;
-            timeBlock.Text = (timeForQue - 1).ToString();
+            leaveButton = new Button { Style = (Style)Resources["brightButton"], Content = "Leave Game", VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, 0, 0, 0) };
+            leaveButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU));
 
-            DispatcherTimer timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(1);
             timer.Tick += (sender, args) =>
                     {
@@ -658,16 +686,38 @@ namespace Trivia_Client
                         if (timeForQue == 1)
                         {
                             timeBlock.Text = "Timeout!";
+                            _using_communicator.WaitOne();
+                            uint correctAnswerId = _communicator.submitAnswer(selectedId, currTime);
+                            _using_communicator.ReleaseMutex();
+                           
+                            for(int i = 0; i < 4; i++)
+                            {
+                                if(((TextBlock)answersListBox.Items[i]).Text == answers.ElementAt(0).Value)
+                                {
+                                    ((TextBlock)answersListBox.Items[i]).Background = new SolidColorBrush(Colors.LightGreen);
+                                }
+                            }
+                            if(selectedId != 0)
+                            {
+                                timeBlock.Text = (timePerQuestion - currTime).ToString();
+                                timeForQue--;
+                            }
                         }
                         else if (timeForQue == 0)
                         {
                             timer.Stop();
-                            if (i < 5)
+                            if (currQuestionNum < questionAmount && _currWindow == Windows.GAME)
                             {
-                                SetGameWindow(i + 1, new Question());
+                                _using_communicator.WaitOne();
+                                GetQuestionRes nextQuestion = _communicator.getQuestion();
+                                _using_communicator.ReleaseMutex();
+                                SetGameWindow(currQuestionNum + 1, questionAmount, timePerQuestion,  nextQuestion.question, nextQuestion.answers);
                             }
                         }
-                        timeForQue--;
+                        if(timeForQue != 0 && selectedId == 0)
+                        {
+                            timeForQue--;
+                        }
                     };
             timer.Start(); // Starting timer for question
             Thread.Sleep(1500);
@@ -828,6 +878,21 @@ namespace Trivia_Client
                             _currWindow = Windows.MENU;
                             SetMenuWindow();
                         }
+                        else if (_currWindow == Windows.GAME)
+                        {
+                            _using_communicator.WaitOne();
+                            bool isLeftGame = _communicator.leaveGame();
+                            _using_communicator.ReleaseMutex();
+
+                            if (!isLeftGame)
+                            {
+                                MessageBoxResult result = MessageBox.Show("Failed to leave game", "Trivia",
+                                    MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                                break;
+                            }
+                            _currWindow = Windows.MENU;
+                            SetMenuWindow();
+                        }
                         else
                         {
                             _currWindow = Windows.MENU;
@@ -945,6 +1010,25 @@ namespace Trivia_Client
                         }
                         break;
 
+                    case Windows.GAME:
+                        _currWindow = Windows.GAME;
+                        _using_communicator.WaitOne();
+                        GetRoomStateRes roomState = _communicator.getRoomState();
+                        bool started = _communicator.startGame();
+                        _using_communicator.ReleaseMutex();
+
+                        if(!started)
+                        {
+                            _currWindow = Windows.ROOM;
+                            MessageBoxResult result = MessageBox.Show("Faild to start game :( \nTry again.", "Trivia",
+                                MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
+                            break;
+                        }
+                        _using_communicator.WaitOne();
+                        GetQuestionRes firstQuestion = _communicator.getQuestion();
+                        _using_communicator.ReleaseMutex();
+                        SetGameWindow(1, roomState.questionCount, roomState.answerTimeout, firstQuestion.question, firstQuestion.answers);
+                        break;
                     default:
                         break;
                 }
@@ -1066,6 +1150,16 @@ namespace Trivia_Client
                 args.Item2.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // Clicks the 'leaveButton' button and performs leave request
                 MessageBoxResult result = MessageBox.Show("Admin closed the room :(", "Trivia",
                     MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                return;
+            }
+            else if(args.Item4.status == (uint)ActiveMode.START_PLAYING && !args.Item3)
+            {   
+                _using_communicator.WaitOne();
+                _communicator.leaveRoom();
+                GetQuestionRes firstQuestion = _communicator.getQuestion();
+                _using_communicator.ReleaseMutex();
+                _currWindow = Windows.GAME;
+                SetGameWindow(1, args.Item4.questionCount, args.Item4.answerTimeout, firstQuestion.question, firstQuestion.answers);
                 return;
             }
 
