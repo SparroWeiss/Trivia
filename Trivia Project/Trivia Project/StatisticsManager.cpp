@@ -60,10 +60,22 @@ StatisticsData StatisticsManager::getStatistics(std::string name)
 }
 
 ////////////////////////////////////////////////////////HELPER
-bool sortByVal(const std::pair<std::string, float>& a,
-	const std::pair<std::string, int>& b)
+std::vector<std::pair<std::string, float>> sortByVal(std::vector<std::pair<std::string, float>> ranks)
 {
-	return (a.second > b.second);
+	int size = ranks.size();
+	for (int i = 0; i < size; i++)
+	{
+		for (int j = 0; j < size; j++)
+		{
+			if (ranks[i].second > ranks[j].second )
+			{
+				std::pair<std::string, float> temp = ranks[i];
+				ranks[i] = ranks[j];
+				ranks[j] = temp;
+			}
+		}
+	}
+	return ranks;
 }
 /*
 function gets the top logged in players in the server
@@ -81,13 +93,13 @@ void StatisticsManager::getTopPlayers(StatisticsData& data)
 		
 		if ((*i)._totalAnswers)
 		{
-			score /= (*i)._totalAnswers;
-			score /= m_database->getPlayerAverageAnswerTime(name);
+			score = score / (*i)._totalAnswers;
+			score = score / m_database->getPlayerAverageAnswerTime(name);
 		}
 		ranks.push_back({ name, score });
 		// score value = (CorrectAns/TotalAns) / AverageTimePerAns
 	}
-	std::sort(ranks.begin(), ranks.end(), sortByVal); // sorts the vector by the score
+	ranks = sortByVal(ranks);
 	for (int i = 0; i < ranks.size() && i < TOP_PLAYERS; i++)
 	{
 		data._topPlayers.push_back(ranks[i].first); // insert the first five to the data variables

@@ -19,9 +19,8 @@ using System.ComponentModel;
 using System.Configuration;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows.Threading;
-
-
 using Newtonsoft.Json;
+
 namespace Trivia_Client
 {
     /// <summary>
