@@ -51,6 +51,11 @@ namespace Trivia_Client
             _room_state_worker.DoWork += checkRoomState;
             _room_state_worker.ProgressChanged += update_room_window;
 
+            _game_results_worker.WorkerSupportsCancellation = true;
+            _game_results_worker.WorkerReportsProgress = true;
+            _game_results_worker.DoWork += checkForGameResults;
+            _game_results_worker.ProgressChanged += update_game_results_window;
+
             _using_communicator = new Mutex();
 
             // Creating connection with server
@@ -605,7 +610,7 @@ namespace Trivia_Client
             MainGrid.Children.Add(backButton);
         }
 
-        private void SetGameWindow(uint currQuestionNum, uint questionAmount, uint timeForQue, string question, Dictionary<uint, string> answers)
+        private void SetGameWindow(uint currQuestionNum, uint questionAmount, uint correctAnswers, uint timeForQue, string question, Dictionary<uint, string> answers)
         {
             SetWindow(600, 900, true);
 
@@ -621,9 +626,8 @@ namespace Trivia_Client
                 VerticalAlignment = VerticalAlignment.Top,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Margin = new Thickness(0, 30, 0, 0),
-                FontSize = 40,
                 Height = 60,
-                Text = currQuestionNum.ToString() + "/" + questionAmount.ToString()
+                Text = "Game Progress: " + currQuestionNum.ToString() + "/" + questionAmount.ToString() + "\nCorrect Answers: " + correctAnswers.ToString()
             };
 
             TextBlock timeBlock = new TextBlock
@@ -664,7 +668,7 @@ namespace Trivia_Client
                                 break;
                             }
                         }
-                        currTime = timePerQuestion - timeForQue;
+                        currTime -= (timeForQue-1);
                         timeForQue = 1;
                     }
                 };
@@ -701,6 +705,11 @@ namespace Trivia_Client
                             {
                                 timeBlock.Text = (timePerQuestion - currTime).ToString();
                                 timeForQue--;
+
+                                if (correctAnswerId == selectedId)
+                                {
+                                    correctAnswers++;
+                                }
                             }
                         }
                         else if (timeForQue == 0)
@@ -711,7 +720,11 @@ namespace Trivia_Client
                                 _using_communicator.WaitOne();
                                 GetQuestionRes nextQuestion = _communicator.getQuestion();
                                 _using_communicator.ReleaseMutex();
-                                SetGameWindow(currQuestionNum + 1, questionAmount, timePerQuestion,  nextQuestion.question, nextQuestion.answers);
+                                SetGameWindow(currQuestionNum + 1, questionAmount, correctAnswers, timePerQuestion,  nextQuestion.question, nextQuestion.answers);
+                            }
+                            else if (_currWindow == Windows.GAME)
+                            {
+                                SetGameResultsWindow();
                             }
                         }
                         if(timeForQue != 0 && selectedId == 0)
@@ -732,6 +745,42 @@ namespace Trivia_Client
             MainGrid.Children.Add(timeBlock);
             MainGrid.Children.Add(gameProgressBlock);
             MainGrid.Children.Add(head);
+        }
+
+        private void SetGameResultsWindow()
+        {
+            SetWindow(600, 500, true);
+
+            // Creating controls for window
+            Image logo = new Image { Style = (Style)Resources["brightLogo"] };
+            TextBlock waitingBlock = new TextBlock
+            {
+                Style = (Style)Resources["brightText"],
+                VerticalAlignment = VerticalAlignment.Top,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Margin = new Thickness(0, 30, 0, 0),
+                FontSize = 40,
+                Height = 120,
+                Width = 450,
+                TextWrapping = TextWrapping.Wrap,
+                Text = "Waiting for other players to finish... :)"
+            };
+            ListBox resultsListBox = new ListBox { Style = (Style)Resources["brightListBox"], Width = 450, Height = 250 };
+
+            Button backButton = new Button { Style = (Style)Resources["brightButton"], Content = "Back to Menu" };
+            backButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU));
+
+            StackPanel head = new StackPanel();
+            head.Children.Add(logo);
+            head.Children.Add(waitingBlock);
+            head.Children.Add(resultsListBox);
+            head.Children.Add(backButton);
+
+            // Adding controls to grid
+            MainGrid.Children.Add(head);
+
+            // Activating background worker
+            _game_results_worker.RunWorkerAsync(argument: new Tuple<StackPanel, TextBlock, ListBox>(head, waitingBlock, resultsListBox));
         }
 
         /*
@@ -1027,7 +1076,7 @@ namespace Trivia_Client
                         _using_communicator.WaitOne();
                         GetQuestionRes firstQuestion = _communicator.getQuestion();
                         _using_communicator.ReleaseMutex();
-                        SetGameWindow(1, roomState.questionCount, roomState.answerTimeout, firstQuestion.question, firstQuestion.answers);
+                        SetGameWindow(1, roomState.questionCount, 0, roomState.answerTimeout, firstQuestion.question, firstQuestion.answers);
                         break;
                     default:
                         break;
@@ -1159,7 +1208,7 @@ namespace Trivia_Client
                 GetQuestionRes firstQuestion = _communicator.getQuestion();
                 _using_communicator.ReleaseMutex();
                 _currWindow = Windows.GAME;
-                SetGameWindow(1, args.Item4.questionCount, args.Item4.answerTimeout, firstQuestion.question, firstQuestion.answers);
+                SetGameWindow(1, args.Item4.questionCount, 0, args.Item4.answerTimeout, firstQuestion.question, firstQuestion.answers);
                 return;
             }
 
@@ -1171,11 +1220,74 @@ namespace Trivia_Client
             }
         }
 
+        /*
+        This function is the 'DoWork' function of '_game_results_worker',
+         and it keeps checking for the current game's results, by communicating the server.
+        Input: sender, e - the event's args - including ui elements sent from sender
+        Output: none
+        */
+        private void checkForGameResults(object sender, DoWorkEventArgs e)
+        {
+            try
+            {
+                List<PlayerResults> gameResults;
+
+                Tuple<StackPanel, TextBlock, ListBox> tmp = (Tuple<StackPanel, TextBlock, ListBox>)e.Argument;
+
+                while (true)
+                {
+                    _using_communicator.WaitOne();
+                    gameResults = _communicator.getGameResults();
+                    _using_communicator.ReleaseMutex();
+
+                    if (gameResults.Count() > 0)
+                    {
+                        Tuple<StackPanel, TextBlock, ListBox, List<PlayerResults>> args =
+                            new Tuple<StackPanel, TextBlock, ListBox, List<PlayerResults>>(tmp.Item1, tmp.Item2, tmp.Item3, gameResults);
+
+                        _game_results_worker.ReportProgress(0, args);
+                        break;
+                    }
+                    
+                    System.Threading.Thread.Sleep(1000); // Checks every second
+
+                    if (_currWindow != Windows.GAME) // Works only if the user is in a game
+                    {
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _using_communicator.ReleaseMutex();
+                MessageBoxResult result = MessageBox.Show(ex.Message, "Trivia",
+                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
+            }
+        }
+
+        /*
+        This function is the 'ProgressChanged' function of '_game_results_worker',
+         and it updates the ui, by updating the players list.
+        Input: sender, e - the event's args - including ui elements sent from sender
+        Output: none
+        */
+        private void update_game_results_window(object sender, ProgressChangedEventArgs e)
+        {
+            Tuple<StackPanel, TextBlock, ListBox, List<PlayerResults>> args = (Tuple<StackPanel, TextBlock, ListBox, List<PlayerResults>>)e.UserState;
+
+            args.Item1.Children.Remove(args.Item2);
+            foreach (PlayerResults p in args.Item4)
+            {
+                args.Item3.Items.Add(p.username + ": " + (1 / p.averageAnswerTime * p.correctAnswerCount / (p.correctAnswerCount + p.wrongAnswerCount) * 100).ToString());
+            }
+        }
+
         private string _username;
         private Windows _currWindow;
         private Communicator _communicator;
         private BackgroundWorker _available_rooms_worker = new BackgroundWorker();
         private BackgroundWorker _room_state_worker = new BackgroundWorker();
+        private BackgroundWorker _game_results_worker = new BackgroundWorker();
         Mutex _using_communicator;
     }
 }

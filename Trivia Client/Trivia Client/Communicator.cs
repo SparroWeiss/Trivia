@@ -406,9 +406,11 @@ namespace Trivia_Client
         {
             send_data(messageCode.GETGAMERESULTSCODE);
             GetGameResultsRes result = recv_data<GetGameResultsRes>();
-            if(result.status == 1)
+            if(result.status == (uint)GameMode.FINISHED)
             {
-                return result.results.OrderBy(o => (1 / o.averageAnswerTime * o.correctAnswerCount / (o.correctAnswerCount + o.wrongAnswerCount))).ToList();
+                List<PlayerResults> results = result.results.OrderBy(o => (1 / o.averageAnswerTime * o.correctAnswerCount / (o.correctAnswerCount + o.wrongAnswerCount))).ToList();
+                results.Reverse();
+                return results;
             }
             return new List<PlayerResults>();
         }

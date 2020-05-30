@@ -421,8 +421,8 @@ void SqliteDatabase::updateStatistics(std::map<std::string, GameData> usersGameD
 					curr._totalAnswers+gameQuestions,
 					curr._correctAnswers + static_cast<int>(player.second.correctAnswersCount),
 					curr._numOfGames+1,
-					static_cast<int>((curr._answersTime*curr._totalAnswers + player.second.averageAnswerTime*gameQuestions)
-					/ curr._totalAnswers + gameQuestions) });
+					static_cast<float>((curr._answersTime*curr._totalAnswers + player.second.averageAnswerTime*gameQuestions)
+					/ (curr._totalAnswers + gameQuestions)) });
 			}
 		}
 	}
@@ -439,7 +439,7 @@ void SqliteDatabase::updateUserStatistic(Statistic userStatistic)
 		", " + CORRECT_ANSWERS_COLUMN + " = " + std::to_string(userStatistic._correctAnswers) + ", " +
 		NUM_OF_GAMES_COLUMN + " = " + std::to_string(userStatistic._numOfGames) + ", " +
 		ANSWERS_TIME_COLUMN + " = " + std::to_string(userStatistic._answersTime) +
-		" WHERE " + NAME_COLUMN + " = " + userStatistic._name + ";";
+		" WHERE " + NAME_COLUMN + " = '" + userStatistic._name + "';";
 
 	std::lock_guard<std::mutex>locker(_using_db);
 	sqlite3_exec(_db, query.c_str(), nullptr, nullptr, nullptr);

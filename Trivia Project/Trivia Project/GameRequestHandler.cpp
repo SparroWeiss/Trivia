@@ -107,7 +107,7 @@ RequestResult GameRequestHandler::getGameResults(RequestInfo info)
 
 	for (std::map<std::string, GameData>::iterator i = results.begin(); i != results.end(); ++i)
 	{
-		if (i->second.playing)
+		if (i->second.playing == PlayerMode::PLAYING)
 		{
 			getGameRes.status == GameMode::WAITING_FOR_PLAYERS;
 		}

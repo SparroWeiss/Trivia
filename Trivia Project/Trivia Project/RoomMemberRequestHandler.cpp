@@ -62,7 +62,7 @@ RequestResult RoomMemberRequestHandler::leaveRoom(RequestInfo info)
 		if (m_room->getData().isActive == ActiveMode::START_PLAYING)
 		{ // if the game has started, the user needs to join the game handler
 			leaveRoomRes = { LeaveRoomStatus::PLAY }; // status: 2
-			newHandle = m_handlerFactory->createGameRequestHandler(m_user, m_room); // pointer to the previous handle : game
+			newHandle = m_handlerFactory->createGameRequestHandler(m_user, m_room); // pointer to the next handle : game
 		}
 		else
 		{ // if the game hasn't started yet and the user wants to log out
