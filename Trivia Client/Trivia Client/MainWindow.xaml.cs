@@ -20,6 +20,7 @@ using System.Configuration;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows.Threading;
 using Newtonsoft.Json;
+using System.Windows.Controls.Primitives;
 
 namespace Trivia_Client
 {
@@ -686,50 +687,54 @@ namespace Trivia_Client
             timer.Tick += (sender, args) =>
                     {
                         timeBlock.Text = (timeForQue-1).ToString();
-                        if (timeForQue == 1)
+                        if (_currWindow == Windows.GAME)
                         {
-                            timeBlock.Text = "Timeout!";
-                            _using_communicator.WaitOne();
-                            uint correctAnswerId = _communicator.submitAnswer(selectedId, currTime);
-                            _using_communicator.ReleaseMutex();
-                           
-                            for(int i = 0; i < 4; i++)
+                            if (timeForQue == 1)
                             {
-                                if(((TextBlock)answersListBox.Items[i]).Text == answers.ElementAt(0).Value)
-                                {
-                                    ((TextBlock)answersListBox.Items[i]).Background = new SolidColorBrush(Colors.LightGreen);
-                                }
-                            }
-                            if(selectedId != 0)
-                            {
-                                timeBlock.Text = (timePerQuestion - currTime).ToString();
-                                timeForQue--;
-
-                                if (correctAnswerId == selectedId)
-                                {
-                                    correctAnswers++;
-                                }
-                            }
-                        }
-                        else if (timeForQue == 0)
-                        {
-                            timer.Stop();
-                            if (currQuestionNum < questionAmount && _currWindow == Windows.GAME)
-                            {
+                                timeBlock.Text = "Timeout!";
                                 _using_communicator.WaitOne();
-                                GetQuestionRes nextQuestion = _communicator.getQuestion();
+                                uint correctAnswerId = _communicator.submitAnswer(selectedId, currTime);
                                 _using_communicator.ReleaseMutex();
-                                SetGameWindow(currQuestionNum + 1, questionAmount, correctAnswers, timePerQuestion,  nextQuestion.question, nextQuestion.answers);
+
+                                for (int i = 0; i < 4; i++)
+                                {
+                                    if (((TextBlock)answersListBox.Items[i]).Text == answers.ElementAt(0).Value)
+                                    {
+                                        ((TextBlock)answersListBox.Items[i]).Background = new SolidColorBrush(Colors.LightGreen);
+                                    }
+                                }
+                                if (selectedId != 0)
+                                {
+                                    timeBlock.Text = (timePerQuestion - currTime).ToString();
+                                    timeForQue--;
+
+                                    if (correctAnswerId == selectedId)
+                                    {
+                                        correctAnswers++;
+                                    }
+                                }
                             }
-                            else if (_currWindow == Windows.GAME)
+                            else if (timeForQue == 0)
                             {
-                                SetGameResultsWindow();
+                                timer.Stop();
+                                if (currQuestionNum < questionAmount)
+                                {
+                                    _using_communicator.WaitOne();
+                                    GetQuestionRes nextQuestion = _communicator.getQuestion();
+                                    _using_communicator.ReleaseMutex();
+                                    SetGameWindow(currQuestionNum + 1, questionAmount, correctAnswers, timePerQuestion, nextQuestion.question, nextQuestion.answers);
+                                }
+                                else
+                                {
+                                    SetGameResultsWindow();
+                                }
+                            }
+                            if (timeForQue != 0 && selectedId == 0)
+                            {
+                                timeForQue--;
                             }
                         }
-                        if(timeForQue != 0 && selectedId == 0)
-                        {
-                            timeForQue--;
-                        }
+                       
                     };
             timer.Start(); // Starting timer for question
             Thread.Sleep(1500);

@@ -392,7 +392,7 @@ namespace Trivia_Client
             SubmitAnswerReq submitAnswer;
             submitAnswer.answerId = answer_id;
             submitAnswer.time = time;
-
+            
             send_data(messageCode.SUBMITANSWERCODE, JsonConvert.SerializeObject(submitAnswer));
             SubmitAnswerRes result = recv_data<SubmitAnswerRes>();
             if(result.status == 0)
