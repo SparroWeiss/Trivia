@@ -658,7 +658,7 @@ namespace Trivia_Client
             ListBox answersListBox = new ListBox { Style = (Style)Resources["brightListBox"], Width = 810, Height = 300, HorizontalAlignment = HorizontalAlignment.Center };
             answersListBox.MouseUp += (sender, args) =>
                 {
-                    if (timeForQue > 1)
+                    if (timeForQue > 1 && answersListBox.SelectedItem != null)
                     {
                         for (int i = 0; i < 4; i++)
                         {
