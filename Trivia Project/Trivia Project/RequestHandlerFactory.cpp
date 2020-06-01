@@ -11,6 +11,7 @@ RequestHandlerFactory::RequestHandlerFactory()
 	m_loginManager = m_loginManager->getInstance();
 	m_roomManager = m_roomManager->getInstance();
 	m_statisticsManager = m_statisticsManager->getInstance();
+	m_gameManager = m_gameManager->getInstance();
 }
 
 /*

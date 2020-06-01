@@ -115,7 +115,7 @@ Output: none
 */
 void to_json(json& j, const SubmitAnswerRequest& submit_answer)
 {
-	j = { {"answerId", submit_answer.answerId} };
+	j = { {"answerId", submit_answer.answerId}, {"time", submit_answer.time} };
 }
 /*
 This is a helper function that enables direct assignment from 'json' to 'SubmitAnswerRequest'.
@@ -125,6 +125,7 @@ Output: none
 void from_json(const json& j, SubmitAnswerRequest& submit_answer)
 {
 	j.at("answerId").get_to(submit_answer.answerId);
+	j.at("time").get_to(submit_answer.time);
 }
 
 /******************** Class Methods ********************/

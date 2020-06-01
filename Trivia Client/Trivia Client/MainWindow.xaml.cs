@@ -18,6 +18,8 @@ using System.Diagnostics;
 using System.ComponentModel;
 using System.Configuration;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Windows.Threading;
+using Newtonsoft.Json;
 
 namespace Trivia_Client
 {
@@ -26,26 +28,16 @@ namespace Trivia_Client
     /// </summary>
     public partial class MainWindow : Window
     {
-        public enum Windows
-        {
-            ENTRY,
-            LOGIN,
-            SIGNUP,
-            MENU,
-            CREATE_ROOM,
-            JOIN_ROOM,
-            ROOM,
-            STATISTICS,
-            USER_STATISTICS,
-            HIGH_SCORES
-        }
-
         /*
         Constructor - Initializes _communicator and background workers.
         */
         public MainWindow()
         {
             InitializeComponent();
+
+            //List<KeyValuePair<uint, string>> test = JsonConvert.DeserializeObject<List<KeyValuePair<uint, string>>>("[[1,\"Five\"],[2,\"Four\"],[3,\"Six\"],[4,\"Eight\"]]");
+            //Dictionary<string, string> test = JsonConvert.DeserializeObject<Dictionary<string, string>>("{'href': '/account/login.aspx','target': '_blank'}");
+            //Dictionary<int, string> test = JsonConvert.DeserializeObject<Dictionary<int, string>>("{1:\"Five\",2:\"Four\",3:\"Six\",4:\"Eight\"}");
 
             // Setting fields
             _available_rooms_worker.WorkerSupportsCancellation = true;
@@ -57,6 +49,11 @@ namespace Trivia_Client
             _room_state_worker.WorkerReportsProgress = true;
             _room_state_worker.DoWork += checkRoomState;
             _room_state_worker.ProgressChanged += update_room_window;
+
+            _game_results_worker.WorkerSupportsCancellation = true;
+            _game_results_worker.WorkerReportsProgress = true;
+            _game_results_worker.DoWork += checkForGameResults;
+            _game_results_worker.ProgressChanged += update_game_results_window;
 
             _using_communicator = new Mutex();
 
@@ -470,7 +467,7 @@ namespace Trivia_Client
             {
                 startButton = new Button { Style = (Style)Resources["brightButton"], Content = "Start Game", Margin = new Thickness(0, 0, 40, 30),
                     HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Bottom};
-                //startButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick()); // for now no start game option
+                startButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.GAME));
 
                 closeButton = new Button { Style = (Style)Resources["brightButton"], Content = "Close Room", Margin = new Thickness(40, 0, 0, 30),
                     HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Bottom };
@@ -610,6 +607,179 @@ namespace Trivia_Client
             MainGrid.Children.Add(head);
             MainGrid.Children.Add(blocks);
             MainGrid.Children.Add(backButton);
+        }
+
+        private void SetGameWindow(uint currQuestionNum, uint questionAmount, uint correctAnswers, uint timeForQue, string question, Dictionary<uint, string> answers)
+        {
+            SetWindow(600, 900, true);
+
+            uint timePerQuestion = timeForQue;
+            DispatcherTimer timer = new DispatcherTimer();
+            uint selectedId = 0, currTime = timePerQuestion;
+
+            // Creating controls for window
+            Image logo = new Image { Style = (Style)Resources["brightLogo"] };
+            TextBlock gameProgressBlock = new TextBlock
+            {
+                Style = (Style)Resources["brightText"],
+                VerticalAlignment = VerticalAlignment.Top,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Margin = new Thickness(0, 30, 0, 0),
+                Height = 60,
+                Text = "Game Progress: " + currQuestionNum.ToString() + "/" + questionAmount.ToString() + "\nCorrect Answers: " + correctAnswers.ToString()
+            };
+
+            TextBlock timeBlock = new TextBlock
+            {
+                Style = (Style)Resources["brightText"],
+                Text = (++timeForQue - 1).ToString(),
+                VerticalAlignment = VerticalAlignment.Top,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(0, 30, 0, 0),
+                FontSize = 40,
+                Height = 60
+            };
+
+            TextBlock questionBlock = new TextBlock
+            {
+                Style = (Style)Resources["brightText"],
+                Height = 60,
+                Width = 790,
+                Text = question,
+                Margin = new Thickness(0, 10, 0, 0),
+                TextWrapping = TextWrapping.Wrap
+            };
+
+            int[] indexs = { 0, 1, 2, 3 };
+            Random r = new Random();
+            indexs = indexs.OrderBy(x => r.Next()).ToArray();
+
+            ListBox answersListBox = new ListBox { Style = (Style)Resources["brightListBox"], Width = 810, Height = 300, HorizontalAlignment = HorizontalAlignment.Center };
+            answersListBox.MouseUp += (sender, args) =>
+                {
+                    if (timeForQue > 1 && answersListBox.SelectedItem != null)
+                    {
+                        for (int i = 0; i < 4; i++)
+                        {
+                            if (((TextBlock)answersListBox.SelectedItem).Text == answers.ElementAt(i).Value)
+                            {
+                                selectedId = answers.ElementAt(i).Key;
+                                break;
+                            }
+                        }
+                        currTime -= (timeForQue-1);
+                        timeForQue = 1;
+                    }
+                };
+
+            
+            answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = answers.ElementAt(indexs[0]).Value, Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
+            answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = answers.ElementAt(indexs[1]).Value, Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
+            answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = answers.ElementAt(indexs[2]).Value, Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
+            answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = answers.ElementAt(indexs[3]).Value, Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
+
+            Button leaveButton;
+            leaveButton = new Button { Style = (Style)Resources["brightButton"], Content = "Leave Game", VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, 0, 0, 0) };
+            leaveButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU));
+
+            timer.Interval = TimeSpan.FromSeconds(1);
+            timer.Tick += (sender, args) =>
+                    {
+                        timeBlock.Text = (timeForQue-1).ToString();
+                        if (timeForQue == 1)
+                        {
+                            timeBlock.Text = "Timeout!";
+                            _using_communicator.WaitOne();
+                            uint correctAnswerId = _communicator.submitAnswer(selectedId, currTime);
+                            _using_communicator.ReleaseMutex();
+                           
+                            for(int i = 0; i < 4; i++)
+                            {
+                                if(((TextBlock)answersListBox.Items[i]).Text == answers.ElementAt(0).Value)
+                                {
+                                    ((TextBlock)answersListBox.Items[i]).Background = new SolidColorBrush(Colors.LightGreen);
+                                }
+                            }
+                            if(selectedId != 0)
+                            {
+                                timeBlock.Text = (timePerQuestion - currTime).ToString();
+                                timeForQue--;
+
+                                if (correctAnswerId == selectedId)
+                                {
+                                    correctAnswers++;
+                                }
+                            }
+                        }
+                        else if (timeForQue == 0)
+                        {
+                            timer.Stop();
+                            if (currQuestionNum < questionAmount && _currWindow == Windows.GAME)
+                            {
+                                _using_communicator.WaitOne();
+                                GetQuestionRes nextQuestion = _communicator.getQuestion();
+                                _using_communicator.ReleaseMutex();
+                                SetGameWindow(currQuestionNum + 1, questionAmount, correctAnswers, timePerQuestion,  nextQuestion.question, nextQuestion.answers);
+                            }
+                            else if (_currWindow == Windows.GAME)
+                            {
+                                SetGameResultsWindow();
+                            }
+                        }
+                        if(timeForQue != 0 && selectedId == 0)
+                        {
+                            timeForQue--;
+                        }
+                    };
+            timer.Start(); // Starting timer for question
+            Thread.Sleep(1500);
+
+            StackPanel head = new StackPanel();
+            head.Children.Add(logo);
+            head.Children.Add(questionBlock);
+            head.Children.Add(answersListBox);
+            head.Children.Add(leaveButton);
+
+            // Adding controls to grid
+            MainGrid.Children.Add(timeBlock);
+            MainGrid.Children.Add(gameProgressBlock);
+            MainGrid.Children.Add(head);
+        }
+
+        private void SetGameResultsWindow()
+        {
+            SetWindow(600, 500, true);
+
+            // Creating controls for window
+            Image logo = new Image { Style = (Style)Resources["brightLogo"] };
+            TextBlock waitingBlock = new TextBlock
+            {
+                Style = (Style)Resources["brightText"],
+                VerticalAlignment = VerticalAlignment.Top,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Margin = new Thickness(0, 30, 0, 0),
+                FontSize = 40,
+                Height = 120,
+                Width = 450,
+                TextWrapping = TextWrapping.Wrap,
+                Text = "Waiting for other players to finish... :)"
+            };
+            ListBox resultsListBox = new ListBox { Style = (Style)Resources["brightListBox"], Width = 450, Height = 250 };
+
+            Button backButton = new Button { Style = (Style)Resources["brightButton"], Content = "Back to Menu" };
+            backButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU));
+
+            StackPanel head = new StackPanel();
+            head.Children.Add(logo);
+            head.Children.Add(waitingBlock);
+            head.Children.Add(resultsListBox);
+            head.Children.Add(backButton);
+
+            // Adding controls to grid
+            MainGrid.Children.Add(head);
+
+            // Activating background worker
+            _game_results_worker.RunWorkerAsync(argument: new Tuple<StackPanel, TextBlock, ListBox>(head, waitingBlock, resultsListBox));
         }
 
         /*
@@ -756,6 +926,21 @@ namespace Trivia_Client
                             _currWindow = Windows.MENU;
                             SetMenuWindow();
                         }
+                        else if (_currWindow == Windows.GAME)
+                        {
+                            _using_communicator.WaitOne();
+                            bool isLeftGame = _communicator.leaveGame();
+                            _using_communicator.ReleaseMutex();
+
+                            if (!isLeftGame)
+                            {
+                                MessageBoxResult result = MessageBox.Show("Failed to leave game", "Trivia",
+                                    MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                                break;
+                            }
+                            _currWindow = Windows.MENU;
+                            SetMenuWindow();
+                        }
                         else
                         {
                             _currWindow = Windows.MENU;
@@ -873,6 +1058,25 @@ namespace Trivia_Client
                         }
                         break;
 
+                    case Windows.GAME:
+                        _currWindow = Windows.GAME;
+                        _using_communicator.WaitOne();
+                        GetRoomStateRes roomState = _communicator.getRoomState();
+                        bool started = _communicator.startGame();
+                        _using_communicator.ReleaseMutex();
+
+                        if(!started)
+                        {
+                            _currWindow = Windows.ROOM;
+                            MessageBoxResult result = MessageBox.Show("Faild to start game :( \nTry again.", "Trivia",
+                                MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
+                            break;
+                        }
+                        _using_communicator.WaitOne();
+                        GetQuestionRes firstQuestion = _communicator.getQuestion();
+                        _using_communicator.ReleaseMutex();
+                        SetGameWindow(1, roomState.questionCount, 0, roomState.answerTimeout, firstQuestion.question, firstQuestion.answers);
+                        break;
                     default:
                         break;
                 }
@@ -996,6 +1200,16 @@ namespace Trivia_Client
                     MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
                 return;
             }
+            else if(args.Item4.status == (uint)ActiveMode.START_PLAYING && !args.Item3)
+            {   
+                _using_communicator.WaitOne();
+                _communicator.leaveRoom();
+                GetQuestionRes firstQuestion = _communicator.getQuestion();
+                _using_communicator.ReleaseMutex();
+                _currWindow = Windows.GAME;
+                SetGameWindow(1, args.Item4.questionCount, 0, args.Item4.answerTimeout, firstQuestion.question, firstQuestion.answers);
+                return;
+            }
 
             args.Item1.Items.Clear(); // clears players list
 
@@ -1005,11 +1219,74 @@ namespace Trivia_Client
             }
         }
 
+        /*
+        This function is the 'DoWork' function of '_game_results_worker',
+         and it keeps checking for the current game's results, by communicating the server.
+        Input: sender, e - the event's args - including ui elements sent from sender
+        Output: none
+        */
+        private void checkForGameResults(object sender, DoWorkEventArgs e)
+        {
+            try
+            {
+                List<PlayerResults> gameResults;
+
+                Tuple<StackPanel, TextBlock, ListBox> tmp = (Tuple<StackPanel, TextBlock, ListBox>)e.Argument;
+
+                while (true)
+                {
+                    _using_communicator.WaitOne();
+                    gameResults = _communicator.getGameResults();
+                    _using_communicator.ReleaseMutex();
+
+                    if (gameResults.Count() > 0)
+                    {
+                        Tuple<StackPanel, TextBlock, ListBox, List<PlayerResults>> args =
+                            new Tuple<StackPanel, TextBlock, ListBox, List<PlayerResults>>(tmp.Item1, tmp.Item2, tmp.Item3, gameResults);
+
+                        _game_results_worker.ReportProgress(0, args);
+                        break;
+                    }
+                    
+                    System.Threading.Thread.Sleep(1000); // Checks every second
+
+                    if (_currWindow != Windows.GAME) // Works only if the user is in a game
+                    {
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _using_communicator.ReleaseMutex();
+                MessageBoxResult result = MessageBox.Show(ex.Message, "Trivia",
+                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
+            }
+        }
+
+        /*
+        This function is the 'ProgressChanged' function of '_game_results_worker',
+         and it updates the ui, by updating the players list.
+        Input: sender, e - the event's args - including ui elements sent from sender
+        Output: none
+        */
+        private void update_game_results_window(object sender, ProgressChangedEventArgs e)
+        {
+            Tuple<StackPanel, TextBlock, ListBox, List<PlayerResults>> args = (Tuple<StackPanel, TextBlock, ListBox, List<PlayerResults>>)e.UserState;
+
+            args.Item1.Children.Remove(args.Item2);
+            foreach (PlayerResults p in args.Item4)
+            {
+                args.Item3.Items.Add(p.username + ": " + (1 / p.averageAnswerTime * p.correctAnswerCount / (p.correctAnswerCount + p.wrongAnswerCount) * 100).ToString());
+            }
+        }
+
         private string _username;
         private Windows _currWindow;
         private Communicator _communicator;
         private BackgroundWorker _available_rooms_worker = new BackgroundWorker();
         private BackgroundWorker _room_state_worker = new BackgroundWorker();
+        private BackgroundWorker _game_results_worker = new BackgroundWorker();
         Mutex _using_communicator;
     }
 }

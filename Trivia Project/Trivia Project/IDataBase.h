@@ -32,7 +32,7 @@ struct
 	int _totalAnswers;
 	int _correctAnswers;
 	int _numOfGames;
-	int _answersTime;
+	float _answersTime;
 }typedef Statistic;
 
 struct
