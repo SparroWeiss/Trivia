@@ -609,6 +609,11 @@ namespace Trivia_Client
             MainGrid.Children.Add(backButton);
         }
 
+        /*
+        This function set the 'game' window.
+        Input: question counter, question amount, correct answers counter, time for question, the question, list of the answers and their id
+        Output: none
+        */
         private void SetGameWindow(uint currQuestionNum, uint questionAmount, uint correctAnswers, uint timeForQue, string question, Dictionary<uint, string> answers)
         {
             SetWindow(600, 900, true);
@@ -619,36 +624,12 @@ namespace Trivia_Client
 
             // Creating controls for window
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
-            TextBlock gameProgressBlock = new TextBlock
-            {
-                Style = (Style)Resources["brightText"],
-                VerticalAlignment = VerticalAlignment.Top,
-                HorizontalAlignment = HorizontalAlignment.Left,
-                Margin = new Thickness(0, 30, 0, 0),
-                Height = 60,
-                Text = "Game Progress: " + currQuestionNum.ToString() + "/" + questionAmount.ToString() + "\nCorrect Answers: " + correctAnswers.ToString()
-            };
+            TextBlock gameProgressBlock = new TextBlock { Style = (Style)Resources["gameProgressText"],
+                Text = "Game Progress: " + currQuestionNum.ToString() + "/" + questionAmount.ToString() + "\nCorrect Answers: " + correctAnswers.ToString() };
 
-            TextBlock timeBlock = new TextBlock
-            {
-                Style = (Style)Resources["brightText"],
-                Text = (++timeForQue - 1).ToString(),
-                VerticalAlignment = VerticalAlignment.Top,
-                HorizontalAlignment = HorizontalAlignment.Right,
-                Margin = new Thickness(0, 30, 0, 0),
-                FontSize = 40,
-                Height = 60
-            };
+            TextBlock timeBlock = new TextBlock { Style = (Style)Resources["gameTimerText"], Text = (++timeForQue - 1).ToString() };
 
-            TextBlock questionBlock = new TextBlock
-            {
-                Style = (Style)Resources["brightText"],
-                Height = 60,
-                Width = 790,
-                Text = question,
-                Margin = new Thickness(0, 10, 0, 0),
-                TextWrapping = TextWrapping.Wrap
-            };
+            TextBlock questionBlock = new TextBlock { Style = (Style)Resources["gameQuestionText"], Text = question };
 
             int[] indexs = { 0, 1, 2, 3 };
             Random r = new Random();
@@ -746,25 +727,19 @@ namespace Trivia_Client
             MainGrid.Children.Add(head);
         }
 
+        /*
+        This function set the 'game results' window.
+        Input: none
+        Output: none
+        */
         private void SetGameResultsWindow()
         {
             SetWindow(600, 500, true);
 
             // Creating controls for window
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
-            TextBlock waitingBlock = new TextBlock
-            {
-                Style = (Style)Resources["brightText"],
-                VerticalAlignment = VerticalAlignment.Top,
-                HorizontalAlignment = HorizontalAlignment.Left,
-                Margin = new Thickness(0, 30, 0, 0),
-                FontSize = 40,
-                Height = 120,
-                Width = 450,
-                TextWrapping = TextWrapping.Wrap,
-                Text = "Waiting for other players to finish... :)"
-            };
-            ListBox resultsListBox = new ListBox { Style = (Style)Resources["brightListBox"], Width = 450, Height = 250 };
+            TextBlock waitingBlock = new TextBlock { Style = (Style)Resources["bigBrightText"], Text = "Waiting for other players to finish... :)" };
+            ListBox resultsListBox = new ListBox { Style = (Style)Resources["brightListBox"], Width = 450 };
 
             Button backButton = new Button { Style = (Style)Resources["brightButton"], Content = "Back to Menu" };
             backButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU));

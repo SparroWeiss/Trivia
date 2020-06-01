@@ -46,6 +46,63 @@
               Value="40, 0, 0, 0" />
         </Style>
 
+        <Style x:Key="bigBrightText" 
+           BasedOn="{StaticResource brightText}" 
+           TargetType="TextBlock">
+            <Setter Property="VerticalAlignment"
+              Value="Top" />
+            <Setter Property="HorizontalAlignment"
+              Value="Left" />
+            <Setter Property="Margin"
+              Value="0, 30, 0, 0" />
+            <Setter Property="FontSize"
+              Value="40" />
+            <Setter Property="Height"
+              Value="120" />
+            <Setter Property="Width"
+              Value="450" />
+            <Setter Property="TextWrapping"
+              Value="Wrap" />
+        </Style>
+
+        <Style x:Key="gameText" 
+           BasedOn="{StaticResource brightText}" 
+           TargetType="TextBlock">
+            <Setter Property="VerticalAlignment"
+              Value="Top" />
+            <Setter Property="Margin"
+              Value="0, 30, 0, 0" />
+            <Setter Property="Height"
+              Value="60" />
+        </Style>
+
+        <Style x:Key="gameQuestionText" 
+           BasedOn="{StaticResource gameText}" 
+           TargetType="TextBlock">
+            <Setter Property="Width"
+              Value="790" />
+            <Setter Property="Margin"
+              Value="0, 10, 0, 0" />
+            <Setter Property="TextWrapping"
+              Value="Wrap" />
+        </Style>
+
+        <Style x:Key="gameProgressText" 
+           BasedOn="{StaticResource gameText}" 
+           TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment"
+              Value="Left" />
+        </Style>
+
+        <Style x:Key="gameTimerText" 
+           BasedOn="{StaticResource gameText}" 
+           TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment"
+              Value="Right" />
+            <Setter Property="FontSize"
+              Value="40" />
+        </Style>
+        
         <Style x:Key="darkTitle" 
            BasedOn="{StaticResource grayText}" 
            TargetType="TextBlock">
