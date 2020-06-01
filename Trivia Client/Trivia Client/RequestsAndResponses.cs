@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Trivia_Client
 {
-    /**** Data Types ****/
+    /********* Data Types *********/
 
     public enum Windows
     {

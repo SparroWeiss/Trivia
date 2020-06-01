@@ -380,6 +380,11 @@ namespace Trivia_Client
             return (result.status == 1);
         }
 
+        /*
+        this function send a start game request to the server
+        input: none
+        output: did start game or not (true \ false)
+        */
         public bool startGame()
         {
             send_data(messageCode.STARTGAMECODE);
@@ -387,6 +392,11 @@ namespace Trivia_Client
             return (result.status == 1);
         }
 
+        /*
+        this function send a submit answer request to the server
+        input: the client answer id and the time 
+        output: the id of the correct answer, zero if request faild
+        */
         public uint submitAnswer(uint answer_id, float time)
         {
             SubmitAnswerReq submitAnswer;
@@ -402,12 +412,18 @@ namespace Trivia_Client
             return result.correctAnswerId;
         }
 
+        /*
+        this function send a get game results request to the server
+        input: none
+        output: list of the players result sorted by the score, empty list if request faild
+        */
         public List<PlayerResults> getGameResults()
         {
             send_data(messageCode.GETGAMERESULTSCODE);
             GetGameResultsRes result = recv_data<GetGameResultsRes>();
             if(result.status == (uint)GameMode.FINISHED)
             {
+                // sort the list
                 List<PlayerResults> results = result.results.OrderBy(o => (1 / o.averageAnswerTime * o.correctAnswerCount / (o.correctAnswerCount + o.wrongAnswerCount))).ToList();
                 results.Reverse();
                 return results;
@@ -415,6 +431,11 @@ namespace Trivia_Client
             return new List<PlayerResults>();
         }
 
+        /*
+        this function send a get question request to the server
+        input: none
+        output: a GetQuestionRes struct (the question and the answers), empty GetQuestionRes if request faild
+        */
         public GetQuestionRes getQuestion()
         {
             send_data(messageCode.GETQUESTIONCODE);
@@ -426,6 +447,11 @@ namespace Trivia_Client
             return new GetQuestionRes();
         }
 
+        /*
+        this function send a leave game request to the server
+        input: none
+        output: did leave game or not (true \ false)
+        */
         public bool leaveGame()
         {
             send_data(messageCode.LEAVEGAMECODE);
