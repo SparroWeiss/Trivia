@@ -38,6 +38,9 @@ namespace Trivia_Client
             //List<KeyValuePair<uint, string>> test = JsonConvert.DeserializeObject<List<KeyValuePair<uint, string>>>("[[1,\"Five\"],[2,\"Four\"],[3,\"Six\"],[4,\"Eight\"]]");
             //Dictionary<string, string> test = JsonConvert.DeserializeObject<Dictionary<string, string>>("{'href': '/account/login.aspx','target': '_blank'}");
             //Dictionary<int, string> test = JsonConvert.DeserializeObject<Dictionary<int, string>>("{1:\"Five\",2:\"Four\",3:\"Six\",4:\"Eight\"}");
+           
+            ToolTipService.ShowDurationProperty.OverrideMetadata(typeof(DependencyObject), new FrameworkPropertyMetadata(Int32.MaxValue));
+            /*without this line the tip window will be closed after 5 seconds*/
 
             // Setting fields
             _available_rooms_worker.WorkerSupportsCancellation = true;
@@ -152,10 +155,20 @@ namespace Trivia_Client
 
             TextBlock passwordBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Password" };
 
+            
             TextBox usernameBox = new TextBox { Style = (Style)Resources["darkTextBox"] };
             usernameBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(usernameBlock, usernameBox));
-            
-            PasswordBox passwordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"] };
+
+            ToolTip password = new ToolTip();
+            password.Style = (Style)Resources["ToolTip"];
+            password.Content = "Password must contain:\n" +
+                "only 8 characters,\n" +
+                "at least 1 upper case letter, \n" +
+                "at least 1 lower case letter,\n" +
+                "at least 1 number\n" +
+                "and at least 1 special character:\n" +
+                "'!', '@', '#', '$', '%', '^', '&', '*'";
+            PasswordBox passwordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"], ToolTip = password };
             passwordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, passwordBox));
 
             List<TextBox> textBoxes = new List<TextBox> { usernameBox };
@@ -204,28 +217,65 @@ namespace Trivia_Client
 
             TextBlock emailBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Email" };
 
-            TextBlock addressBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Address (Street, Apt, City)" };
+            TextBlock addressBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Address" };
 
             TextBlock phoneBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Phone" };
 
-            TextBlock birthdateBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Birthdate (DD/MM/YYYY)" };
+            TextBlock birthdateBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Birthdate" };
 
-            TextBox usernameBox = new TextBox { Style = (Style)Resources["darkTextBox"] };
+            ToolTip username = new ToolTip();
+            username.Style = (Style)Resources["ToolTip"];
+            username.Content = "Choose your own unique user name!";
+            TextBox usernameBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = username };
             usernameBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(usernameBlock, usernameBox));
 
-            PasswordBox passwordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"] };
+            ToolTip password = new ToolTip();
+            password.Style = (Style)Resources["ToolTip"];
+            password.Content = "Password must contain:\n" +
+                "only 8 characters,\n" +
+                "at least 1 upper case letter, \n" +
+                "at least 1 lower case letter,\n" +
+                "at least 1 number\n" +
+                "and at least 1 special character:\n" +
+                "'!', '@', '#', '$', '%', '^', '&', '*'";
+            PasswordBox passwordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"], ToolTip = password };
             passwordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, passwordBox));
 
-            TextBox emailBox = new TextBox{ Style = (Style)Resources["darkTextBox"] };
+            ToolTip email = new ToolTip();
+            email.Style = (Style)Resources["ToolTip"];
+            email.Content = "Must be a valid email!\n" +
+                "with '@' in the middle\n" +
+                "and some web domain ending at the end\n" +
+                "('.com', '.co.il', etc...)";
+            TextBox emailBox = new TextBox{ Style = (Style)Resources["darkTextBox"], ToolTip = email };
             emailBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(emailBlock, emailBox));
-            
-            TextBox addressBox = new TextBox { Style = (Style)Resources["darkTextBox"] };
+
+            ToolTip address = new ToolTip();
+            address.Style = (Style)Resources["ToolTip"];
+            address.Content = "Address is in the format of: Street, Apartment, City\n" +
+                "Street - must not contain any non alphabetic character\n" +
+                "Apartment - can contain only numbers\n" +
+                "City - must not contain any non alphabetic character\n" +
+                "and don't forget to put ', ' between them!";
+            TextBox addressBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = address };
             addressBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(addressBlock, addressBox));
-            
-            TextBox phoneBox = new TextBox { Style = (Style)Resources["darkTextBox"] };
+
+            ToolTip phone = new ToolTip();
+            phone.Style = (Style)Resources["ToolTip"];
+            phone.Content = "Phone is in the format of: Prefix-Number\n" +
+                "Prefix - must start with '0', must be 2 or 3 numbers,\n" +
+                "Number - must contain 7 numbers, no lees, no more\n" +
+                "and don't forget to put '-' between them!";
+            TextBox phoneBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = phone };
             phoneBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(phoneBlock, phoneBox));
-            
-            TextBox birthdateBox = new TextBox { Style = (Style)Resources["darkTextBox"] };
+
+            ToolTip birthdate = new ToolTip();
+            birthdate.Style = (Style)Resources["ToolTip"];
+            birthdate.Content = "Share with us your birthdate!\n" +
+                "The formats are:\n" +
+                "DD.MM.YYYY\n" +
+                "DD/MM/YYYY";
+            TextBox birthdateBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = birthdate };
             birthdateBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(birthdateBlock, birthdateBox));
 
             List<TextBox> textBoxes = new List<TextBox>{ usernameBox, emailBox, addressBox, phoneBox, birthdateBox };
@@ -892,18 +942,34 @@ namespace Trivia_Client
                         if (_currWindow == Windows.LOGIN)
                         {
                             _using_communicator.WaitOne();
-                            bool login = _communicator.login(textBoxes[0].Text, passwordBox.Password);
+                            int login = _communicator.login(textBoxes[0].Text, passwordBox.Password);
                             _using_communicator.ReleaseMutex();
 
-                            if (login)
+                            string message = "";
+                            bool error = true;
+                            switch (login)
                             {
-                                _username = textBoxes[0].Text;
-                                _currWindow = Windows.MENU;
-                                SetMenuWindow();
+                                case (int)LoginStatus.SUCCESS:
+                                    _username = textBoxes[0].Text;
+                                    _currWindow = Windows.MENU;
+                                    SetMenuWindow();
+                                    error = false;
+                                    break;
+                                case (int)LoginStatus.ALREADYINGAME:
+                                    message = "Oops, it looks like this account already logged in.";
+                                    break;
+                                case (int)LoginStatus.WRONGPASSWORD:
+                                    message = "Your password is incorrect, Don't forget to mind the format.";
+                                    break;
+                                case (int)LoginStatus.WRONGUSERNAME:
+                                    message = string.Format("The user name \"{0}\" doesn't exists in our lists.", textBoxes[0].Text);
+                                    break;
+                                default:
+                                    break;
                             }
-                            else
+                            if (error)
                             {
-                                MessageBoxResult result = MessageBox.Show("Some details were invalid. \nTry again :)", "Trivia",
+                                MessageBoxResult result = MessageBox.Show(string.Format("{0} \nTry again :)", message), "Trivia",
                                     MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
                             }
                         }

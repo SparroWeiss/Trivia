@@ -3,6 +3,11 @@
 #include <vector>
 #include <mutex>
 
+enum loginStatus
+{
+	SUCCESS = 1, WRONGPASSWORD, WRONGUSERNAME, ALREADYINGAME
+};
+
 class LoggedUser
 {
 public:
@@ -34,7 +39,7 @@ public:
 	static LoginManager* getInstance();
 	~LoginManager();
 	bool signup(std::string, std::string, std::string, std::string, std::string, std::string);
-	bool login(std::string, std::string);
+	loginStatus login(std::string, std::string);
 	bool logout(std::string);
 
 private:

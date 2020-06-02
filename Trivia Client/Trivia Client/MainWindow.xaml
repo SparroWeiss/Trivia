@@ -267,6 +267,20 @@
             <Setter Property="BorderThickness"
               Value="0" />
         </Style>
+        
+        <Style x:Key="ToolTip"
+               TargetType="ToolTip">
+            <Setter Property="FontFamily"
+                    Value="Comic Sans MS" />
+            <Setter Property="FontSize"
+                    Value="15" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="Background"
+              Value="MediumSlateBlue" />
+            <Setter Property="Foreground"
+              Value="Lavender" />
+        </Style>
     </Window.Resources>
 
     <Grid x:Name="MainGrid" />

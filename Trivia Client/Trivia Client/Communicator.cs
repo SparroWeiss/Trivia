@@ -137,7 +137,7 @@ namespace Trivia_Client
         input: the username and the password
         output: did login or not (true \ false)
         */
-        public bool login(string username, string password)
+        public int login(string username, string password)
         {
             LoginReq login;
             login.username = username;
@@ -145,7 +145,7 @@ namespace Trivia_Client
             
             send_data(messageCode.LOGINCODE, JsonConvert.SerializeObject(login));
             LoginRes result = recv_data<LoginRes>();
-            return (result.status == 1); 
+            return result.status; 
         }
 
         /*

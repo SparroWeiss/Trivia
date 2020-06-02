@@ -54,10 +54,9 @@ RequestResult LoginRequestHandler::login(RequestInfo info)
 {
 	LoginRequest loginReq = JsonRequestPacketDeserializer::deserializeLoginRequest(info.buffer);
 	IRequestHandler* newHandle = this; // if the login request isn't valid, stay in same handler
-	LoginResponse loginRes = { 0 }; // status: 0
-	if (m_loginManager->login(loginReq.username, loginReq.password))
+	LoginResponse loginRes = { m_loginManager->login(loginReq.username, loginReq.password) }; 
+	if (loginRes.status == loginStatus::SUCCESS)
 	{ // if the login request is valid
-		loginRes = { 1 }; // status: 1
 		newHandle = m_handlerFactory->createMenuRequestHandler(loginReq.username); // pointer to the next handle : menu
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(loginRes), newHandle };

@@ -67,23 +67,28 @@ function logs in a user by it's name and password
 input: username, password
 output: true - logged in, false - something went wrong
 */
-bool LoginManager::login(std::string name, std::string password)
+loginStatus LoginManager::login(std::string name, std::string password)
 {
 	std::unique_lock<std::mutex> locker1(_mutex_db);
+	if (!m_database->doesUserExist(name))
+	{ // user doesn't exists
+		return loginStatus::WRONGUSERNAME;
+	}
 	bool pass_match = m_database->doesPasswordMatch(name, password);
 	locker1.unlock();
 	if (pass_match)
 	{ // if the password matches the username
 		std::unique_lock<std::mutex> locker2(_mutex_loggedUsers);
 		if (findUsername(name) == m_loggedUsers.end())
-		{//didn't find the user 
+		{ //didn't find the user in the server
 			m_loggedUsers.push_back(LoggedUser(name));
 			locker2.unlock();
-			return true;
+			return loginStatus::SUCCESS;
 		}
 		locker2.unlock();
+		return loginStatus::ALREADYINGAME;
 	}
-	return false;
+	return loginStatus::WRONGPASSWORD;
 }
 
 /*

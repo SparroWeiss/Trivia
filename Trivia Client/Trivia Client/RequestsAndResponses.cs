@@ -51,6 +51,11 @@ namespace Trivia_Client
         FINISHED = 1, WAITING_FOR_PLAYERS
     };
 
+    enum LoginStatus
+    {
+        SUCCESS = 1, WRONGPASSWORD, WRONGUSERNAME, ALREADYINGAME
+    };
+
     struct RoomData
     {
         public uint id;
