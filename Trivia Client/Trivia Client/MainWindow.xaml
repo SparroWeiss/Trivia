@@ -280,6 +280,8 @@
               Value="MediumSlateBlue" />
             <Setter Property="Foreground"
               Value="Lavender" />
+            <Setter Property="Visibility"
+              Value="Visible" />
         </Style>
     </Window.Resources>
 

@@ -942,26 +942,26 @@ namespace Trivia_Client
                         if (_currWindow == Windows.LOGIN)
                         {
                             _using_communicator.WaitOne();
-                            int login = _communicator.login(textBoxes[0].Text, passwordBox.Password);
+                            LoginStatus login = _communicator.login(textBoxes[0].Text, passwordBox.Password);
                             _using_communicator.ReleaseMutex();
 
                             string message = "";
                             bool error = true;
                             switch (login)
                             {
-                                case (int)LoginStatus.SUCCESS:
+                                case LoginStatus.SUCCESS:
                                     _username = textBoxes[0].Text;
                                     _currWindow = Windows.MENU;
                                     SetMenuWindow();
                                     error = false;
                                     break;
-                                case (int)LoginStatus.ALREADYINGAME:
+                                case LoginStatus.ALREADYINGAME:
                                     message = "Oops, it looks like this account already logged in.";
                                     break;
-                                case (int)LoginStatus.WRONGPASSWORD:
-                                    message = "Your password is incorrect, Don't forget to mind the format.";
+                                case LoginStatus.WRONGPASSWORD:
+                                    message = "Your password is incorrect, please note the format.";
                                     break;
-                                case (int)LoginStatus.WRONGUSERNAME:
+                                case LoginStatus.WRONGUSERNAME:
                                     message = string.Format("The user name \"{0}\" doesn't exists in our lists.", textBoxes[0].Text);
                                     break;
                                 default:
@@ -976,19 +976,44 @@ namespace Trivia_Client
                         else if (_currWindow == Windows.SIGNUP)
                         {
                             _using_communicator.WaitOne();
-                            bool signup = _communicator.signup(textBoxes[0].Text, passwordBox.Password, textBoxes[1].Text,
+                            SignupStatus signup = _communicator.signup(textBoxes[0].Text, passwordBox.Password, textBoxes[1].Text,
                                 textBoxes[2].Text, textBoxes[3].Text, textBoxes[4].Text);
                             _using_communicator.ReleaseMutex();
 
-                            if (signup)
+                            string message = "";
+                            bool error = true;
+                            switch (signup)
                             {
-                                _username = textBoxes[0].Text;
-                                _currWindow = Windows.MENU;
-                                SetMenuWindow();
+                                case SignupStatus.SOMETHING_WENT_WRONG:
+                                    message = "Something went wrong.";
+                                    break;
+                                case SignupStatus.SIGNUP_SUCCESS:
+                                    _username = textBoxes[0].Text;
+                                    _currWindow = Windows.MENU;
+                                    SetMenuWindow();
+                                    error = false;
+                                    break;
+                                case SignupStatus.INVALID_PASSWORD:
+                                    message = "Your password is invalid, please note the format.";
+                                    break;
+                                case SignupStatus.INVALID_EMAIL:
+                                    message = "Your email is invalid, please note the format.";
+                                    break;
+                                case SignupStatus.INVALID_ADDRESS:
+                                    message = "Your address is invalid, please note the format.";
+                                    break;
+                                case SignupStatus.INVALID_PHONE:
+                                    message = "Your phone number is invalid, please note the format.";
+                                    break;
+                                case SignupStatus.INVALID_BIRTHDATE:
+                                    message = "Your birth date is invalid, please note the format.";
+                                    break;
+                                default:
+                                    break;
                             }
-                            else
+                            if (error)
                             {
-                                MessageBoxResult result = MessageBox.Show("Some details were invalid. \nTry again :)", "Trivia",
+                                MessageBoxResult result = MessageBox.Show(string.Format("{0} \nTry again :)", message), "Trivia",
                                     MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
                             }
                         }

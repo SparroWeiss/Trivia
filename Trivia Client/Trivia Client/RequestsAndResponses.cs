@@ -55,6 +55,10 @@ namespace Trivia_Client
     {
         SUCCESS = 1, WRONGPASSWORD, WRONGUSERNAME, ALREADYINGAME
     };
+    enum SignupStatus
+    {
+        SOMETHING_WENT_WRONG = 0, SIGNUP_SUCCESS, INVALID_PASSWORD, INVALID_EMAIL, INVALID_ADDRESS, INVALID_PHONE, INVALID_BIRTHDATE
+    };
 
     struct RoomData
     {

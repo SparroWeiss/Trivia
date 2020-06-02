@@ -72,13 +72,22 @@ RequestResult LoginRequestHandler::signup(RequestInfo info)
 	SignupRequest signReq = JsonRequestPacketDeserializer::deserializeSignupRequest(info.buffer);
 	IRequestHandler* newHandle = this; // if the login request isn't valid, stay in same handler
 	SignupResponse signRes = { 0 }; // status: 0
-	if (signupValidation(signReq.password, signReq.email, signReq.address, signReq.phone, signReq.birthdate)) // if parameters are valid
+	signupStatus status = signupValidation(signReq.password, signReq.email, signReq.address, signReq.phone, signReq.birthdate);
+	if (status == signupStatus::SIGNUP_SUCCESS) // if parameters are valid
 	{
 		if (m_loginManager->signup(signReq.username, signReq.password, signReq.email, signReq.address, signReq.phone, signReq.birthdate))
 		{ // if the login request is valid
-			signRes = { 1 }; // status: 1
+			signRes = { signupStatus::SIGNUP_SUCCESS }; // status: 1
 			newHandle = m_handlerFactory->createMenuRequestHandler(signReq.username); // pointer to the next handle : menu
 		}
+		else
+		{
+			signRes = { signupStatus::SOMETHING_WENT_WRONG }; // status: 0
+		}
+	}
+	else
+	{
+		signRes = { (unsigned int)status }; // status: 0
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(signRes), newHandle };
 }
@@ -88,32 +97,32 @@ This function checks a signup req parameters are valid
 Input: parameters to check
 Output: bool
 */
-bool LoginRequestHandler::signupValidation(std::string password, std::string email, std::string address, std::string phone, std::string birthdate)
+signupStatus LoginRequestHandler::signupValidation(std::string password, std::string email, std::string address, std::string phone, std::string birthdate)
 {
 	if (!std::regex_match(password, PASSWORD_REGEX)) // Password must be 8 chars, and contain at least one:
 	{												 // uppercase letter, lowercase letter, digit, special character
-		return false;
+		return signupStatus::INVALID_PASSWORD;
 	}
 	
 	if (!std::regex_match(email, EMAIL_REGEX)) // Email must be in the format:
 	{										   // <email-prefix>@<domain>
-		return false;
+		return signupStatus::INVALID_EMAIL;
 	}
 	
 	if (!std::regex_match(address, ADDRESS_REGEX)) // Address must be in format:
 	{											   // <street>, <apartment-number>, <city>
-		return false;
+		return signupStatus::INVALID_ADDRESS;
 	}
 	
 	if (!std::regex_match(phone, PHONE_REGEX)) // Phone must be in format:
 	{										   // <phone-prefix>-<phone-number(7 digits)>
-		return false;
+		return signupStatus::INVALID_PHONE;
 	}
 	
 	if (!std::regex_match(birthdate, BIRTHDATE_REGEX)) // Birthdate must be in format:
 	{												   // DD.MM.YYYY or DD/MM/YYYY
-		return false;
+		return signupStatus::INVALID_BIRTHDATE;
 	}
 
-	return true;
+	return signupStatus::SIGNUP_SUCCESS;
 }
