@@ -614,13 +614,16 @@ namespace Trivia_Client
         Input: question counter, question amount, correct answers counter, time for question, the question, list of the answers and their id
         Output: none
         */
-        private void SetGameWindow(uint currQuestionNum, uint questionAmount, uint correctAnswers, uint timeForQue, string question, Dictionary<uint, string> answers)
+        private void SetGameWindow(uint currQuestionNum, uint questionAmount, uint correctAnswers, uint timeForQue, string question, Dictionary<uint, string> answers, bool useHelp)
         {
             SetWindow(600, 900, true);
 
+            bool help = false;
             uint timePerQuestion = timeForQue;
             DispatcherTimer timer = new DispatcherTimer();
             uint selectedId = 0, currTime = timePerQuestion;
+            StackPanel head = new StackPanel();
+            StackPanel buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Center};
 
             // Creating controls for window
             Image logo = new Image { Style = (Style)Resources["brightLogo"] };
@@ -653,14 +656,12 @@ namespace Trivia_Client
                     }
                 };
 
-            
             answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = answers.ElementAt(indexs[0]).Value, Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
             answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = answers.ElementAt(indexs[1]).Value, Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
             answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = answers.ElementAt(indexs[2]).Value, Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
             answersListBox.Items.Add(new TextBlock { Style = (Style)Resources["brightText"], Height = 60, Text = answers.ElementAt(indexs[3]).Value, Width = 790, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 0) });
 
-            Button leaveButton;
-            leaveButton = new Button { Style = (Style)Resources["brightButton"], Content = "Leave Game", VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, 0, 0, 0) };
+            Button leaveButton = new Button { Style = (Style)Resources["brightButton"], Content = "Leave Game", HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top };
             leaveButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU));
 
             timer.Interval = TimeSpan.FromSeconds(1);
@@ -670,15 +671,33 @@ namespace Trivia_Client
                         if (timeForQue == 1)
                         {
                             timeBlock.Text = "Timeout!";
-                            _using_communicator.WaitOne();
-                            uint correctAnswerId = _communicator.submitAnswer(selectedId, currTime);
-                            _using_communicator.ReleaseMutex();
+
+                            uint correctAnswerId = 0;
+                            if (help)
+                            {
+                                if (_currWindow == Windows.GAME)
+                                {
+                                    _using_communicator.WaitOne();
+                                    correctAnswerId = _communicator.submitAnswer(selectedId, currTime + 5);
+                                    _using_communicator.ReleaseMutex();
+                                }
+                            }
+                            else
+                            {
+                                if (_currWindow == Windows.GAME)
+                                {
+                                    _using_communicator.WaitOne();
+                                    correctAnswerId = _communicator.submitAnswer(selectedId, currTime);
+                                    _using_communicator.ReleaseMutex();
+                                }
+                            }
                            
                             for(int i = 0; i < 4; i++)
                             {
                                 if(((TextBlock)answersListBox.Items[i]).Text == answers.ElementAt(0).Value)
                                 {
                                     ((TextBlock)answersListBox.Items[i]).Background = new SolidColorBrush(Colors.LightGreen);
+                                    break;
                                 }
                             }
                             if(selectedId != 0)
@@ -700,7 +719,7 @@ namespace Trivia_Client
                                 _using_communicator.WaitOne();
                                 GetQuestionRes nextQuestion = _communicator.getQuestion();
                                 _using_communicator.ReleaseMutex();
-                                SetGameWindow(currQuestionNum + 1, questionAmount, correctAnswers, timePerQuestion,  nextQuestion.question, nextQuestion.answers);
+                                SetGameWindow(currQuestionNum + 1, questionAmount, correctAnswers, timePerQuestion,  nextQuestion.question, nextQuestion.answers, useHelp);
                             }
                             else if (_currWindow == Windows.GAME)
                             {
@@ -715,11 +734,48 @@ namespace Trivia_Client
             timer.Start(); // Starting timer for question
             Thread.Sleep(1500);
 
-            StackPanel head = new StackPanel();
             head.Children.Add(logo);
             head.Children.Add(questionBlock);
             head.Children.Add(answersListBox);
-            head.Children.Add(leaveButton);
+
+            Button helpButton = new Button();
+            if (!useHelp)
+            {
+                helpButton = new Button { Style = (Style)Resources["brightButton"], Content = "50/50", HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Top };
+                helpButton.Click += (sender, args) =>
+                {
+                    uint counter = 0;
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (((TextBlock)answersListBox.Items[i]).Text != answers.ElementAt(0).Value)
+                        {
+                            answersListBox.Items.Remove(answersListBox.Items[i]);
+                            if (++counter == 2)
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+
+                    leaveButton.HorizontalAlignment = HorizontalAlignment.Center;
+                    head.Children.Remove(buttons);
+                    buttons.Children.Clear();
+
+                    head.Children.Add(leaveButton);
+                    useHelp = true;
+                    help = true;
+                };
+
+                buttons.Children.Add(leaveButton);
+                buttons.Children.Add(helpButton);
+                head.Children.Add(buttons);
+            }
+            else
+            {
+                leaveButton.HorizontalAlignment = HorizontalAlignment.Center;
+                head.Children.Add(leaveButton);
+            }
 
             // Adding controls to grid
             MainGrid.Children.Add(timeBlock);
@@ -1050,7 +1106,7 @@ namespace Trivia_Client
                         _using_communicator.WaitOne();
                         GetQuestionRes firstQuestion = _communicator.getQuestion();
                         _using_communicator.ReleaseMutex();
-                        SetGameWindow(1, roomState.questionCount, 0, roomState.answerTimeout, firstQuestion.question, firstQuestion.answers);
+                        SetGameWindow(1, roomState.questionCount, 0, roomState.answerTimeout, firstQuestion.question, firstQuestion.answers, false);
                         break;
                     default:
                         break;
@@ -1182,7 +1238,7 @@ namespace Trivia_Client
                 GetQuestionRes firstQuestion = _communicator.getQuestion();
                 _using_communicator.ReleaseMutex();
                 _currWindow = Windows.GAME;
-                SetGameWindow(1, args.Item4.questionCount, 0, args.Item4.answerTimeout, firstQuestion.question, firstQuestion.answers);
+                SetGameWindow(1, args.Item4.questionCount, 0, args.Item4.answerTimeout, firstQuestion.question, firstQuestion.answers, false);
                 return;
             }
 
