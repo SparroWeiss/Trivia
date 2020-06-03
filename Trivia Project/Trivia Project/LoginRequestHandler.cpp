@@ -82,7 +82,7 @@ RequestResult LoginRequestHandler::signup(RequestInfo info)
 		}
 		else
 		{
-			signRes = { signupStatus::SOMETHING_WENT_WRONG }; // status: 0
+			signRes = { signupStatus::INVALID_NAME }; // status: 0
 		}
 	}
 	else

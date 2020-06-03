@@ -335,6 +335,19 @@ namespace Trivia_Client
         }
 
         /*
+        this function send a get players in a room request to the server
+        input: the room id
+        output: number of players
+        */
+        public int getPlayersInRoom(uint room_id)
+        { 
+            send_data(messageCode.GETPLAYERSINROOMCODE, room_id.ToString());
+            GetPlayersInRoomRes result = recv_data<GetPlayersInRoomRes>();
+
+            return result.players.Count();
+        }
+
+        /*
         this function get the room admin from the server
         input: none
         output: the room admin

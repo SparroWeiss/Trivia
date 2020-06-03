@@ -164,7 +164,7 @@ namespace Trivia_Client
             ToolTip username = new ToolTip();
             username.Style = (Style)Resources["ToolTip"];
             username.Content = "Please enter your user name.";
-            TextBox usernameBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = username, Margin = new Thickness(0, 0, 0, 20) };
+            TextBox usernameBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = username, Margin = new Thickness(0, 0, 0, 10) };
             usernameBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(usernameBlock, usernameBox, usernameMessageBlock));
 
             ToolTip password = new ToolTip();
@@ -183,7 +183,7 @@ namespace Trivia_Client
             List<TextBlock> textBlocks = new List<TextBlock> { passwordMessageBlock, usernameMessageBlock };
             Button nextButton = new Button { Style = (Style)Resources["darkButton"], Content = "Next",
                HorizontalAlignment = HorizontalAlignment.Right };
-            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, textBoxes, passwordBox, null, false, textBlocks));
+            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, textBoxes, passwordBox, textBlocks: textBlocks));
             
             Button backButton = new Button { Style = (Style)Resources["darkButton"], Content = "Back",
                 HorizontalAlignment = HorizontalAlignment.Left };
@@ -307,7 +307,7 @@ namespace Trivia_Client
                 Margin = new Thickness(40, 0, 20, 5),
                 HorizontalAlignment = HorizontalAlignment.Left, Height = 30,
                 ToolTip = prefix,
-                Foreground = Brushes.DarkBlue };
+                Foreground = Brushes.DarkBlue, Width = 60 };
             prefixBox.Items.Add("02");
             prefixBox.Items.Add("03");
             prefixBox.Items.Add("04");
@@ -343,7 +343,7 @@ namespace Trivia_Client
             List<ComboBox> comboBoxes = new List<ComboBox> { prefixBox };
             Button nextButton = new Button { Style = (Style)Resources["darkButton"], Content = "Next",
                 HorizontalAlignment = HorizontalAlignment.Right };
-            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, textBoxes, passwordBox, null, true, textBlocks, comboBoxes));
+            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, textBoxes, passwordBox, textBlocks: textBlocks, comboBoxes: comboBoxes));
             
             Button backButton = new Button { Style = (Style)Resources["darkButton"], Content = "Back",
                 HorizontalAlignment = HorizontalAlignment.Left};
@@ -442,49 +442,94 @@ namespace Trivia_Client
 
             TextBlock messageBlock = new TextBlock { Style = (Style)Resources["brightTitle"], Text = "Enter room details :)" };
 
-            TextBlock roomNameBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Room name" };
+            TextBlock roomNameBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Room name", Margin = new Thickness(0, 0, 0, 200) };
 
-            TextBlock userNumBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Number of users" };
 
-            TextBlock questionNumBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Number of questions" };
-
-            TextBlock questionTimeBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Time for question (sec)" };
-
-            TextBox roomNameBox = new TextBox { Style = (Style)Resources["brightTextBox"] };
+            TextBlock roomNameMessageBlock = new TextBlock
+            {
+                Style = (Style)Resources["messageBlock"],
+                Text = "The room name is taken!",
+                Foreground = Brushes.White
+            };
+            TextBox roomNameBox = new TextBox { Style = (Style)Resources["brightTextBox"], Margin = new Thickness(0, 0, 0, 5) };
             roomNameBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(roomNameBlock, roomNameBox));
 
-            TextBox userNumBox = new TextBox { Style = (Style)Resources["brightTextBox"] };
-            userNumBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(userNumBlock, userNumBox));
+            TextBlock questionTimeMessageBlock = new TextBlock
+            {
+                Style = (Style)Resources["messageBlock"],
+                Text = "Please choose an option.",
+                Foreground = Brushes.White
+            };
+            ComboBox questionTimeBox = new ComboBox { Style = (Style)Resources["comboStyle"], SelectedIndex = 0, Margin = new Thickness(0, 0, 0, 20) };
+            questionTimeBox.Items.Add("-- Time Per Questions --");
+            for (int i = 10; i <= 50; i += 10)
+            {
+                questionTimeBox.Items.Add(i.ToString());
+            }
 
-            TextBox questionNumBox = new TextBox { Style = (Style)Resources["brightTextBox"] };
-            questionNumBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(questionNumBlock, questionNumBox));
-            
-            TextBox questionTimeBox = new TextBox { Style = (Style)Resources["brightTextBox"] };
-            questionTimeBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(questionTimeBlock, questionTimeBox));
+            TextBlock questionNumMessageBlock = new TextBlock
+            {
+                Style = (Style)Resources["messageBlock"],
+                Text = "Please choose an option.",
+                Foreground = Brushes.White
+            };
+            ComboBox questionNumBox = new ComboBox { Style = (Style)Resources["comboStyle"], SelectedIndex = 0, Margin = new Thickness(0, 0, 0, 5) };
+            questionNumBox.Items.Add("-- Number Of Questions --");
+            for (int i = 5; i <= 20; i += 5)
+            {
+                questionNumBox.Items.Add(i.ToString());
+            }
 
-            List<TextBox> textBoxes = new List<TextBox> { roomNameBox, userNumBox, questionNumBox, questionTimeBox };
+            TextBlock userMaxMessageBlock = new TextBlock
+            {
+                Style = (Style)Resources["messageBlock"],
+                Text = "Please choose an option.",
+                Foreground = Brushes.White
+            };
+            ComboBox userNumBox = new ComboBox { Style = (Style)Resources["comboStyle"], SelectedIndex = 0, Margin = new Thickness(0, 0, 0, 5) };
+            userNumBox.Items.Add("-- Maximum Amount Of Users --");
+            for (int i = 2; i <= 10; i++)
+            {
+                userNumBox.Items.Add(i.ToString());
+            }
 
-            Button nextButton = new Button { Style = (Style)Resources["brightButton"], Content = "Next",
-                Width = 100, HorizontalAlignment = HorizontalAlignment.Right };
-            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.ROOM, textBoxes));
+            List<TextBox> textBoxes = new List<TextBox> { roomNameBox };
+            List<ComboBox> comboBoxes = new List<ComboBox> { userNumBox, questionNumBox, questionTimeBox };
+            List<TextBlock> textBlocks = new List<TextBlock> { roomNameMessageBlock, userMaxMessageBlock, questionNumMessageBlock, questionTimeMessageBlock };
 
-            Button backButton = new Button { Style = (Style)Resources["brightButton"], Content = "Back",
-                Width = 100, HorizontalAlignment = HorizontalAlignment.Left };
+            Button nextButton = new Button
+            {
+                Style = (Style)Resources["brightButton"],
+                Content = "Next",
+                Width = 100,
+                HorizontalAlignment = HorizontalAlignment.Right
+            };
+            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.ROOM, textBoxes, comboBoxes: comboBoxes, textBlocks: textBlocks));
+
+            Button backButton = new Button
+            {
+                Style = (Style)Resources["brightButton"],
+                Content = "Back",
+                Width = 100,
+                HorizontalAlignment = HorizontalAlignment.Left
+            };
             backButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU));
 
             StackPanel boxes = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom };
+            boxes.Children.Add(roomNameMessageBlock);
             boxes.Children.Add(roomNameBox);
+            boxes.Children.Add(userMaxMessageBlock);
             boxes.Children.Add(userNumBox);
+            boxes.Children.Add(questionNumMessageBlock);
             boxes.Children.Add(questionNumBox);
+            boxes.Children.Add(questionTimeMessageBlock);
             boxes.Children.Add(questionTimeBox);
             boxes.Children.Add(nextButton);
 
             StackPanel blocks = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom };
             blocks.Children.Add(roomNameBlock);
-            blocks.Children.Add(userNumBlock);
-            blocks.Children.Add(questionNumBlock);
-            blocks.Children.Add(questionTimeBlock);
             blocks.Children.Add(backButton);
+
 
             StackPanel head = new StackPanel();
             head.Children.Add(logo);
@@ -1156,27 +1201,59 @@ namespace Trivia_Client
                     case Windows.ROOM:
                         if (_currWindow == Windows.CREATE_ROOM)
                         {
-                            _using_communicator.WaitOne();
-                            bool create_room = _communicator.createRoom(textBoxes[0].Text, textBoxes[1].Text, textBoxes[2].Text, textBoxes[3].Text);
-                            _using_communicator.ReleaseMutex();
-                            
-                            if (create_room)
+                            for (int i = 0; i < textBlocks.Count; i++)
                             {
-                                RoomData temp;
-                                temp.id = 0;
-                                temp.name = textBoxes[0].Text;
-                                temp.maxPlayers = UInt32.Parse(textBoxes[1].Text);
-                                temp.questionCount = UInt32.Parse(textBoxes[2].Text);
-                                temp.timePerQuestion = UInt32.Parse(textBoxes[3].Text);
-                                temp.isActive = (uint)ActiveMode.WAITING;
-
-                                _currWindow = Windows.ROOM;
-                                SetRoomWindow(temp);
+                                if (textBlocks[i].Visibility == Visibility.Visible)
+                                {
+                                    textBlocks[i].Visibility = Visibility.Hidden;
+                                }
                             }
-                            else
+                            bool success = true;
+                            if (comboBoxes[0].Text[0] == '-')
+                            { // check the user max box
+                                textBlocks[1].Visibility = Visibility.Visible;
+                                success = false;
+                            }
+                            if (comboBoxes[1].Text[0] == '-')
+                            { // check the number of question box
+                                textBlocks[2].Visibility = Visibility.Visible;
+                                success = false;
+                            }
+                            if (comboBoxes[2].Text[0] == '-')
+                            { // check the time per question box
+                                textBlocks[3].Visibility = Visibility.Visible;
+                                success = false;
+                            }
+                            if (textBoxes[0].Text == "")
+                            { // check the room name box
+                                textBlocks[0].Text = "Please enter a name";
+                                textBlocks[0].Visibility = Visibility.Visible;
+                                success = false;
+                            }
+                            if (success)
                             {
-                                MessageBoxResult result = MessageBox.Show("Some details were invalid. \nTry again :)", "Trivia",
-                                    MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                                _using_communicator.WaitOne();
+                                bool create_room = _communicator.createRoom(textBoxes[0].Text, comboBoxes[0].Text, comboBoxes[1].Text, comboBoxes[2].Text);
+                                _using_communicator.ReleaseMutex();
+
+                                if (create_room)
+                                {
+                                    RoomData temp;
+                                    temp.id = 0;
+                                    temp.name = textBoxes[0].Text;
+                                    temp.maxPlayers = UInt32.Parse(comboBoxes[0].Text);
+                                    temp.questionCount = UInt32.Parse(comboBoxes[1].Text);
+                                    temp.timePerQuestion = UInt32.Parse(comboBoxes[2].Text);
+                                    temp.isActive = (uint)ActiveMode.WAITING;
+
+                                    _currWindow = Windows.ROOM;
+                                    SetRoomWindow(temp);
+                                }
+                                else
+                                {
+                                    textBlocks[0].Text = "The room name is taken";
+                                    textBlocks[0].Visibility = Visibility.Visible;
+                                }
                             }
                         }
                         else if (_currWindow == Windows.JOIN_ROOM)

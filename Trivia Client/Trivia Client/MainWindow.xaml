@@ -321,9 +321,9 @@
             <Setter Property="FontSize"
               Value="15" />
             <Setter Property="Width"
-              Value="60" />
+              Value="300" />
             <Setter Property="Height"
-              Value="25" />
+              Value="30" />
             <Setter Property="Margin"
               Value="0, 10, 0, 15" />
             <Setter Property="FontFamily"
