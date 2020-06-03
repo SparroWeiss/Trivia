@@ -151,31 +151,39 @@ namespace Trivia_Client
             // Creating controls for window
             Image logo = new Image { Style = (Style)Resources["darkLogo"] };
 
-            TextBlock usernameBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Username" };
+            TextBlock usernameBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Username", Margin = new Thickness(0, 0, 0, 20) };
+           
+            TextBlock passwordBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Password", Margin = new Thickness(0, 0, 0, 20) };
 
-            TextBlock passwordBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Password" };
+            TextBlock passwordMessageBlock = new TextBlock { Style = (Style)Resources["messageBlock"],
+                Text = "Your password is incorrect" };
 
-            
-            TextBox usernameBox = new TextBox { Style = (Style)Resources["darkTextBox"] };
-            usernameBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(usernameBlock, usernameBox));
+            TextBlock usernameMessageBlock = new TextBlock { Style = (Style)Resources["messageBlock"], 
+                Text = "The user name doesn't exists in our lists." };
+
+            ToolTip username = new ToolTip();
+            username.Style = (Style)Resources["ToolTip"];
+            username.Content = "Please enter your user name.";
+            TextBox usernameBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = username, Margin = new Thickness(0, 0, 0, 20) };
+            usernameBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(usernameBlock, usernameBox, usernameMessageBlock));
 
             ToolTip password = new ToolTip();
             password.Style = (Style)Resources["ToolTip"];
-            password.Content = "Password must contain:\n" +
+            password.Content = "Don't forget that the password must contain:\n" +
                 "only 8 characters,\n" +
                 "at least 1 upper case letter, \n" +
                 "at least 1 lower case letter,\n" +
                 "at least 1 number\n" +
                 "and at least 1 special character:\n" +
                 "'!', '@', '#', '$', '%', '^', '&', '*'";
-            PasswordBox passwordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"], ToolTip = password };
-            passwordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, passwordBox));
+            PasswordBox passwordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"], ToolTip = password, Margin = new Thickness(0, 25, 0, 20) };
+            passwordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, passwordBox, passwordMessageBlock));
 
             List<TextBox> textBoxes = new List<TextBox> { usernameBox };
-
+            List<TextBlock> textBlocks = new List<TextBlock> { passwordMessageBlock, usernameMessageBlock };
             Button nextButton = new Button { Style = (Style)Resources["darkButton"], Content = "Next",
                HorizontalAlignment = HorizontalAlignment.Right };
-            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, textBoxes, passwordBox));
+            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, textBoxes, passwordBox, null, false, textBlocks));
             
             Button backButton = new Button { Style = (Style)Resources["darkButton"], Content = "Back",
                 HorizontalAlignment = HorizontalAlignment.Left };
@@ -187,7 +195,9 @@ namespace Trivia_Client
             boxes.Children.Add(nextButton);
 
             StackPanel blocks = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom };
+            blocks.Children.Add(usernameMessageBlock);
             blocks.Children.Add(usernameBlock);
+            blocks.Children.Add(passwordMessageBlock);
             blocks.Children.Add(passwordBlock);
             blocks.Children.Add(backButton);
 
@@ -209,25 +219,37 @@ namespace Trivia_Client
             // Creating controls for window
             Image logo = new Image { Style = (Style)Resources["darkLogo"] };
 
-            TextBlock messageBlock = new TextBlock { Style = (Style)Resources["darkTitle"], Text = "Enter your details :)" };
+            TextBlock messageBlock = new TextBlock { Style = (Style)Resources["darkTitle"], Text = "Enter your details :)", Margin = new Thickness(0, 0, 0, 5) };
 
-            TextBlock usernameBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Username" };
+            TextBlock usernameBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Username", Margin = new Thickness(0, 0, 0, 5) };
 
-            TextBlock passwordBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Password" };
+            TextBlock passwordBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Password", Margin = new Thickness(0, 0, 0, 5) };
 
-            TextBlock emailBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Email" };
+            TextBlock emailBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Email", Margin = new Thickness(0, 0, 0, 5) };
 
-            TextBlock addressBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Address" };
+            TextBlock addressBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Address", Margin = new Thickness(0, 0, 0, 5) };
 
-            TextBlock phoneBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Phone" };
+            TextBlock phoneBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Phone", Margin = new Thickness(0, 0, 40, 140), Width = 240, HorizontalAlignment = HorizontalAlignment.Right };
 
-            TextBlock birthdateBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Birthdate" };
+            TextBlock birthdateBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Birthdate", Margin = new Thickness(0, 0, 0, 20) };
+
+            TextBlock usernameMessageBlock = new TextBlock
+            {
+                Style = (Style)Resources["messageBlock"],
+                Text = "The user name is taken!"
+            };
 
             ToolTip username = new ToolTip();
             username.Style = (Style)Resources["ToolTip"];
             username.Content = "Choose your own unique user name!";
-            TextBox usernameBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = username };
-            usernameBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(usernameBlock, usernameBox));
+            TextBox usernameBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = username, Margin = new Thickness(0, 25, 0, 5) };
+            usernameBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(usernameBlock, usernameBox, usernameMessageBlock));
+
+            TextBlock passwordMessageBlock = new TextBlock
+            {
+                Style = (Style)Resources["messageBlock"],
+                Text = "Your password is invalid."
+            };
 
             ToolTip password = new ToolTip();
             password.Style = (Style)Resources["ToolTip"];
@@ -238,17 +260,29 @@ namespace Trivia_Client
                 "at least 1 number\n" +
                 "and at least 1 special character:\n" +
                 "'!', '@', '#', '$', '%', '^', '&', '*'";
-            PasswordBox passwordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"], ToolTip = password };
-            passwordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, passwordBox));
+            PasswordBox passwordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"], ToolTip = password, Margin = new Thickness(0, 25, 0, 5) };
+            passwordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, passwordBox, passwordMessageBlock));
+
+            TextBlock emailMessageBlock = new TextBlock
+            {
+                Style = (Style)Resources["messageBlock"],
+                Text = "Your email is invalid."
+            };
 
             ToolTip email = new ToolTip();
             email.Style = (Style)Resources["ToolTip"];
             email.Content = "Must be a valid email!\n" +
                 "with '@' in the middle\n" +
-                "and some web domain ending at the end\n" +
+                "and some web domain at the end\n" +
                 "('.com', '.co.il', etc...)";
-            TextBox emailBox = new TextBox{ Style = (Style)Resources["darkTextBox"], ToolTip = email };
-            emailBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(emailBlock, emailBox));
+            TextBox emailBox = new TextBox{ Style = (Style)Resources["darkTextBox"], ToolTip = email, Margin = new Thickness(0, 25, 0, 5) };
+            emailBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(emailBlock, emailBox, emailMessageBlock));
+
+            TextBlock addressMessageBlock = new TextBlock
+            {
+                Style = (Style)Resources["messageBlock"],
+                Text = "Your address is invalid."
+            };
 
             ToolTip address = new ToolTip();
             address.Style = (Style)Resources["ToolTip"];
@@ -257,17 +291,43 @@ namespace Trivia_Client
                 "Apartment - can contain only numbers\n" +
                 "City - must not contain any non alphabetic character\n" +
                 "and don't forget to put ', ' between them!";
-            TextBox addressBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = address };
-            addressBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(addressBlock, addressBox));
+            TextBox addressBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = address, Margin = new Thickness(0, 25, 0, 5) };
+            addressBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(addressBlock, addressBox, addressMessageBlock));
+
+            TextBlock phoneMessageBlock = new TextBlock
+            {
+                Style = (Style)Resources["messageBlock"],
+                Text = "Your phone is invalid."
+            };
+
+            ToolTip prefix = new ToolTip();
+            prefix.Style = (Style)Resources["ToolTip"];
+            prefix.Content = "Phone prefix";
+            ComboBox prefixBox = new ComboBox { Style = (Style)Resources["comboStyle"],
+                Margin = new Thickness(40, 0, 20, 5),
+                HorizontalAlignment = HorizontalAlignment.Left, Height = 30,
+                ToolTip = prefix,
+                Foreground = Brushes.DarkBlue };
+            prefixBox.Items.Add("02");
+            prefixBox.Items.Add("03");
+            prefixBox.Items.Add("04");
+            prefixBox.Items.Add("050");
+            prefixBox.Items.Add("052");
+            prefixBox.Items.Add("054");
 
             ToolTip phone = new ToolTip();
             phone.Style = (Style)Resources["ToolTip"];
-            phone.Content = "Phone is in the format of: Prefix-Number\n" +
-                "Prefix - must start with '0', must be 2 or 3 numbers,\n" +
-                "Number - must contain 7 numbers, no lees, no more\n" +
-                "and don't forget to put '-' between them!";
-            TextBox phoneBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = phone };
-            phoneBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(phoneBlock, phoneBox));
+            phone.Content = "Phone Number\n" +
+                "must contain 7 numbers, no less, no more";
+            TextBox phoneBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = phone,
+                Margin = new Thickness(20, 25, 40, 5), Width = 240, HorizontalAlignment = HorizontalAlignment.Right, MaxLength = 7 };
+            phoneBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(phoneBlock, phoneBox, phoneMessageBlock));
+
+            TextBlock birthdateMessageBlock = new TextBlock
+            {
+                Style = (Style)Resources["messageBlock"],
+                Text = "Your birth date is invalid."
+            };
 
             ToolTip birthdate = new ToolTip();
             birthdate.Style = (Style)Resources["ToolTip"];
@@ -275,14 +335,15 @@ namespace Trivia_Client
                 "The formats are:\n" +
                 "DD.MM.YYYY\n" +
                 "DD/MM/YYYY";
-            TextBox birthdateBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = birthdate };
-            birthdateBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(birthdateBlock, birthdateBox));
+            TextBox birthdateBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = birthdate, Margin = new Thickness(0, 25, 0, 20) };
+            birthdateBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(birthdateBlock, birthdateBox, birthdateMessageBlock));
 
             List<TextBox> textBoxes = new List<TextBox>{ usernameBox, emailBox, addressBox, phoneBox, birthdateBox };
-
+            List<TextBlock> textBlocks = new List<TextBlock> { passwordMessageBlock, emailMessageBlock, addressMessageBlock, phoneMessageBlock, birthdateMessageBlock, usernameMessageBlock };
+            List<ComboBox> comboBoxes = new List<ComboBox> { prefixBox };
             Button nextButton = new Button { Style = (Style)Resources["darkButton"], Content = "Next",
                 HorizontalAlignment = HorizontalAlignment.Right };
-            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, textBoxes, passwordBox));
+            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, textBoxes, passwordBox, null, true, textBlocks, comboBoxes));
             
             Button backButton = new Button { Style = (Style)Resources["darkButton"], Content = "Back",
                 HorizontalAlignment = HorizontalAlignment.Left};
@@ -298,13 +359,22 @@ namespace Trivia_Client
             boxes.Children.Add(nextButton);
 
             StackPanel blocks = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom };
+            blocks.Children.Add(usernameMessageBlock);
             blocks.Children.Add(usernameBlock);
+            blocks.Children.Add(passwordMessageBlock);
             blocks.Children.Add(passwordBlock);
+            blocks.Children.Add(emailMessageBlock);
             blocks.Children.Add(emailBlock);
+            blocks.Children.Add(addressMessageBlock);
             blocks.Children.Add(addressBlock);
-            blocks.Children.Add(phoneBlock);
+            blocks.Children.Add(phoneMessageBlock);
+            blocks.Children.Add(prefixBox);
+            blocks.Children.Add(birthdateMessageBlock);
             blocks.Children.Add(birthdateBlock);
             blocks.Children.Add(backButton);
+
+            StackPanel phoneText = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom };
+            phoneText.Children.Add(phoneBlock);
 
             StackPanel head = new StackPanel();
             head.Children.Add(logo);
@@ -313,6 +383,7 @@ namespace Trivia_Client
             // Adding controls to grid
             MainGrid.Children.Add(head);
             MainGrid.Children.Add(blocks);
+            MainGrid.Children.Add(phoneText);
             MainGrid.Children.Add(boxes);
         }
 
@@ -869,8 +940,13 @@ namespace Trivia_Client
         Input: the TextBlock to handle, the TextBox to determine visibility.
         Output: none
         */
-        public void HandleBlockOutput(TextBlock textBlock, TextBox textBox)
+        public void HandleBlockOutput(TextBlock textBlock, TextBox textBox, TextBlock textBlock2 = null)
         {
+            if (textBox.BorderBrush == Brushes.Red)
+            { // for wrong input that were corrected
+                textBox.BorderBrush = Brushes.DarkBlue;
+                textBlock2.Visibility = Visibility.Hidden;
+            }
             if (textBox.Text != "") // If the user inserts input
             {
                 textBlock.Visibility = Visibility.Hidden;
@@ -887,8 +963,13 @@ namespace Trivia_Client
         Input: the TextBlock to handle, the PasswordBox to determine visibility.
         Output: none
         */
-        public void HandleBlockOutput(TextBlock textBlock, PasswordBox passwordBox)
+        public void HandleBlockOutput(TextBlock textBlock, PasswordBox passwordBox, TextBlock textBlock2 = null)
         {
+            if (passwordBox.BorderBrush == Brushes.Red)
+            { // for wrong input that were corrected
+                passwordBox.BorderBrush = Brushes.DarkBlue;
+                textBlock2.Visibility = Visibility.Hidden;
+            }
             if (passwordBox.Password != "") // If the user inserts password input
             {
                 textBlock.Visibility = Visibility.Hidden;
@@ -910,7 +991,7 @@ namespace Trivia_Client
         Output: none
         */
         public void HandleButtonClick(Windows nextWindow, List<TextBox> textBoxes = null, PasswordBox passwordBox = null, 
-            string roomName = null, bool closeRoom = true)
+            string roomName = null, bool closeRoom = true, List<TextBlock> textBlocks = null, List<ComboBox> comboBoxes = null)
         {
             try
             {
@@ -922,7 +1003,6 @@ namespace Trivia_Client
                             _using_communicator.WaitOne();
                             _communicator.logout();
                             _using_communicator.ReleaseMutex();
-                            this.Close();
                         }
                         _currWindow = Windows.ENTRY;
                         SetEntryWindow();
@@ -944,77 +1024,70 @@ namespace Trivia_Client
                             _using_communicator.WaitOne();
                             LoginStatus login = _communicator.login(textBoxes[0].Text, passwordBox.Password);
                             _using_communicator.ReleaseMutex();
-
-                            string message = "";
-                            bool error = true;
+  
                             switch (login)
                             {
                                 case LoginStatus.SUCCESS:
                                     _username = textBoxes[0].Text;
                                     _currWindow = Windows.MENU;
                                     SetMenuWindow();
-                                    error = false;
                                     break;
                                 case LoginStatus.ALREADYINGAME:
-                                    message = "Oops, it looks like this account already logged in.";
+                                    MessageBoxResult result = MessageBox.Show("Oops, it looks like this account already logged in.", "Trivia",
+                                        MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
                                     break;
                                 case LoginStatus.WRONGPASSWORD:
-                                    message = "Your password is incorrect, please note the format.";
+                                    passwordBox.BorderBrush = Brushes.Red;
+                                    textBlocks[0].Visibility = Visibility.Visible;
                                     break;
                                 case LoginStatus.WRONGUSERNAME:
-                                    message = string.Format("The user name \"{0}\" doesn't exists in our lists.", textBoxes[0].Text);
+                                    textBoxes[0].BorderBrush = Brushes.Red;
+                                    textBlocks[1].Visibility = Visibility.Visible;
                                     break;
                                 default:
                                     break;
-                            }
-                            if (error)
-                            {
-                                MessageBoxResult result = MessageBox.Show(string.Format("{0} \nTry again :)", message), "Trivia",
-                                    MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
                             }
                         }
                         else if (_currWindow == Windows.SIGNUP)
                         {
                             _using_communicator.WaitOne();
                             SignupStatus signup = _communicator.signup(textBoxes[0].Text, passwordBox.Password, textBoxes[1].Text,
-                                textBoxes[2].Text, textBoxes[3].Text, textBoxes[4].Text);
+                                textBoxes[2].Text, string.Format("{0}-{1}", comboBoxes[0].Text, textBoxes[3].Text), textBoxes[4].Text);
                             _using_communicator.ReleaseMutex();
 
-                            string message = "";
-                            bool error = true;
                             switch (signup)
                             {
-                                case SignupStatus.SOMETHING_WENT_WRONG:
-                                    message = "Something went wrong.";
-                                    break;
                                 case SignupStatus.SIGNUP_SUCCESS:
                                     _username = textBoxes[0].Text;
                                     _currWindow = Windows.MENU;
                                     SetMenuWindow();
-                                    error = false;
+                                    break;
+                                case SignupStatus.INVALID_NAME:
+                                    textBlocks[5].Visibility = Visibility.Visible;
+                                    textBoxes[0].BorderBrush = Brushes.Red;
                                     break;
                                 case SignupStatus.INVALID_PASSWORD:
-                                    message = "Your password is invalid, please note the format.";
+                                    textBlocks[0].Visibility = Visibility.Visible;
+                                    passwordBox.BorderBrush = Brushes.Red;
                                     break;
                                 case SignupStatus.INVALID_EMAIL:
-                                    message = "Your email is invalid, please note the format.";
+                                    textBlocks[1].Visibility = Visibility.Visible;
+                                    textBoxes[1].BorderBrush = Brushes.Red; 
                                     break;
                                 case SignupStatus.INVALID_ADDRESS:
-                                    message = "Your address is invalid, please note the format.";
+                                    textBlocks[2].Visibility = Visibility.Visible;
+                                    textBoxes[2].BorderBrush = Brushes.Red;
                                     break;
                                 case SignupStatus.INVALID_PHONE:
-                                    message = "Your phone number is invalid, please note the format.";
+                                    textBlocks[3].Visibility = Visibility.Visible;
+                                    textBoxes[3].BorderBrush = Brushes.Red;
                                     break;
                                 case SignupStatus.INVALID_BIRTHDATE:
-                                    message = "Your birth date is invalid, please note the format.";
+                                    textBlocks[4].Visibility = Visibility.Visible;
+                                    textBoxes[4].BorderBrush = Brushes.Red;
                                     break;
                                 default:
                                     break;
-                            }
-                            if (error)
-                            {
-                                MessageBoxResult result = MessageBox.Show(string.Format("{0} \nTry again :)", message), "Trivia",
-                                    MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
                             }
                         }
                         else if (_currWindow == Windows.ROOM)

@@ -72,7 +72,7 @@ RequestResult MenuRequestHandler::signout(RequestInfo info)
 	if (m_handlerFactory->getLoginManager().logout(m_user.getUsername()))
 	{ // if the sign out request is valid
 		signOutRes = { 1 }; // status: 1
-		newHandle = nullptr; // pointer to the next handle : nullptr
+		newHandle = m_handlerFactory->createLoginRequestHandler(); // pointer to the next handle : login
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(signOutRes), newHandle };
 }
