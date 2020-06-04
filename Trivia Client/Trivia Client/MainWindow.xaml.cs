@@ -552,7 +552,13 @@ namespace Trivia_Client
             TextBlock messageBlock = new TextBlock { Style = (Style)Resources["brightTitle"], Text = "Choose a room to play in :)" };
 
             ListBox roomsListBox = new ListBox { Style = (Style)Resources["brightListBox"] };
-            roomsListBox.MouseDoubleClick += new MouseButtonEventHandler((sender, args) => HandleButtonClick(Windows.ROOM, roomName: roomsListBox.SelectedItem.ToString()));
+            roomsListBox.MouseDoubleClick += (sender, args) =>
+            {
+                if (roomsListBox.SelectedItem != null) // Only if a room is selected
+                {
+                    HandleButtonClick(Windows.ROOM, roomName: roomsListBox.SelectedItem.ToString());
+                }
+            };
 
             Button backButton = new Button { Style = (Style)Resources["brightButton"], Content = "Back", Margin = new Thickness(0, 35, 0, 0) };
             backButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU));
