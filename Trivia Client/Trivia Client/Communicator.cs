@@ -269,6 +269,10 @@ namespace Trivia_Client
             joinRoom.roomId = 0;
             bool foundRoom = false;
 
+            string[] delimeter = { " >>> (" };
+
+            roomName = roomName.Split(delimeter, StringSplitOptions.RemoveEmptyEntries).First();
+
             // get the room id
             foreach (RoomData r in getAvailableRooms())
             {
@@ -340,8 +344,11 @@ namespace Trivia_Client
         output: number of players
         */
         public int getPlayersInRoom(uint room_id)
-        { 
-            send_data(messageCode.GETPLAYERSINROOMCODE, room_id.ToString());
+        {
+            GetPlayersInRoomReq getPlayers;
+            getPlayers.roomId = room_id;
+
+            send_data(messageCode.GETPLAYERSINROOMCODE, JsonConvert.SerializeObject(getPlayers));
             GetPlayersInRoomRes result = recv_data<GetPlayersInRoomRes>();
 
             return result.players.Count();

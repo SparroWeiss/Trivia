@@ -147,7 +147,7 @@ namespace Trivia_Client
             // Creating controls for window
             Image logo = new Image { Style = (Style)Resources["darkLogo"] };
 
-            TextBlock usernameBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Username", Margin = new Thickness(0, 0, 0, 20) };
+            TextBlock usernameBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Username", Margin = new Thickness(0, 0, 0, 10) };
            
             TextBlock passwordBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Password", Margin = new Thickness(0, 0, 0, 20) };
 
@@ -1383,7 +1383,11 @@ namespace Trivia_Client
 
                     foreach (RoomData room in currRooms)
                     {
-                        roomNames.Add(room.name);
+                        _using_communicator.WaitOne();
+                        int loggedPlayersAmount = _communicator.getPlayersInRoom(room.id);
+                        _using_communicator.ReleaseMutex();
+
+                        roomNames.Add(room.name + " >>> (" + loggedPlayersAmount.ToString() + "/ " + room.maxPlayers.ToString() + ")");
                     }
 
                     _available_rooms_worker.ReportProgress(0, new Tuple<List<string>, ListBox>(roomNames, (ListBox)e.Argument));
