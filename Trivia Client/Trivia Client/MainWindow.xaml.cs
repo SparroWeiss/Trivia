@@ -35,13 +35,9 @@ namespace Trivia_Client
         {
             InitializeComponent();
 
-            //List<KeyValuePair<uint, string>> test = JsonConvert.DeserializeObject<List<KeyValuePair<uint, string>>>("[[1,\"Five\"],[2,\"Four\"],[3,\"Six\"],[4,\"Eight\"]]");
-            //Dictionary<string, string> test = JsonConvert.DeserializeObject<Dictionary<string, string>>("{'href': '/account/login.aspx','target': '_blank'}");
-            //Dictionary<int, string> test = JsonConvert.DeserializeObject<Dictionary<int, string>>("{1:\"Five\",2:\"Four\",3:\"Six\",4:\"Eight\"}");
-           
+            // Initializing ToolTip message time
             ToolTipService.ShowDurationProperty.OverrideMetadata(typeof(DependencyObject), new FrameworkPropertyMetadata(Int32.MaxValue));
-            /*without this line the tip window will be closed after 5 seconds*/
-
+            
             // Setting fields
             _available_rooms_worker.WorkerSupportsCancellation = true;
             _available_rooms_worker.WorkerReportsProgress = true;
