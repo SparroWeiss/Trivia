@@ -104,5 +104,9 @@
     <Resource Include="Resources\BrightLogo.png" />
     <Resource Include="Resources\DarkLogo.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\HidePassword.png" />
+    <Resource Include="Resources\ShowPassword.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

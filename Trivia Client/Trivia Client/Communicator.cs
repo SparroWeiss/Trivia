@@ -329,7 +329,7 @@ namespace Trivia_Client
             
             foreach(RoomData room in result.rooms)
             {
-                if (room.isActive == (uint)ActiveMode.WAITING)
+                if (room.isActive == (uint)ActiveMode.WAITING && room.maxPlayers != getPlayersInRoom(room.id))
                 {
                     availableRooms.Add(room);
                 }

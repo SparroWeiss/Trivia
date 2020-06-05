@@ -142,7 +142,7 @@ namespace Trivia_Client
         */
         private void SetLoginWindow()
         {
-            SetWindow(350, 400, false);
+            SetWindow(350, 420, false);
 
             // Creating controls for window
             Image logo = new Image { Style = (Style)Resources["darkLogo"] };
@@ -172,14 +172,58 @@ namespace Trivia_Client
                 "at least 1 number\n" +
                 "and at least 1 special character:\n" +
                 "'!', '@', '#', '$', '%', '^', '&', '*'";
-            PasswordBox passwordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"], ToolTip = password, Margin = new Thickness(0, 25, 0, 20) };
-            passwordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, passwordBox, passwordMessageBlock));
+            PasswordBox hiddenPasswordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"], ToolTip = password, Margin = new Thickness(0, 25, 0, 20) };
+            hiddenPasswordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, hiddenPasswordBox, passwordMessageBlock));
+            TextBox visiblePasswordBox = new TextBox
+            {
+                Style = (Style)Resources["darkTextBox"],
+                Margin = new Thickness(0, 116, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Visibility = Visibility.Hidden,
+                MaxLength = 8,
+                ToolTip = password
+            };
+
+            Button passwordEye = new Button
+            {
+                Style = (Style)Resources["passwordEyeButton"],
+                Background = new ImageBrush(new BitmapImage(new Uri("..\\..\\Resources\\HidePassword.png", UriKind.Relative)))
+            };
+            passwordEye.Click += (sender, args) =>
+            {
+                if (hiddenPasswordBox.Password.Length != 0)
+                {
+                    if (hiddenPasswordBox.Visibility == Visibility.Visible)
+                    {
+                        visiblePasswordBox.Text = hiddenPasswordBox.Password;
+                        hiddenPasswordBox.Visibility = Visibility.Hidden;
+                        visiblePasswordBox.Visibility = Visibility.Visible;
+                        passwordEye.Background = new ImageBrush(new BitmapImage(new Uri("..\\..\\Resources\\ShowPassword.png", UriKind.Relative)));
+                    }
+                    else
+                    {
+                        hiddenPasswordBox.Password = visiblePasswordBox.Text;
+                        visiblePasswordBox.Visibility = Visibility.Hidden;
+                        hiddenPasswordBox.Visibility = Visibility.Visible;
+                        passwordEye.Background = new ImageBrush(new BitmapImage(new Uri("..\\..\\Resources\\HidePassword.png", UriKind.Relative)));
+                    }
+                }
+            };
 
             List<TextBox> textBoxes = new List<TextBox> { usernameBox };
             List<TextBlock> textBlocks = new List<TextBlock> { passwordMessageBlock, usernameMessageBlock };
             Button nextButton = new Button { Style = (Style)Resources["darkButton"], Content = "Next",
                HorizontalAlignment = HorizontalAlignment.Right };
-            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, textBoxes, passwordBox, textBlocks: textBlocks));
+            nextButton.Click += (sender, args) =>
+            {
+                if (hiddenPasswordBox.Visibility == Visibility.Hidden)
+                {
+                    hiddenPasswordBox.Password = visiblePasswordBox.Text;
+                }
+
+                HandleButtonClick(Windows.MENU, textBoxes, hiddenPasswordBox, textBlocks: textBlocks);
+            };
             
             Button backButton = new Button { Style = (Style)Resources["darkButton"], Content = "Back",
                 HorizontalAlignment = HorizontalAlignment.Left };
@@ -187,7 +231,7 @@ namespace Trivia_Client
 
             StackPanel boxes = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom};
             boxes.Children.Add(usernameBox);
-            boxes.Children.Add(passwordBox);
+            boxes.Children.Add(hiddenPasswordBox);
             boxes.Children.Add(nextButton);
 
             StackPanel blocks = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom };
@@ -201,6 +245,8 @@ namespace Trivia_Client
             MainGrid.Children.Add(logo);
             MainGrid.Children.Add(blocks);
             MainGrid.Children.Add(boxes);
+            MainGrid.Children.Add(passwordEye);
+            MainGrid.Children.Add(visiblePasswordBox);
         }
 
         /*
@@ -256,8 +302,46 @@ namespace Trivia_Client
                 "at least 1 number\n" +
                 "and at least 1 special character:\n" +
                 "'!', '@', '#', '$', '%', '^', '&', '*'";
-            PasswordBox passwordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"], ToolTip = password, Margin = new Thickness(0, 25, 0, 5) };
-            passwordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, passwordBox, passwordMessageBlock));
+            PasswordBox hiddenPasswordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"], ToolTip = password, Margin = new Thickness(0, 25, 0, 5) };
+            hiddenPasswordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, hiddenPasswordBox, passwordMessageBlock));
+
+            TextBox visiblePasswordBox = new TextBox
+            {
+                Style = (Style)Resources["darkTextBox"],
+                Margin = new Thickness(0, 0, 0, 113),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Visibility = Visibility.Hidden,
+                MaxLength = 8,
+                ToolTip = password
+            };
+
+            Button passwordEye = new Button
+            {
+                Style = (Style)Resources["passwordEyeButton"],
+                Margin = new Thickness(0, 0, 0, 113),
+                Background = new ImageBrush(new BitmapImage(new Uri("..\\..\\Resources\\HidePassword.png", UriKind.Relative)))
+            };
+            passwordEye.Click += (sender, args) =>
+            {
+                if (hiddenPasswordBox.Password.Length != 0)
+                {
+                    if (hiddenPasswordBox.Visibility == Visibility.Visible)
+                    {
+                        visiblePasswordBox.Text = hiddenPasswordBox.Password;
+                        hiddenPasswordBox.Visibility = Visibility.Hidden;
+                        visiblePasswordBox.Visibility = Visibility.Visible;
+                        passwordEye.Background = new ImageBrush(new BitmapImage(new Uri("..\\..\\Resources\\ShowPassword.png", UriKind.Relative)));
+                    }
+                    else
+                    {
+                        hiddenPasswordBox.Password = visiblePasswordBox.Text;
+                        visiblePasswordBox.Visibility = Visibility.Hidden;
+                        hiddenPasswordBox.Visibility = Visibility.Visible;
+                        passwordEye.Background = new ImageBrush(new BitmapImage(new Uri("..\\..\\Resources\\HidePassword.png", UriKind.Relative)));
+                    }
+                }
+            };
 
             TextBlock emailMessageBlock = new TextBlock
             {
@@ -339,15 +423,23 @@ namespace Trivia_Client
             List<ComboBox> comboBoxes = new List<ComboBox> { prefixBox };
             Button nextButton = new Button { Style = (Style)Resources["darkButton"], Content = "Next",
                 HorizontalAlignment = HorizontalAlignment.Right };
-            nextButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.MENU, textBoxes, passwordBox, textBlocks: textBlocks, comboBoxes: comboBoxes));
-            
+            nextButton.Click += (sender, args) =>
+            {
+                if (hiddenPasswordBox.Visibility == Visibility.Hidden)
+                {
+                    hiddenPasswordBox.Password = visiblePasswordBox.Text;
+                }
+
+                HandleButtonClick(Windows.MENU, textBoxes, hiddenPasswordBox, textBlocks: textBlocks, comboBoxes: comboBoxes);
+            };
+
             Button backButton = new Button { Style = (Style)Resources["darkButton"], Content = "Back",
                 HorizontalAlignment = HorizontalAlignment.Left};
             backButton.Click += new RoutedEventHandler((sender, args) => HandleButtonClick(Windows.ENTRY));
 
             StackPanel boxes = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom };
             boxes.Children.Add(usernameBox);
-            boxes.Children.Add(passwordBox);
+            boxes.Children.Add(hiddenPasswordBox);
             boxes.Children.Add(emailBox);
             boxes.Children.Add(addressBox);
             boxes.Children.Add(phoneBox);
@@ -381,6 +473,8 @@ namespace Trivia_Client
             MainGrid.Children.Add(blocks);
             MainGrid.Children.Add(phoneText);
             MainGrid.Children.Add(boxes);
+            MainGrid.Children.Add(visiblePasswordBox);
+            MainGrid.Children.Add(passwordEye);
         }
 
         /*
