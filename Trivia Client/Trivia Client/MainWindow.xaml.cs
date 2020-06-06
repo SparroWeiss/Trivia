@@ -34,7 +34,6 @@ namespace Trivia_Client
         public MainWindow()
         {
             InitializeComponent();
-
             // Initializing ToolTip message time
             ToolTipService.ShowDurationProperty.OverrideMetadata(typeof(DependencyObject), new FrameworkPropertyMetadata(Int32.MaxValue));
             
@@ -880,6 +879,8 @@ namespace Trivia_Client
         {
             SetWindow(600, 900, true);
 
+            System.Media.SoundPlayer player = new System.Media.SoundPlayer("..\\..\\Resources\\"+timeForQue.ToString()+"_sec.wav");
+
             bool help = false;
             uint timePerQuestion = timeForQue;
             DispatcherTimer timer = new DispatcherTimer();
@@ -929,6 +930,10 @@ namespace Trivia_Client
             timer.Interval = TimeSpan.FromSeconds(1);
             timer.Tick += (sender, args) =>
                     {
+                        if(_currWindow != Windows.GAME)
+                        {
+                            player.Stop();
+                        }
                         timeBlock.Text = (timeForQue-1).ToString();
                         if (timeForQue == 1)
                         {
@@ -975,6 +980,7 @@ namespace Trivia_Client
                         }
                         else if (timeForQue == 0)
                         {
+                            player.Stop();
                             timer.Stop();
                             if (currQuestionNum < questionAmount && _currWindow == Windows.GAME)
                             {
@@ -995,6 +1001,7 @@ namespace Trivia_Client
                     };
             timer.Start(); // Starting timer for question
             Thread.Sleep(1500);
+            player.Play();
 
             head.Children.Add(logo);
             head.Children.Add(questionBlock);
@@ -1003,7 +1010,8 @@ namespace Trivia_Client
             Button helpButton = new Button();
             if (!useHelp)
             {
-                helpButton = new Button { Style = (Style)Resources["brightButton"], Content = "50/50", HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Top };
+                helpButton = new Button { Style = (Style)Resources["Button"], Content = "50/50", 
+                    HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Top, };
                 helpButton.Click += (sender, args) =>
                 {
                     uint counter = 0;
@@ -1018,7 +1026,6 @@ namespace Trivia_Client
                             }
                         }
                     }
-
 
                     leaveButton.HorizontalAlignment = HorizontalAlignment.Center;
                     head.Children.Remove(buttons);

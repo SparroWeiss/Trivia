@@ -7,6 +7,14 @@
         mc:Ignorable="d"
         Title="Trivia" Height="500" Width="600" Background="White" ResizeMode="NoResize">
 
+    <!--<Window.Triggers>
+        <EventTrigger RoutedEvent="Button.Click">
+            <EventTrigger.Actions>
+                <SoundPlayerAction Source="Resources\ButtonClick1.mp3"/>
+            </EventTrigger.Actions>
+        </EventTrigger>
+    </Window.Triggers> -->
+
     <Window.Resources>
         <Style x:Key="grayText"
            TargetType="TextBlock">
@@ -176,27 +184,7 @@
                     Value="8" />
         </Style>
 
-        <Style x:Key="darkButton"
-           TargetType="Button">
-            <Setter Property="FontSize"
-              Value="20" />
-            <Setter Property="Width"
-              Value="100" />
-            <Setter Property="FontFamily"
-              Value="Comic Sans MS" />
-            <Setter Property="Margin"
-              Value="70, 0, 70, 30" />
-            <Setter Property="HorizontalContentAlignment"
-              Value="Center" />
-            <Setter Property="Background"
-              Value="Transparent" />
-            <Setter Property="BorderBrush"
-              Value="DarkBlue" />
-            <Setter Property="Foreground"
-              Value="DarkBlue" />
-        </Style>
-
-        <Style x:Key="brightButton"
+        <Style x:Key="Button"
            TargetType="Button">
             <Setter Property="FontSize"
               Value="20" />
@@ -214,6 +202,32 @@
               Value="Lavender" />
             <Setter Property="Foreground"
               Value="Lavender" />
+        </Style>
+        
+        <Style x:Key="darkButton"
+           BasedOn="{StaticResource Button}"
+           TargetType="Button">
+            <Style.Triggers>
+                <EventTrigger RoutedEvent="PreviewMouseDown">
+                    <SoundPlayerAction Source="Resources\ButtonClick.wav" />
+                </EventTrigger>
+            </Style.Triggers>
+            <Setter Property="Width"
+              Value="100" />
+            <Setter Property="BorderBrush"
+              Value="DarkBlue" />
+            <Setter Property="Foreground"
+              Value="DarkBlue" />
+        </Style>
+
+        <Style x:Key="brightButton"
+           BasedOn="{StaticResource Button}"
+           TargetType="Button">
+            <Style.Triggers>
+                <EventTrigger RoutedEvent="PreviewMouseDown">
+                    <SoundPlayerAction Source="Resources\ButtonClick.wav" />
+                </EventTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="darkLogo"

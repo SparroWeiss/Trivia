@@ -101,11 +101,18 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\BrightLogo.png" />
-    <Resource Include="Resources\DarkLogo.png" />
+    <Content Include="Resources\10_sec.wav" />
+    <Content Include="Resources\20_sec.wav" />
+    <Content Include="Resources\30_sec.wav" />
+    <Content Include="Resources\40_sec.wav" />
+    <Content Include="Resources\50_sec.wav" />
+    <Content Include="Resources\ButtonClick.wav" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\BrightLogo.png" />
+    <Resource Include="Resources\DarkLogo.png" />
     <Resource Include="Resources\HidePassword.png" />
+    <Resource Include="Resources\lifeguardWheel.jpg" />
     <Resource Include="Resources\ShowPassword.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
