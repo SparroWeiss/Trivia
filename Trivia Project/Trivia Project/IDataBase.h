@@ -56,5 +56,5 @@ public:
 	virtual int getNumOfTotalAnswers(std::string name) = 0;
 	virtual int getNumOfPlayerGames(std::string name) = 0;
 	virtual std::vector<Statistic> getStatistics() = 0;
-	virtual void updateStatistics(std::map<std::string, GameData> usersGameData) = 0;
+	virtual void updateStatistics(std::map<std::string, GameData> usersGameData, std::string username) = 0;
 };

@@ -13,6 +13,7 @@ public:
 	~GameManager();
 	Game* createGame(Room room);
 	bool deleteGame(Game* game);
+	void updateUserStatistics(Game* game, std::string username);
 
 private:
 	GameManager();

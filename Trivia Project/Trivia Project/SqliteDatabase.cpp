@@ -407,23 +407,28 @@ function updates the statistics of the users
 input: the usernames and their data
 output: none
 */
-void SqliteDatabase::updateStatistics(std::map<std::string, GameData> usersGameData)
+void SqliteDatabase::updateStatistics(std::map<std::string, GameData> usersGameData, std::string username)
 {
 	for (Statistic curr : getStatistics())
 	{
-		for (std::pair<std::string, GameData> player : usersGameData)
+		if (curr._name == username)
 		{
-			if (curr._name == player.first)
+			for (std::pair<std::string, GameData> player : usersGameData)
 			{
-				int gameQuestions = player.second.correctAnswersCount + player.second.wrongAnswersCount;
+				if (curr._name == player.first)
+				{
+					int gameQuestions = player.second.correctAnswersCount + player.second.wrongAnswersCount;
 
-				updateUserStatistic(Statistic{curr._name,
-					curr._totalAnswers+gameQuestions,
-					curr._correctAnswers + static_cast<int>(player.second.correctAnswersCount),
-					curr._numOfGames+1,
-					static_cast<float>((curr._answersTime*curr._totalAnswers + player.second.averageAnswerTime*gameQuestions)
-					/ (curr._totalAnswers + gameQuestions)) });
+					updateUserStatistic(Statistic{ curr._name,
+						curr._totalAnswers + gameQuestions,
+						curr._correctAnswers + static_cast<int>(player.second.correctAnswersCount),
+						curr._numOfGames + 1,
+						static_cast<float>((curr._answersTime * curr._totalAnswers + player.second.averageAnswerTime * gameQuestions)
+						/ (curr._totalAnswers + gameQuestions)) });
+					break;
+				}
 			}
+			break;
 		}
 	}
 }

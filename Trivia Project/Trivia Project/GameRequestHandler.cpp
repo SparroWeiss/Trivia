@@ -13,6 +13,7 @@ GameRequestHandler::GameRequestHandler(LoggedUser user, Room* room)
 	m_gameManager = m_gameManager->getInstance();
 	m_game = room->getGame();
 	m_handlerFactory = m_handlerFactory->getInstance();
+	m_updateStatistics = false;
 }
 
 /*
@@ -105,6 +106,14 @@ RequestResult GameRequestHandler::getGameResults(RequestInfo info)
 	std::map<std::string, GameData> results = m_game->getUsersData();
 	locker.unlock();
 
+	std::unique_lock<std::mutex> locker2(_mutex_game);
+	if (!m_updateStatistics)
+	{
+		m_gameManager->updateUserStatistics(m_game, m_user.getUsername());
+		m_updateStatistics = true;
+	}
+	locker2.unlock();
+
 	for (std::map<std::string, GameData>::iterator i = results.begin(); i != results.end(); ++i)
 	{
 		if ((*i).second.playing == PlayerMode::PLAYING)
@@ -129,6 +138,11 @@ RequestResult GameRequestHandler::leaveGame(RequestInfo info)
 	std::unique_lock<std::mutex> locker(_mutex_game);
 	if (m_game->removePlayer(m_user))
 	{
+		if (!m_updateStatistics)
+		{
+			m_gameManager->updateUserStatistics(m_game, m_user.getUsername());
+			m_updateStatistics = true;
+		}
 		if (m_game->getUsersAmount() == 0) // If all players left the game
 		{
 			m_gameManager->deleteGame(m_game); // delete the game
