@@ -6,15 +6,7 @@
         xmlns:local="clr-namespace:Trivia_Client"
         mc:Ignorable="d"
         Title="Trivia" Height="500" Width="600" Background="White" ResizeMode="NoResize">
-
-    <!--<Window.Triggers>
-        <EventTrigger RoutedEvent="Button.Click">
-            <EventTrigger.Actions>
-                <SoundPlayerAction Source="Resources\ButtonClick1.mp3"/>
-            </EventTrigger.Actions>
-        </EventTrigger>
-    </Window.Triggers> -->
-
+    
     <Window.Resources>
         <Style x:Key="grayText"
            TargetType="TextBlock">

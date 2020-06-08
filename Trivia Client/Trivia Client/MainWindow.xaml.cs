@@ -1181,8 +1181,9 @@ namespace Trivia_Client
                                     SetMenuWindow();
                                     break;
                                 case LoginStatus.ALREADYINGAME:
-                                    MessageBoxResult result = MessageBox.Show("Oops, it looks like this account already logged in.", "Trivia",
-                                        MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                                    textBoxes[0].BorderBrush = Brushes.Red;
+                                    textBlocks[1].Text = "This account already logged in.";
+                                    textBlocks[1].Visibility = Visibility.Visible;
                                     break;
                                 case LoginStatus.WRONGPASSWORD:
                                     passwordBox.BorderBrush = Brushes.Red;
@@ -1190,6 +1191,7 @@ namespace Trivia_Client
                                     break;
                                 case LoginStatus.WRONGUSERNAME:
                                     textBoxes[0].BorderBrush = Brushes.Red;
+                                    textBlocks[1].Text = "The user name doesn't exists in our lists.";
                                     textBlocks[1].Visibility = Visibility.Visible;
                                     break;
                                 default:
