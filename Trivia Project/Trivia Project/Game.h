@@ -23,6 +23,7 @@ public:
 	bool removePlayer(LoggedUser& user);
 	std::map<std::string, GameData> getUsersData();
 	unsigned int getUsersAmount();
+	unsigned int getNumOfQuestions();
 private:
 	std::map<std::string, GameData> m_players;
 	std::vector<Question> m_questions;

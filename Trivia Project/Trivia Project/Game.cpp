@@ -187,6 +187,16 @@ unsigned int Game::getUsersAmount()
 	return sum;
 }
 
+/*
+function gets how many question there are in the game
+input: none
+output: the number of questions
+*/
+unsigned int Game::getNumOfQuestions()
+{
+	return m_questions.size();
+}
+
 /////////////////////////HELPER
 
 /*
