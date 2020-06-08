@@ -134,7 +134,6 @@ output: none
 void Communicator::handleNewClient(SOCKET client_socket)
 {
 	std::string name = "%unknown%";
-	bool loggedIn = false;
 	while (true)
 	{
 		try
@@ -150,9 +149,14 @@ void Communicator::handleNewClient(SOCKET client_socket)
 				{ // if the handler has changed
 					delete m_clients[client_socket];
 					m_clients[client_socket] = currResult.newHandler; // updating client state
+					if (currRequest.id == SIGNOUT)
+					{
+						std::cout << "### " << name << " left" << std::endl;
+						name = "%unknown%";
+					}
 				}
 				locker.unlock();
-				if (!loggedIn) // not enter to this block more than once
+				if (currRequest.id == SIGNUPCODE || currRequest.id == LOGINCODE)
 				{
 					try
 					{
@@ -162,7 +166,6 @@ void Communicator::handleNewClient(SOCKET client_socket)
 						{
 							name = JsonRequestPacketDeserializer::deserializeLoginRequest(currRequest.buffer).username;
 							std::cout << "### "<< name << " joined" << std::endl; // rememberring the name for the thread
-							loggedIn = true; // there is no need to enter this block again, we got what we need
 						}
 					}
 					catch (const std::exception& e)
@@ -170,14 +173,6 @@ void Communicator::handleNewClient(SOCKET client_socket)
 						std::cout << e.what() << std::endl;
 					}
 					
-				}
-				if (m_clients[client_socket] == nullptr)
-				{ // if the user logged out
-					std::cout << "### " << name << " logged out" << std::endl;
-					std::lock_guard<std::mutex> locker(_using_clients);
-					m_clients.erase(client_socket);
-					closesocket(client_socket);
-					return;
 				}
 			}
 			else
