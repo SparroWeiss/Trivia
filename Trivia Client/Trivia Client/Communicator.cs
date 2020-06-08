@@ -137,7 +137,7 @@ namespace Trivia_Client
         input: the username and the password
         output: did login or not (true \ false)
         */
-        public bool login(string username, string password)
+        public LoginStatus login(string username, string password)
         {
             LoginReq login;
             login.username = username;
@@ -145,7 +145,7 @@ namespace Trivia_Client
             
             send_data(messageCode.LOGINCODE, JsonConvert.SerializeObject(login));
             LoginRes result = recv_data<LoginRes>();
-            return (result.status == 1); 
+            return (LoginStatus)result.status; 
         }
 
         /*
@@ -153,7 +153,7 @@ namespace Trivia_Client
         input: the username, password, email, address, phone and birth date
         output: did signup or not (true \ false)
         */
-        public bool signup(string username, string password, string email, string address, string phone, string birthdate)
+        public SignupStatus signup(string username, string password, string email, string address, string phone, string birthdate)
         {
             SignupReq signup;
             signup.username = username;
@@ -165,7 +165,7 @@ namespace Trivia_Client
 
             send_data(messageCode.SIGNUPCODE, JsonConvert.SerializeObject(signup));
             SignupRes result = recv_data<SignupRes>();
-            return (result.status == 1);
+            return (SignupStatus)result.status;
         }
 
         /*
@@ -269,6 +269,10 @@ namespace Trivia_Client
             joinRoom.roomId = 0;
             bool foundRoom = false;
 
+            string[] delimeter = { " >>> (" };
+
+            roomName = roomName.Split(delimeter, StringSplitOptions.RemoveEmptyEntries).First();
+
             // get the room id
             foreach (RoomData r in getAvailableRooms())
             {
@@ -325,13 +329,29 @@ namespace Trivia_Client
             
             foreach(RoomData room in result.rooms)
             {
-                if (room.isActive == (uint)ActiveMode.WAITING)
+                if (room.isActive == (uint)ActiveMode.WAITING && room.maxPlayers != getPlayersInRoom(room.id))
                 {
                     availableRooms.Add(room);
                 }
             }
 
             return availableRooms;
+        }
+
+        /*
+        this function send a get players in a room request to the server
+        input: the room id
+        output: number of players
+        */
+        public int getPlayersInRoom(uint room_id)
+        {
+            GetPlayersInRoomReq getPlayers;
+            getPlayers.roomId = room_id;
+
+            send_data(messageCode.GETPLAYERSINROOMCODE, JsonConvert.SerializeObject(getPlayers));
+            GetPlayersInRoomRes result = recv_data<GetPlayersInRoomRes>();
+
+            return result.players.Count();
         }
 
         /*

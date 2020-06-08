@@ -20,7 +20,7 @@ public:
 	virtual int getNumOfTotalAnswers(std::string name);
 	virtual int getNumOfPlayerGames(std::string name);
 	std::vector<Statistic> getStatistics();
-	void updateStatistics(std::map<std::string, GameData> usersGameData);
+	void updateStatistics(std::map<std::string, GameData> usersGameData, std::string username, unsigned int gameQuestions);
 
 private:
 	SqliteDatabase();

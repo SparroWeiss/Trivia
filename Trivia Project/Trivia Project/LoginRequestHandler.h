@@ -12,6 +12,11 @@ class RequestHandlerFactory;
 #define PHONE_REGEX std::regex(R"(^((0[2-48-9])|(05\d))-\d{7}$)")
 #define BIRTHDATE_REGEX std::regex(R"(^(((3[0-3]|[0-2]\d)\/(0\d|1[0-2])\/(\d{4}))|((3[0-3]|[0-2]\d)\.(0\d|1[0-2])\.(\d{4})))$)")
 
+enum signupStatus
+{
+	INVALID_NAME = 0, SIGNUP_SUCCESS, INVALID_PASSWORD, INVALID_EMAIL, INVALID_ADDRESS, INVALID_PHONE, INVALID_BIRTHDATE
+};
+
 class LoginRequestHandler : public IRequestHandler
 {
 public:
@@ -27,5 +32,5 @@ private:
 	RequestResult login(RequestInfo info);
 	RequestResult signup(RequestInfo info);
 
-	bool signupValidation(std::string, std::string, std::string, std::string, std::string);
+	signupStatus signupValidation(std::string, std::string, std::string, std::string, std::string);
 };

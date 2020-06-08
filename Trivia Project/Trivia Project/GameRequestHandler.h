@@ -21,6 +21,7 @@ private:
 	LoggedUser m_user;
 	GameManager* m_gameManager;
 	RequestHandlerFactory* m_handlerFactory;
+	bool m_updateStatistics;
 
 	RequestResult getQuestion(RequestInfo);
 	RequestResult submitAnswer(RequestInfo);

@@ -75,7 +75,6 @@ bool GameManager::deleteGame(Game* game)
 	if (it != m_games.end())
 	{
 		std::unique_lock<std::mutex> locker(_using_db);
-		m_database->updateStatistics(game->getUsersData());
 		locker.unlock();
 		m_games.erase(it);
 		try
@@ -89,4 +88,14 @@ bool GameManager::deleteGame(Game* game)
 		}
 	}
 	return true;
+}
+
+/*
+this function update the user statistics in the DB
+input: the game that the user played in
+output: none
+*/
+void GameManager::updateUserStatistics(Game* game, std::string username)
+{
+	m_database->updateStatistics(game->getUsersData(), username, game->getNumOfQuestions());
 }

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Trivia_Client"
         mc:Ignorable="d"
         Title="Trivia" Height="500" Width="600" Background="White" ResizeMode="NoResize">
-
+    
     <Window.Resources>
         <Style x:Key="grayText"
            TargetType="TextBlock">
@@ -176,27 +176,7 @@
                     Value="8" />
         </Style>
 
-        <Style x:Key="darkButton"
-           TargetType="Button">
-            <Setter Property="FontSize"
-              Value="20" />
-            <Setter Property="Width"
-              Value="100" />
-            <Setter Property="FontFamily"
-              Value="Comic Sans MS" />
-            <Setter Property="Margin"
-              Value="70, 0, 70, 30" />
-            <Setter Property="HorizontalContentAlignment"
-              Value="Center" />
-            <Setter Property="Background"
-              Value="Transparent" />
-            <Setter Property="BorderBrush"
-              Value="DarkBlue" />
-            <Setter Property="Foreground"
-              Value="DarkBlue" />
-        </Style>
-
-        <Style x:Key="brightButton"
+        <Style x:Key="Button"
            TargetType="Button">
             <Setter Property="FontSize"
               Value="20" />
@@ -214,6 +194,32 @@
               Value="Lavender" />
             <Setter Property="Foreground"
               Value="Lavender" />
+        </Style>
+        
+        <Style x:Key="darkButton"
+           BasedOn="{StaticResource Button}"
+           TargetType="Button">
+            <Style.Triggers>
+                <EventTrigger RoutedEvent="PreviewMouseDown">
+                    <SoundPlayerAction Source="Resources\ButtonClick.wav" />
+                </EventTrigger>
+            </Style.Triggers>
+            <Setter Property="Width"
+              Value="100" />
+            <Setter Property="BorderBrush"
+              Value="DarkBlue" />
+            <Setter Property="Foreground"
+              Value="DarkBlue" />
+        </Style>
+
+        <Style x:Key="brightButton"
+           BasedOn="{StaticResource Button}"
+           TargetType="Button">
+            <Style.Triggers>
+                <EventTrigger RoutedEvent="PreviewMouseDown">
+                    <SoundPlayerAction Source="Resources\ButtonClick.wav" />
+                </EventTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="darkLogo"
@@ -266,6 +272,144 @@
               Value="Auto"/>
             <Setter Property="BorderThickness"
               Value="0" />
+        </Style>
+        
+        <Style x:Key="ToolTip"
+               TargetType="ToolTip">
+            <Setter Property="FontFamily"
+                    Value="Comic Sans MS" />
+            <Setter Property="FontSize"
+                    Value="15" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="Background"
+              Value="MediumSlateBlue" />
+            <Setter Property="Foreground"
+              Value="Lavender" />
+            <Setter Property="Visibility"
+              Value="Visible" />
+        </Style>
+
+        <Style x:Key="messageBox"
+               TargetType="TextBox"
+               BasedOn="{StaticResource brightTextBox}">
+            <Setter Property="IsReadOnly"
+                    Value="True" />
+            <Setter Property="Height"
+                    Value="0" />
+            <Setter Property="Margin"
+                    Value="0, 25, 0, 0" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+        </Style>
+
+        <Style x:Key="messageBlock"
+               BasedOn="{StaticResource grayText}"
+               TargetType="TextBlock">
+            <Setter Property="TextAlignment"
+                    Value="Center" />
+            <Setter Property="Height"
+                    Value="25" />
+            <Setter Property="FontSize"
+                    Value="15" />
+            <Setter Property="Margin"
+                    Value="0, 0, 0, 0" />
+            <Setter Property="Foreground"
+                    Value="Red" />
+            <Setter Property="Visibility"
+                    Value="Hidden" />
+            <Setter Property="ForceCursor"
+                    Value="True" />
+        </Style>
+
+        <Style x:Key="comboStyle"
+               TargetType="ComboBox">
+            <Setter Property="FontSize"
+              Value="15" />
+            <Setter Property="Width"
+              Value="300" />
+            <Setter Property="Height"
+              Value="30" />
+            <Setter Property="Margin"
+              Value="0, 10, 0, 15" />
+            <Setter Property="FontFamily"
+              Value="Comic Sans MS" />
+            <Setter Property="Background"
+              Value="Transparent" />
+            <Setter Property="Foreground"
+              Value="Firebrick" />
+            <Setter Property="VerticalAlignment"
+              Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment"
+              Value="Center" />
+            <Setter Property="Template">
+              <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                  <Grid>
+                    <ToggleButton Grid.Column="2" Focusable="false" IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}" >
+                      <ToggleButton.Template>
+                        <ControlTemplate>
+                          <Grid>
+                            <Grid.ColumnDefinitions>
+                               <ColumnDefinition Width="5*" />
+                               <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="Border"  Grid.ColumnSpan="2" Background="Beige" BorderBrush="Black" BorderThickness="1" />
+                            <Path x:Name="Arrow" Grid.Column="1"  Fill="Gray" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 4 4 L 8 0 Z"/>
+                          </Grid>
+                        </ControlTemplate>
+                      </ToggleButton.Template>
+                    </ToggleButton>
+                    <ContentPresenter Name="ContentSite" IsHitTestVisible="False"  Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" Margin="3"  />
+                    <TextBox x:Name="PART_EditableTextBox" Visibility="Hidden" IsReadOnly="{TemplateBinding IsReadOnly}"/>
+                    <Popup Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True"  Focusable="False" PopupAnimation="Slide">
+                      <Grid  Name="DropDown" SnapsToDevicePixels="True" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                        <Border x:Name="DropDownBorder" Background="Beige" BorderBrush="Black" BorderThickness="1"/>
+                        <ScrollViewer SnapsToDevicePixels="True">
+                          <StackPanel IsItemsHost="True" />
+                        </ScrollViewer>
+                      </Grid>
+                    </Popup>
+                  </Grid>
+                </ControlTemplate>
+              </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="comboItem" 
+           TargetType="ComboBoxItem">
+            <Setter Property="Foreground"
+              Value="Firebrick" />
+            <Setter Property="Margin"
+              Value="0, 10, 0, 20" />
+            <Setter Property="VerticalAlignment"
+              Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment"
+              Value="Left" />
+        </Style>
+
+        <Style x:Key="transparentButton"
+           TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Background="{TemplateBinding Background}">
+                            <ContentPresenter />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="passwordEyeButton"
+           TargetType="Button" BasedOn="{StaticResource transparentButton}">
+            <Setter Property="Margin" Value="0, 115, 5, 0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="Width" Value="45" />
+            <Setter Property="Height" Value="45" />
         </Style>
     </Window.Resources>
 
