@@ -407,7 +407,7 @@ function updates the statistics of the users
 input: the usernames and their data
 output: none
 */
-void SqliteDatabase::updateStatistics(std::map<std::string, GameData> usersGameData, std::string username)
+void SqliteDatabase::updateStatistics(std::map<std::string, GameData> usersGameData, std::string username, unsigned int gameQuestions)
 {
 	for (Statistic curr : getStatistics())
 	{
@@ -417,14 +417,12 @@ void SqliteDatabase::updateStatistics(std::map<std::string, GameData> usersGameD
 			{
 				if (curr._name == player.first)
 				{
-					int gameQuestions = player.second.correctAnswersCount + player.second.wrongAnswersCount;
-
 					updateUserStatistic(Statistic{ curr._name,
-						curr._totalAnswers + gameQuestions,
+						curr._totalAnswers + static_cast<int>(gameQuestions),
 						curr._correctAnswers + static_cast<int>(player.second.correctAnswersCount),
 						curr._numOfGames + 1,
 						static_cast<float>((curr._answersTime * curr._totalAnswers + player.second.averageAnswerTime * gameQuestions)
-						/ (curr._totalAnswers + gameQuestions)) });
+						/ (curr._totalAnswers + static_cast<int>(gameQuestions))) });
 					break;
 				}
 			}

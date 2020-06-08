@@ -97,5 +97,5 @@ output: none
 */
 void GameManager::updateUserStatistics(Game* game, std::string username)
 {
-	m_database->updateStatistics(game->getUsersData(), username);
+	m_database->updateStatistics(game->getUsersData(), username, game->getNumOfQuestions());
 }

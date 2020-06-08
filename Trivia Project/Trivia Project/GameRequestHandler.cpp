@@ -104,15 +104,13 @@ RequestResult GameRequestHandler::getGameResults(RequestInfo info)
 
 	std::unique_lock<std::mutex> locker(_mutex_game);
 	std::map<std::string, GameData> results = m_game->getUsersData();
-	locker.unlock();
 
-	std::unique_lock<std::mutex> locker2(_mutex_game);
 	if (!m_updateStatistics)
 	{
 		m_gameManager->updateUserStatistics(m_game, m_user.getUsername());
 		m_updateStatistics = true;
 	}
-	locker2.unlock();
+	locker.unlock();
 
 	for (std::map<std::string, GameData>::iterator i = results.begin(); i != results.end(); ++i)
 	{
