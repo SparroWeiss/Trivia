@@ -411,6 +411,34 @@
             <Setter Property="Width" Value="45" />
             <Setter Property="Height" Value="45" />
         </Style>
+
+        <Style x:Key="DateTimeCalendar"
+            TargetType="Calendar" >
+            <Setter Property="Background" Value="PaleTurquoise"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontFamily" Value="Comic Sans MS"/>
+            <Setter Property="Foreground" Value="LightGray"/>
+             <!--<Setter Property="TextBlock.Background" Value="Transparent"/>-->
+        </Style>
+        
+        <Style x:Key="datePicker"
+           TargetType="DatePicker">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="DarkBlue"/>
+            <Setter Property="Width" Value="300" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontFamily" Value="Comic Sans MS"/>
+            <Setter Property="Foreground" Value="LightGray"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="SelectedDateFormat" Value="Long"/>
+            <Setter Property="TextBlock.Focusable" Value="False"/>
+            <Setter Property="TextElement.Cursor" Value="Arrow"/>
+            <Setter Property="CalendarStyle" Value="{StaticResource DateTimeCalendar}"/>
+        </Style>
+        
     </Window.Resources>
 
     <Grid x:Name="MainGrid" />

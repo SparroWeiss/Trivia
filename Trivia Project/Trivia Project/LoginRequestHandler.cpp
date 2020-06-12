@@ -75,7 +75,11 @@ RequestResult LoginRequestHandler::signup(RequestInfo info)
 	signupStatus status = signupValidation(signReq.password, signReq.email, signReq.address, signReq.phone, signReq.birthdate);
 	if (status == signupStatus::SIGNUP_SUCCESS) // if parameters are valid
 	{
-		if (m_loginManager->signup(signReq.username, signReq.password, signReq.email, signReq.address, signReq.phone, signReq.birthdate))
+		if (signReq.username.size() == 0)
+		{
+			signRes = { signupStatus::INVALID_NAME }; // status: 0
+		}
+		else if (m_loginManager->signup(signReq.username, signReq.password, signReq.email, signReq.address, signReq.phone, signReq.birthdate))
 		{ // if the login request is valid
 			signRes = { signupStatus::SIGNUP_SUCCESS }; // status: 1
 			newHandle = m_handlerFactory->createMenuRequestHandler(signReq.username); // pointer to the next handle : menu
