@@ -20,6 +20,7 @@ using System.Configuration;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows.Threading;
 using Newtonsoft.Json;
+using System.Net;
 
 namespace Trivia_Client
 {
@@ -1284,106 +1285,89 @@ namespace Trivia_Client
                         }
                         else if (_currWindow == Windows.SIGNUP)
                         {
-                            string day = textBoxes[6].Text;
-                            string month = textBoxes[7].Text;
-                            string year = textBoxes[8].Text;
-                            day = day.Length == 1 ? "0" + day : day;
-                            month = month.Length == 1 ? "0" + month : month;
-                            string date = day + "." + month + "." + year;
-                            DateTime temp;
-                            if (textBoxes[6].Text.Length == 0 || textBoxes[7].Text.Length == 0 || textBoxes[8].Text.Length == 0
-                                || !DateTime.TryParse(date, out temp) || temp > DateTime.Now || textBoxes[6].Text[0] == '-' || textBoxes[7].Text[0] == '-' || textBoxes[8].Text[0] == '-')
+                            string day = "";
+                            string month = "";
+                            string year = "";
+                            bool problem = false;
+                            if (!checkDate(textBoxes[6].Text, textBoxes[7].Text, textBoxes[8].Text))
                             { // birthdate
                                 textBlocks[4].Visibility = Visibility.Visible;
                                 textBoxes[6].BorderBrush = Brushes.Red; // day
                                 textBoxes[7].BorderBrush = Brushes.Red; // month
                                 textBoxes[8].BorderBrush = Brushes.Red; // year
+                                problem = true;
                             }
-                            if (textBoxes[0].Text.Length == 0)
+                            else
+                            {
+                                day = textBoxes[6].Text.Length == 1 ? "0" + textBoxes[6].Text : textBoxes[6].Text;
+                                month = textBoxes[7].Text.Length == 1 ? "0" + textBoxes[7].Text : textBoxes[7].Text;
+                                for (int i = 0; i < textBoxes[6].Text.Length; i++)
+                                {
+                                    year += "0";
+                                }
+                                year += textBoxes[8].Text;
+                            }
+                            if (!checkUsername(textBoxes[0].Text, textBlocks[5]))
                             { // name
                                 textBlocks[5].Visibility = Visibility.Visible;
-                                textBlocks[5].Text = "Your user name is invalid.";
                                 textBoxes[0].BorderBrush = Brushes.Red;
+                                problem = true;
                             }
-                            if (passwordBox.Password.Length == 0)
+                            if (!checkPassword(passwordBox.Password))
                             { // password
                                 textBlocks[0].Visibility = Visibility.Visible;
                                 passwordBox.BorderBrush = Brushes.Red;
+                                problem = true;
                             }
-                            if (textBoxes[1].Text.Length == 0)
+                            if (!checkEmail(textBoxes[1].Text))
                             { // email
                                 textBlocks[1].Visibility = Visibility.Visible;
                                 textBoxes[1].BorderBrush = Brushes.Red;
+                                problem = true;
                             }
-                            if (textBoxes[2].Text.Length == 0 || textBoxes[3].Text.Length == 0 || textBoxes[4].Text.Length == 0)
+                            if (!checkAddress(textBoxes[2].Text, textBoxes[3].Text, textBoxes[4].Text))
                             { // address
                                 textBlocks[2].Visibility = Visibility.Visible;
                                 textBoxes[2].BorderBrush = Brushes.Red; // street
                                 textBoxes[3].BorderBrush = Brushes.Red; // apartment
                                 textBoxes[4].BorderBrush = Brushes.Red; // city
+                                problem = true;
                             }
                             if (comboBoxes[0].Text.Length == 0)
                             {
                                 textBlocks[3].Visibility = Visibility.Visible;
                                 textBlocks[3].Text = "Enter a prefix.";
+                                problem = true;
                             }
                             else
                             {
                                 textBlocks[3].Visibility = Visibility.Hidden;
                             }
-                            if (textBoxes[5].Text.Length == 0)
+                            if (!checkPhone(textBoxes[5].Text))
                             { // phone
                                 textBlocks[3].Visibility = Visibility.Visible;
                                 textBoxes[5].BorderBrush = Brushes.Red;
                                 textBlocks[3].Text = "Your phone is invalid.";
+                                problem = true;
                             }
-                            _using_communicator.WaitOne();
-                            SignupStatus signup = _communicator.signup(textBoxes[0].Text, passwordBox.Password, textBoxes[1].Text,
-                                string.Format("{0}, {1}, {2}", textBoxes[2].Text, textBoxes[3].Text, textBoxes[4].Text), string.Format("{0}-{1}", comboBoxes[0].Text, textBoxes[3].Text), date);
-                            _using_communicator.ReleaseMutex();
 
-                            switch (signup)
+                            if (!problem)
                             {
-                                case SignupStatus.SIGNUP_SUCCESS:
+                                _using_communicator.WaitOne();
+                                int signup = _communicator.signup(textBoxes[0].Text, passwordBox.Password, textBoxes[1].Text,
+                                    string.Format("{0}, {1}, {2}", textBoxes[2].Text, textBoxes[3].Text, textBoxes[4].Text),
+                                    string.Format("{0}-{1}", comboBoxes[0].Text, textBoxes[5].Text),
+                                    string.Format("{0}.{1}.{2}", day, month, year));
+                                _using_communicator.ReleaseMutex();
+
+                                if (signup == 1)
+                                {
                                     _username = textBoxes[0].Text;
                                     _currWindow = Windows.MENU;
                                     SetMenuWindow();
-                                    break;
-                                case SignupStatus.INVALID_NAME:
-                                    textBlocks[5].Visibility = Visibility.Visible;
-                                    if (textBoxes[0].Text.Length != 0)
-                                    {
-                                        textBlocks[5].Text = "Your user name is taken.";
-                                    }
-                                    textBoxes[0].BorderBrush = Brushes.Red;
-                                    break;
-                                case SignupStatus.INVALID_PASSWORD:
-                                    textBlocks[0].Visibility = Visibility.Visible;
-                                    passwordBox.BorderBrush = Brushes.Red;
-                                    break;
-                                case SignupStatus.INVALID_EMAIL:
-                                    textBlocks[1].Visibility = Visibility.Visible;
-                                    textBoxes[1].BorderBrush = Brushes.Red; 
-                                    break;
-                                case SignupStatus.INVALID_ADDRESS:
-                                    textBlocks[2].Visibility = Visibility.Visible;
-                                    textBoxes[2].BorderBrush = Brushes.Red; // street
-                                    textBoxes[3].BorderBrush = Brushes.Red; // apartment
-                                    textBoxes[4].BorderBrush = Brushes.Red; // city
-                                    break;
-                                case SignupStatus.INVALID_PHONE:
-                                    textBlocks[3].Visibility = Visibility.Visible;
-                                    textBoxes[5].BorderBrush = Brushes.Red;
-                                    textBlocks[3].Text = "Your phone is invalid.";
-                                    if (comboBoxes[0].Text.Length == 0)
-                                    {
-                                        textBlocks[3].Visibility = Visibility.Visible;
-                                        textBlocks[3].Text = "Enter a prefix.";
-                                    }
-                                    break;
-                                default:
-                                    break;
+                                }
                             }
+                            
                         }
                         else if (_currWindow == Windows.ROOM)
                         {
@@ -1805,6 +1789,182 @@ namespace Trivia_Client
             {
                 args.Item3.Items.Add(p.username + ": " + (1 / p.averageAnswerTime * p.correctAnswerCount / (p.correctAnswerCount + p.wrongAnswerCount) * 100).ToString());
             }
+        }
+
+        /*
+        This function checks if a char is a lower case letter
+        Input: character
+        Output: true - char is lower letter, false - else
+        */
+        private bool isLower(char ch)
+        {
+            return ch >= 'a' && ch <= 'z';
+        }
+        /*
+        This function checks if a char is a upper case letter
+        Input: character
+        Output: true - char is upper letter, false - else
+        */
+        private bool isUpper(char ch)
+        {
+            return ch >= 'A' && ch <= 'Z';
+        }
+        /*
+        This function checks if a char is a digit
+        Input: character
+        Output: true - char is digit, false - else
+        */
+        private bool isDigit(char ch)
+        {
+            return ch >= '0' && ch <= '9';
+        }
+        /*
+        This function checks if user name is valid
+        Input: username, his message text block
+        Output: true - name is valid, false - name is invalid or taken
+        */
+        private bool checkUsername(string username, TextBlock textBlock)
+        {
+            textBlock.Text = "Your user name is invalid.";
+            if (username.Length == 0)
+            {
+                return false;
+            }
+
+            _using_communicator.WaitOne();
+            LoginStatus login = _communicator.login(username, "");
+            _using_communicator.ReleaseMutex();
+
+            if (login == LoginStatus.WRONGUSERNAME)
+            {
+                return true;
+            }
+            textBlock.Text = "Your user name is taken.";
+            return false;
+        }
+        /*
+        This function checks if password is valid
+        Input: password
+        Output: true - password is valid, false - password is invalid or taken
+        */
+        private bool checkPassword(string password)
+        {
+            bool lowercase = false;
+            bool uppercase = false;
+            bool special = false;
+            bool digit = false;
+            if (password.Length != 8)
+            {
+                return false;
+            }
+            foreach (char ch in password)
+            {
+                if (isLower(ch))
+                { // one lower case
+                    lowercase = true;
+                }
+                else if (isUpper(ch))
+                { // one upper case
+                    uppercase = true;
+                }
+                else if (isDigit(ch))
+                { // one digit
+                    digit = true;
+                }
+                else
+                { // one special
+                    special = true;
+                }
+            }
+            return lowercase && uppercase && digit && special;
+        }
+        /*
+        This function checks if email is valid
+        Input: email
+        Output: true - email is valid, false - email is invalid or taken
+        */
+        private bool checkEmail(string email)
+        {
+            if (email.Length == 0 || !email.Contains('@'))
+            {
+                return false;
+            }
+            string domain = email.Split('@')[1];
+            try
+            {
+                IPHostEntry iPHostEntry = Dns.GetHostEntry(domain);
+            }
+            catch (Exception e)
+            { // the domain is invalid
+                return false;
+            }
+            return true;
+        }
+        /*
+        This function checks if address is valid
+        Input: street, apt, city
+        Output: true - address is valid, false - address is invalid or taken
+        */
+        private bool checkAddress(string street, string apt, string city)
+        {
+            if (street.Length == 0 || apt.Length == 0 || city.Length == 0)
+            {
+                return false;
+            }
+            foreach (char ch in street)
+            {
+                if (!isUpper(ch) && !isLower(ch))
+                { // if it's not a letter
+                    return false;
+                }
+            }
+            foreach (char ch in city)
+            {
+                if (!isUpper(ch) && !isLower(ch))
+                { // if it's not a letter
+                    return false;
+                }
+            }
+            foreach (char ch in apt)
+            {
+                if (!isDigit(ch))
+                { // if it's not a digit
+                    return false;
+                }
+            }
+            return true;
+        }
+        /*
+        This function checks if phone is valid
+        Input: phone number
+        Output: true - phone is valid, false - phone is invalid or taken
+        */
+        private bool checkPhone(string phone)
+        {
+            foreach (char ch in phone)
+            {
+                if (!isDigit(ch))
+                {
+                    return false;
+                }
+            }
+            return phone.Length == 7;
+        }
+        /*
+        This function checks if date is valid
+        Input: day, month, year
+        Output: true - date is valid, false - date is invalid or taken
+        */
+        private bool checkDate(string day, string month, string year)
+        {
+            string date = day + "." + month + "." + year;
+            DateTime temp;
+            if (day.Length == 0 || month.Length == 0 || year.Length == 0
+                || !DateTime.TryParse(date, out temp) || temp > DateTime.Now || day[0] == '-' || month[0] == '-' || year[0] == '-')
+            {
+                return false;
+            }
+            return true;
         }
 
         private string _username;

@@ -153,7 +153,7 @@ namespace Trivia_Client
         input: the username, password, email, address, phone and birth date
         output: did signup or not (true \ false)
         */
-        public SignupStatus signup(string username, string password, string email, string address, string phone, string birthdate)
+        public int signup(string username, string password, string email, string address, string phone, string birthdate)
         {
             SignupReq signup;
             signup.username = username;
@@ -165,7 +165,7 @@ namespace Trivia_Client
 
             send_data(messageCode.SIGNUPCODE, JsonConvert.SerializeObject(signup));
             SignupRes result = recv_data<SignupRes>();
-            return (SignupStatus)result.status;
+            return (int)result.status;
         }
 
         /*
