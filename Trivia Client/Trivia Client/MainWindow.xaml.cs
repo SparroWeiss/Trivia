@@ -270,10 +270,10 @@ namespace Trivia_Client
             TextBlock emailBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Email", Margin = new Thickness(0, 0, 0, 5) };
 
             TextBlock streetBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Street", Margin = new Thickness(40, 0, 0, 5), HorizontalAlignment = HorizontalAlignment.Left, Width = 140 };
-            TextBlock aptBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Apt", Margin = new Thickness(30, 0, 0, 32), HorizontalAlignment = HorizontalAlignment.Center, Width = 40 };
-            TextBlock cityBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "City", Margin = new Thickness(0, 0, 40, 202), HorizontalAlignment = HorizontalAlignment.Right, Width = 110 };
+            TextBlock aptBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Apt", Margin = new Thickness(25, 0, 0, 32), HorizontalAlignment = HorizontalAlignment.Center, Width = 40 };
+            TextBlock cityBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "City", Margin = new Thickness(0, 0, 45, 202), HorizontalAlignment = HorizontalAlignment.Right, Width = 110 };
 
-            TextBlock phoneBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Phone", Margin = new Thickness(0, 0, 40, 20), Width = 240, HorizontalAlignment = HorizontalAlignment.Right };
+            TextBlock phoneBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Phone", Margin = new Thickness(0, 0, 40, 140), Width = 240, HorizontalAlignment = HorizontalAlignment.Right };
 
             TextBlock dayBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Day", Margin = new Thickness(40, 0, 20, 82), HorizontalAlignment = HorizontalAlignment.Left, Width = 90 };
             TextBlock monthBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Month", Margin = new Thickness(0, 0, 0, 82), HorizontalAlignment = HorizontalAlignment.Center, Width = 80 };
@@ -287,7 +287,8 @@ namespace Trivia_Client
 
             ToolTip username = new ToolTip();
             username.Style = (Style)Resources["ToolTip"];
-            username.Content = "Choose your own unique user name!";
+            username.Content = "Choose your own unique user name!\n" +
+                "can contain only letters and numbers.";
             TextBox usernameBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = username, Margin = new Thickness(0, 25, 0, 5) };
             usernameBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(usernameBlock, usernameBox, usernameMessageBlock));
 
@@ -307,7 +308,6 @@ namespace Trivia_Client
                 "and at least 1 special character:\n" +
                 "'!', '@', '#', '$', '%', '^', '&', '*'";
             PasswordBox hiddenPasswordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"], ToolTip = password, Margin = new Thickness(0, 25, 0, 5) };
-            hiddenPasswordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, hiddenPasswordBox, passwordMessageBlock));
 
             TextBox visiblePasswordBox = new TextBox
             {
@@ -319,6 +319,9 @@ namespace Trivia_Client
                 MaxLength = 8,
                 ToolTip = password
             };
+
+            visiblePasswordBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, visiblePasswordBox, passwordMessageBlock));
+            hiddenPasswordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, hiddenPasswordBox, passwordMessageBlock, visiblePasswordBox));
 
             Button passwordEye = new Button
             {
@@ -332,14 +335,20 @@ namespace Trivia_Client
                 {
                     if (hiddenPasswordBox.Visibility == Visibility.Visible)
                     {
-                        visiblePasswordBox.Text = hiddenPasswordBox.Password;
+                        if (hiddenPasswordBox.Password != visiblePasswordBox.Text)
+                        {
+                            visiblePasswordBox.Text = hiddenPasswordBox.Password;
+                        }
                         hiddenPasswordBox.Visibility = Visibility.Hidden;
                         visiblePasswordBox.Visibility = Visibility.Visible;
                         passwordEye.Background = new ImageBrush(new BitmapImage(new Uri("..\\..\\Resources\\ShowPassword.png", UriKind.Relative)));
                     }
                     else
                     {
-                        hiddenPasswordBox.Password = visiblePasswordBox.Text;
+                        if (hiddenPasswordBox.Password != visiblePasswordBox.Text)
+                        {
+                            hiddenPasswordBox.Password = visiblePasswordBox.Text;
+                        }
                         visiblePasswordBox.Visibility = Visibility.Hidden;
                         hiddenPasswordBox.Visibility = Visibility.Visible;
                         passwordEye.Background = new ImageBrush(new BitmapImage(new Uri("..\\..\\Resources\\HidePassword.png", UriKind.Relative)));
@@ -358,8 +367,8 @@ namespace Trivia_Client
             email.Content = "Must be a valid email!\n" +
                 "with '@' in the middle\n" +
                 "and some web domain at the end\n" +
-                "('.com', '.co.il', etc...)";
-            TextBox emailBox = new TextBox{ Style = (Style)Resources["darkTextBox"], ToolTip = email, Margin = new Thickness(0, 25, 0, 5) };
+                "('gmail.com', etc...)";
+            TextBox emailBox = new TextBox{ Style = (Style)Resources["darkTextBox"], ToolTip = email, Margin = new Thickness(0, 25, 0, 262) };
             emailBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(emailBlock, emailBox, emailMessageBlock));
 
             TextBlock addressMessageBlock = new TextBlock
@@ -371,20 +380,20 @@ namespace Trivia_Client
             ToolTip apt = new ToolTip();
             apt.Style = (Style)Resources["ToolTip"];
             apt.Content = "Enter your Apartment\n" +
-                "Must only contain numbers";
-            TextBox aptBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = apt, Margin = new Thickness(30, 25, 0, 65), Width = 40, MaxLength = 3, HorizontalAlignment = HorizontalAlignment.Center};
+                "must only contain numbers";
+            TextBox aptBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = apt, Margin = new Thickness(5, 25, 0, 202), Width = 40, MaxLength = 3, HorizontalAlignment = HorizontalAlignment.Center};
 
             ToolTip street = new ToolTip();
             street.Style = (Style)Resources["ToolTip"];
             street.Content = "Enter your Street\n" +
-                "Must only contain letters";
-            TextBox streetBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = street, Margin = new Thickness(40, 25, 0, 5), Width = 140, HorizontalAlignment = HorizontalAlignment.Left };
+                "must only contain letters";
+            TextBox streetBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = street, Margin = new Thickness(40, 25, 0, 202), Width = 140, HorizontalAlignment = HorizontalAlignment.Left };
 
             ToolTip city = new ToolTip();
             city.Style = (Style)Resources["ToolTip"];
             city.Content = "Enter your City\n" +
-                "Must only contain letters";
-            TextBox cityBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = city, Margin = new Thickness(0, 25, 40, 202), Width = 110, HorizontalAlignment = HorizontalAlignment.Right };
+                "must only contain letters";
+            TextBox cityBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = city, Margin = new Thickness(5, 25, 40, 202), Width = 110, HorizontalAlignment = HorizontalAlignment.Right };
 
             List<TextBox> address = new List<TextBox> { streetBox, cityBox, aptBox };
             aptBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(aptBlock, aptBox, addressMessageBlock, address));
@@ -401,7 +410,7 @@ namespace Trivia_Client
             prefix.Style = (Style)Resources["ToolTip"];
             prefix.Content = "Phone prefix";
             ComboBox prefixBox = new ComboBox { Style = (Style)Resources["comboStyle"],
-                Margin = new Thickness(40, 0, 20, 5),
+                Margin = new Thickness(40, 0, 0, 115),
                 HorizontalAlignment = HorizontalAlignment.Left, Height = 30,
                 ToolTip = prefix,
                 Foreground = Brushes.DarkBlue, Width = 60 };
@@ -418,13 +427,13 @@ namespace Trivia_Client
             phone.Content = "Phone Number\n" +
                 "must contain 7 numbers, no less, no more";
             TextBox phoneBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = phone,
-                Margin = new Thickness(20, 25, 40, 5), Width = 240, HorizontalAlignment = HorizontalAlignment.Right, MaxLength = 7 };
+                Margin = new Thickness(10, 25, 0, 140), Width = 230, HorizontalAlignment = HorizontalAlignment.Left, MaxLength = 7 };
             phoneBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(phoneBlock, phoneBox, phoneMessageBlock));
 
             TextBlock birthdateMessageBlock = new TextBlock
             {
                 Style = (Style)Resources["messageBlock"],
-                Text = "Your birth date is invalid.", Margin = new Thickness(0, 0, 0, 50)
+                Text = "Your birth date is invalid.", Margin = new Thickness(0, 35, 0, 50)
             };
 
             ToolTip day = new ToolTip();
@@ -434,7 +443,7 @@ namespace Trivia_Client
             {
                 Style = (Style)Resources["darkTextBox"],
                 ToolTip = day,
-                Margin = new Thickness(40, 25, 10, 20),
+                Margin = new Thickness(40, 25, 15, 82),
                 Width = 90,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 MaxLength = 2
@@ -447,7 +456,7 @@ namespace Trivia_Client
             {
                 Style = (Style)Resources["darkTextBox"],
                 ToolTip = month,
-                Margin = new Thickness(0, 10, 0, 82),
+                Margin = new Thickness(0, 25, 0, 82),
                 Width = 90,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 MaxLength = 2
@@ -460,7 +469,7 @@ namespace Trivia_Client
             {
                 Style = (Style)Resources["darkTextBox"],
                 ToolTip = year,
-                Margin = new Thickness(10, 25, 40, 82),
+                Margin = new Thickness(15, 25, 40, 82),
                 Width = 90,
                 HorizontalAlignment = HorizontalAlignment.Right,
                 MaxLength = 4
@@ -471,7 +480,7 @@ namespace Trivia_Client
             monthBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(monthBlock, monthBox, birthdateMessageBlock, birthdate));
             yearBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(yearBlock, yearBox, birthdateMessageBlock, birthdate));
 
-            List<TextBox> textBoxes = new List<TextBox>{ usernameBox, emailBox, streetBox, aptBox, cityBox, phoneBox, dayBox, monthBox, yearBox };
+            List<TextBox> textBoxes = new List<TextBox>{ usernameBox, emailBox, streetBox, aptBox, cityBox, phoneBox, dayBox, monthBox, yearBox, visiblePasswordBox };
             List<TextBlock> textBlocks = new List<TextBlock> { passwordMessageBlock, emailMessageBlock, addressMessageBlock, phoneMessageBlock, birthdateMessageBlock, usernameMessageBlock };
             List<ComboBox> comboBoxes = new List<ComboBox> { prefixBox };
 
@@ -495,10 +504,6 @@ namespace Trivia_Client
             boxes.Children.Add(usernameBox);
             boxes.Children.Add(hiddenPasswordBox);
             boxes.Children.Add(emailBox);
-            boxes.Children.Add(streetBox);
-            boxes.Children.Add(phoneBox);
-            boxes.Children.Add(dayBox);
-            boxes.Children.Add(nextButton);
 
             StackPanel blocks = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom };
             blocks.Children.Add(usernameMessageBlock);
@@ -510,18 +515,26 @@ namespace Trivia_Client
             blocks.Children.Add(addressMessageBlock);
             blocks.Children.Add(streetBlock);
             blocks.Children.Add(phoneMessageBlock);
-            blocks.Children.Add(prefixBox);
             blocks.Children.Add(birthdateMessageBlock);
             blocks.Children.Add(backButton);
 
             StackPanel phoneText = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom };
             phoneText.Children.Add(aptBlock);
             phoneText.Children.Add(phoneBlock);
-            phoneText.Children.Add(monthBox);
 
-            StackPanel yearText = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom };
-            yearText.Children.Add(aptBox);
-            yearText.Children.Add(yearBox);
+            StackPanel addressBoxes = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Bottom };
+            addressBoxes.Children.Add(streetBox);
+            addressBoxes.Children.Add(aptBox);
+            addressBoxes.Children.Add(cityBox);
+
+            StackPanel phoneBoxes = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Bottom };
+            phoneBoxes.Children.Add(prefixBox);
+            phoneBoxes.Children.Add(phoneBox);
+
+            StackPanel birthdateBoxes = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Bottom };
+            birthdateBoxes.Children.Add(dayBox);
+            birthdateBoxes.Children.Add(monthBox);
+            birthdateBoxes.Children.Add(yearBox);
 
             StackPanel birthdateBlocks = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Bottom };
             birthdateBlocks.Children.Add(dayBlock);
@@ -531,8 +544,8 @@ namespace Trivia_Client
             StackPanel cityBlocks = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom };
             cityBlocks.Children.Add(cityBlock);
 
-            StackPanel cityBoxes = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom };
-            cityBoxes.Children.Add(cityBox);
+            StackPanel nextBox = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom };
+            nextBox.Children.Add(nextButton);
 
             StackPanel head = new StackPanel();
             head.Children.Add(logo);
@@ -544,9 +557,11 @@ namespace Trivia_Client
             MainGrid.Children.Add(cityBlocks);
             MainGrid.Children.Add(birthdateBlocks);
             MainGrid.Children.Add(phoneText);
-            MainGrid.Children.Add(yearText);
-            MainGrid.Children.Add(cityBoxes);
             MainGrid.Children.Add(boxes);
+            MainGrid.Children.Add(addressBoxes);
+            MainGrid.Children.Add(phoneBoxes);
+            MainGrid.Children.Add(birthdateBoxes);
+            MainGrid.Children.Add(nextBox);
             MainGrid.Children.Add(visiblePasswordBox);
             MainGrid.Children.Add(passwordEye);
         }
@@ -1196,10 +1211,14 @@ namespace Trivia_Client
         Input: the TextBlock to handle, the PasswordBox to determine visibility.
         Output: none
         */
-        public void HandleBlockOutput(TextBlock textBlock, PasswordBox passwordBox, TextBlock textBlock2 = null)
+        public void HandleBlockOutput(TextBlock textBlock, PasswordBox passwordBox, TextBlock textBlock2 = null, TextBox hidden = null)
         {
             if (passwordBox.BorderBrush == Brushes.Red)
             { // for wrong input that were corrected
+                if (hidden != null)
+                {
+                    hidden.BorderBrush = Brushes.DarkBlue;
+                }
                 passwordBox.BorderBrush = Brushes.DarkBlue;
                 textBlock2.Visibility = Visibility.Hidden;
             }
@@ -1317,6 +1336,7 @@ namespace Trivia_Client
                             { // password
                                 textBlocks[0].Visibility = Visibility.Visible;
                                 passwordBox.BorderBrush = Brushes.Red;
+                                textBoxes[9].BorderBrush = Brushes.Red;
                                 problem = true;
                             }
                             if (!checkEmail(textBoxes[1].Text))
@@ -1819,6 +1839,15 @@ namespace Trivia_Client
             return ch >= '0' && ch <= '9';
         }
         /*
+        This function checks if a char is one of those: '!', '@', '#', '$', '%', '^', '&', '*'
+        Input: character
+        Output: true - char is special, false - else
+        */
+        private bool isSpecial(char ch)
+        { // '!', '@', '#', '$', '%', '^', '&', '*'
+            return ch == '!' || ch == '@' || ch == '#' || ch == '$' || ch == '%' || ch == '^' || ch == '&' || ch == '*';
+        }
+        /*
         This function checks if user name is valid
         Input: username, his message text block
         Output: true - name is valid, false - name is invalid or taken
@@ -1829,6 +1858,13 @@ namespace Trivia_Client
             if (username.Length == 0)
             {
                 return false;
+            }
+            foreach (char ch in username)
+            {
+                if (!isDigit(ch) && !isLower(ch) && !isUpper(ch))
+                {
+                    return false;
+                }
             }
 
             _using_communicator.WaitOne();
@@ -1871,9 +1907,13 @@ namespace Trivia_Client
                 { // one digit
                     digit = true;
                 }
-                else
+                else if (isSpecial(ch))
                 { // one special
                     special = true;
+                }
+                else
+                { // unknown char
+                    return false;
                 }
             }
             return lowercase && uppercase && digit && special;
@@ -1885,7 +1925,7 @@ namespace Trivia_Client
         */
         private bool checkEmail(string email)
         {
-            if (email.Length == 0 || !email.Contains('@'))
+            if (email.Length == 0 || !email.Contains('@') || email.Contains(' '))
             {
                 return false;
             }
