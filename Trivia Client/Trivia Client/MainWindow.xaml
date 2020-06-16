@@ -411,6 +411,7 @@
             <Setter Property="Width" Value="45" />
             <Setter Property="Height" Value="45" />
         </Style>
+        
     </Window.Resources>
 
     <Grid x:Name="MainGrid" />

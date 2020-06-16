@@ -20,6 +20,8 @@ using System.Configuration;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows.Threading;
 using Newtonsoft.Json;
+using System.Net;
+using System.Text.RegularExpressions;
 
 namespace Trivia_Client
 {
@@ -172,7 +174,7 @@ namespace Trivia_Client
                 "and at least 1 special character:\n" +
                 "'!', '@', '#', '$', '%', '^', '&', '*'";
             PasswordBox hiddenPasswordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"], ToolTip = password, Margin = new Thickness(0, 25, 0, 20) };
-            hiddenPasswordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, hiddenPasswordBox, passwordMessageBlock));
+
             TextBox visiblePasswordBox = new TextBox
             {
                 Style = (Style)Resources["darkTextBox"],
@@ -189,20 +191,29 @@ namespace Trivia_Client
                 Style = (Style)Resources["passwordEyeButton"],
                 Background = new ImageBrush(new BitmapImage(new Uri("..\\..\\Resources\\HidePassword.png", UriKind.Relative)))
             };
+            visiblePasswordBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, visiblePasswordBox, passwordMessageBlock));
+            hiddenPasswordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, hiddenPasswordBox, passwordMessageBlock, visiblePasswordBox));
+
             passwordEye.Click += (sender, args) =>
             {
                 if (hiddenPasswordBox.Password.Length != 0)
                 {
                     if (hiddenPasswordBox.Visibility == Visibility.Visible)
                     {
-                        visiblePasswordBox.Text = hiddenPasswordBox.Password;
+                        if (hiddenPasswordBox.Password != visiblePasswordBox.Text)
+                        {
+                            visiblePasswordBox.Text = hiddenPasswordBox.Password;
+                        }
                         hiddenPasswordBox.Visibility = Visibility.Hidden;
                         visiblePasswordBox.Visibility = Visibility.Visible;
                         passwordEye.Background = new ImageBrush(new BitmapImage(new Uri("..\\..\\Resources\\ShowPassword.png", UriKind.Relative)));
                     }
                     else
                     {
-                        hiddenPasswordBox.Password = visiblePasswordBox.Text;
+                        if (hiddenPasswordBox.Password != visiblePasswordBox.Text)
+                        {
+                            hiddenPasswordBox.Password = visiblePasswordBox.Text;
+                        }
                         visiblePasswordBox.Visibility = Visibility.Hidden;
                         hiddenPasswordBox.Visibility = Visibility.Visible;
                         passwordEye.Background = new ImageBrush(new BitmapImage(new Uri("..\\..\\Resources\\HidePassword.png", UriKind.Relative)));
@@ -210,7 +221,7 @@ namespace Trivia_Client
                 }
             };
 
-            List<TextBox> textBoxes = new List<TextBox> { usernameBox };
+            List<TextBox> textBoxes = new List<TextBox> { usernameBox, visiblePasswordBox };
             List<TextBlock> textBlocks = new List<TextBlock> { passwordMessageBlock, usernameMessageBlock };
             Button nextButton = new Button { Style = (Style)Resources["darkButton"], Content = "Next",
                HorizontalAlignment = HorizontalAlignment.Right };
@@ -268,11 +279,15 @@ namespace Trivia_Client
 
             TextBlock emailBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Email", Margin = new Thickness(0, 0, 0, 5) };
 
-            TextBlock addressBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Address", Margin = new Thickness(0, 0, 0, 5) };
+            TextBlock streetBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Street", Margin = new Thickness(40, 0, 0, 5), HorizontalAlignment = HorizontalAlignment.Left, Width = 140 };
+            TextBlock aptBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Apt", Margin = new Thickness(25, 0, 0, 32), HorizontalAlignment = HorizontalAlignment.Center, Width = 40 };
+            TextBlock cityBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "City", Margin = new Thickness(0, 0, 45, 202), HorizontalAlignment = HorizontalAlignment.Right, Width = 110 };
 
             TextBlock phoneBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Phone", Margin = new Thickness(0, 0, 40, 140), Width = 240, HorizontalAlignment = HorizontalAlignment.Right };
 
-            TextBlock birthdateBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Birthdate", Margin = new Thickness(0, 0, 0, 20) };
+            TextBlock dayBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Day", Margin = new Thickness(40, 0, 20, 82), HorizontalAlignment = HorizontalAlignment.Left, Width = 90 };
+            TextBlock monthBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Month", Margin = new Thickness(0, 0, 0, 82), HorizontalAlignment = HorizontalAlignment.Center, Width = 80 };
+            TextBlock yearBlock = new TextBlock { Style = (Style)Resources["grayText"], Text = "Year", Margin = new Thickness(25, 0, 40, 82), HorizontalAlignment = HorizontalAlignment.Right, Width = 90 };
 
             TextBlock usernameMessageBlock = new TextBlock
             {
@@ -282,7 +297,8 @@ namespace Trivia_Client
 
             ToolTip username = new ToolTip();
             username.Style = (Style)Resources["ToolTip"];
-            username.Content = "Choose your own unique user name!";
+            username.Content = "Choose your own unique user name!\n" +
+                "can contain only letters and numbers.";
             TextBox usernameBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = username, Margin = new Thickness(0, 25, 0, 5) };
             usernameBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(usernameBlock, usernameBox, usernameMessageBlock));
 
@@ -302,7 +318,6 @@ namespace Trivia_Client
                 "and at least 1 special character:\n" +
                 "'!', '@', '#', '$', '%', '^', '&', '*'";
             PasswordBox hiddenPasswordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"], ToolTip = password, Margin = new Thickness(0, 25, 0, 5) };
-            hiddenPasswordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, hiddenPasswordBox, passwordMessageBlock));
 
             TextBox visiblePasswordBox = new TextBox
             {
@@ -314,6 +329,9 @@ namespace Trivia_Client
                 MaxLength = 8,
                 ToolTip = password
             };
+
+            visiblePasswordBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, visiblePasswordBox, passwordMessageBlock));
+            hiddenPasswordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, hiddenPasswordBox, passwordMessageBlock, visiblePasswordBox));
 
             Button passwordEye = new Button
             {
@@ -327,14 +345,20 @@ namespace Trivia_Client
                 {
                     if (hiddenPasswordBox.Visibility == Visibility.Visible)
                     {
-                        visiblePasswordBox.Text = hiddenPasswordBox.Password;
+                        if (hiddenPasswordBox.Password != visiblePasswordBox.Text)
+                        {
+                            visiblePasswordBox.Text = hiddenPasswordBox.Password;
+                        }
                         hiddenPasswordBox.Visibility = Visibility.Hidden;
                         visiblePasswordBox.Visibility = Visibility.Visible;
                         passwordEye.Background = new ImageBrush(new BitmapImage(new Uri("..\\..\\Resources\\ShowPassword.png", UriKind.Relative)));
                     }
                     else
                     {
-                        hiddenPasswordBox.Password = visiblePasswordBox.Text;
+                        if (hiddenPasswordBox.Password != visiblePasswordBox.Text)
+                        {
+                            hiddenPasswordBox.Password = visiblePasswordBox.Text;
+                        }
                         visiblePasswordBox.Visibility = Visibility.Hidden;
                         hiddenPasswordBox.Visibility = Visibility.Visible;
                         passwordEye.Background = new ImageBrush(new BitmapImage(new Uri("..\\..\\Resources\\HidePassword.png", UriKind.Relative)));
@@ -353,8 +377,8 @@ namespace Trivia_Client
             email.Content = "Must be a valid email!\n" +
                 "with '@' in the middle\n" +
                 "and some web domain at the end\n" +
-                "('.com', '.co.il', etc...)";
-            TextBox emailBox = new TextBox{ Style = (Style)Resources["darkTextBox"], ToolTip = email, Margin = new Thickness(0, 25, 0, 5) };
+                "('gmail.com', etc...)";
+            TextBox emailBox = new TextBox{ Style = (Style)Resources["darkTextBox"], ToolTip = email, Margin = new Thickness(0, 25, 0, 262) };
             emailBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(emailBlock, emailBox, emailMessageBlock));
 
             TextBlock addressMessageBlock = new TextBlock
@@ -363,15 +387,28 @@ namespace Trivia_Client
                 Text = "Your address is invalid."
             };
 
-            ToolTip address = new ToolTip();
-            address.Style = (Style)Resources["ToolTip"];
-            address.Content = "Address is in the format of: Street, Apartment, City\n" +
-                "Street - must not contain any non alphabetic character\n" +
-                "Apartment - can contain only numbers\n" +
-                "City - must not contain any non alphabetic character\n" +
-                "and don't forget to put ', ' between them!";
-            TextBox addressBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = address, Margin = new Thickness(0, 25, 0, 5) };
-            addressBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(addressBlock, addressBox, addressMessageBlock));
+            ToolTip apt = new ToolTip();
+            apt.Style = (Style)Resources["ToolTip"];
+            apt.Content = "Enter your Apartment\n" +
+                "must only contain numbers";
+            TextBox aptBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = apt, Margin = new Thickness(5, 25, 0, 202), Width = 40, MaxLength = 3, HorizontalAlignment = HorizontalAlignment.Center};
+
+            ToolTip street = new ToolTip();
+            street.Style = (Style)Resources["ToolTip"];
+            street.Content = "Enter your Street\n" +
+                "must only contain letters";
+            TextBox streetBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = street, Margin = new Thickness(40, 25, 0, 202), Width = 140, HorizontalAlignment = HorizontalAlignment.Left };
+
+            ToolTip city = new ToolTip();
+            city.Style = (Style)Resources["ToolTip"];
+            city.Content = "Enter your City\n" +
+                "must only contain letters";
+            TextBox cityBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = city, Margin = new Thickness(5, 25, 40, 202), Width = 110, HorizontalAlignment = HorizontalAlignment.Right };
+
+            List<TextBox> address = new List<TextBox> { streetBox, cityBox, aptBox };
+            aptBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(aptBlock, aptBox, addressMessageBlock, address));
+            streetBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(streetBlock, streetBox, addressMessageBlock, address));
+            cityBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(cityBlock, cityBox, addressMessageBlock, address));
 
             TextBlock phoneMessageBlock = new TextBlock
             {
@@ -383,43 +420,90 @@ namespace Trivia_Client
             prefix.Style = (Style)Resources["ToolTip"];
             prefix.Content = "Phone prefix";
             ComboBox prefixBox = new ComboBox { Style = (Style)Resources["comboStyle"],
-                Margin = new Thickness(40, 0, 20, 5),
+                Margin = new Thickness(40, 0, 0, 115),
                 HorizontalAlignment = HorizontalAlignment.Left, Height = 30,
                 ToolTip = prefix,
                 Foreground = Brushes.DarkBlue, Width = 60 };
+            /*0[2-48-9])|(05\d)*/
+
             prefixBox.Items.Add("02");
             prefixBox.Items.Add("03");
             prefixBox.Items.Add("04");
+            prefixBox.Items.Add("08");
+            prefixBox.Items.Add("09");
             prefixBox.Items.Add("050");
+            prefixBox.Items.Add("051");
             prefixBox.Items.Add("052");
+            prefixBox.Items.Add("053");
             prefixBox.Items.Add("054");
+            prefixBox.Items.Add("055");
+            prefixBox.Items.Add("056");
+            prefixBox.Items.Add("057");
+            prefixBox.Items.Add("058");
+            prefixBox.Items.Add("059");
 
             ToolTip phone = new ToolTip();
             phone.Style = (Style)Resources["ToolTip"];
             phone.Content = "Phone Number\n" +
                 "must contain 7 numbers, no less, no more";
             TextBox phoneBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = phone,
-                Margin = new Thickness(20, 25, 40, 5), Width = 240, HorizontalAlignment = HorizontalAlignment.Right, MaxLength = 7 };
+                Margin = new Thickness(10, 25, 0, 140), Width = 230, HorizontalAlignment = HorizontalAlignment.Left, MaxLength = 7 };
             phoneBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(phoneBlock, phoneBox, phoneMessageBlock));
 
             TextBlock birthdateMessageBlock = new TextBlock
             {
                 Style = (Style)Resources["messageBlock"],
-                Text = "Your birth date is invalid."
+                Text = "Your birth date is invalid.", Margin = new Thickness(0, 35, 0, 50)
             };
 
-            ToolTip birthdate = new ToolTip();
-            birthdate.Style = (Style)Resources["ToolTip"];
-            birthdate.Content = "Share with us your birthdate!\n" +
-                "The formats are:\n" +
-                "DD.MM.YYYY\n" +
-                "DD/MM/YYYY";
-            TextBox birthdateBox = new TextBox { Style = (Style)Resources["darkTextBox"], ToolTip = birthdate, Margin = new Thickness(0, 25, 0, 20) };
-            birthdateBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(birthdateBlock, birthdateBox, birthdateMessageBlock));
+            ToolTip day = new ToolTip();
+            day.Style = (Style)Resources["ToolTip"];
+            day.Content = "Enter the day in the month of your birthday";
+            TextBox dayBox = new TextBox
+            {
+                Style = (Style)Resources["darkTextBox"],
+                ToolTip = day,
+                Margin = new Thickness(40, 25, 15, 82),
+                Width = 90,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                MaxLength = 2
+            };
 
-            List<TextBox> textBoxes = new List<TextBox>{ usernameBox, emailBox, addressBox, phoneBox, birthdateBox };
+            ToolTip month = new ToolTip();
+            month.Style = (Style)Resources["ToolTip"];
+            month.Content = "Enter the month of your birthday";
+            TextBox monthBox = new TextBox
+            {
+                Style = (Style)Resources["darkTextBox"],
+                ToolTip = month,
+                Margin = new Thickness(0, 25, 0, 82),
+                Width = 90,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                MaxLength = 2
+            };
+
+            ToolTip year = new ToolTip();
+            year.Style = (Style)Resources["ToolTip"];
+            year.Content = "Enter the year you were born";
+            TextBox yearBox = new TextBox
+            {
+                Style = (Style)Resources["darkTextBox"],
+                ToolTip = year,
+                Margin = new Thickness(15, 25, 40, 82),
+                Width = 90,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                MaxLength = 4
+            };
+
+            List<TextBox> birthdate = new List<TextBox> { dayBox, monthBox, yearBox };
+            dayBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(dayBlock, dayBox, birthdateMessageBlock, birthdate));
+            monthBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(monthBlock, monthBox, birthdateMessageBlock, birthdate));
+            yearBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(yearBlock, yearBox, birthdateMessageBlock, birthdate));
+
+            List<TextBox> textBoxes = new List<TextBox>{ usernameBox, emailBox, streetBox, aptBox, cityBox, phoneBox, dayBox, monthBox, yearBox, visiblePasswordBox };
             List<TextBlock> textBlocks = new List<TextBlock> { passwordMessageBlock, emailMessageBlock, addressMessageBlock, phoneMessageBlock, birthdateMessageBlock, usernameMessageBlock };
             List<ComboBox> comboBoxes = new List<ComboBox> { prefixBox };
+
             Button nextButton = new Button { Style = (Style)Resources["darkButton"], Content = "Next",
                 HorizontalAlignment = HorizontalAlignment.Right };
             nextButton.Click += (sender, args) =>
@@ -440,10 +524,6 @@ namespace Trivia_Client
             boxes.Children.Add(usernameBox);
             boxes.Children.Add(hiddenPasswordBox);
             boxes.Children.Add(emailBox);
-            boxes.Children.Add(addressBox);
-            boxes.Children.Add(phoneBox);
-            boxes.Children.Add(birthdateBox);
-            boxes.Children.Add(nextButton);
 
             StackPanel blocks = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom };
             blocks.Children.Add(usernameMessageBlock);
@@ -453,15 +533,39 @@ namespace Trivia_Client
             blocks.Children.Add(emailMessageBlock);
             blocks.Children.Add(emailBlock);
             blocks.Children.Add(addressMessageBlock);
-            blocks.Children.Add(addressBlock);
+            blocks.Children.Add(streetBlock);
             blocks.Children.Add(phoneMessageBlock);
-            blocks.Children.Add(prefixBox);
             blocks.Children.Add(birthdateMessageBlock);
-            blocks.Children.Add(birthdateBlock);
             blocks.Children.Add(backButton);
 
             StackPanel phoneText = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom };
+            phoneText.Children.Add(aptBlock);
             phoneText.Children.Add(phoneBlock);
+
+            StackPanel addressBoxes = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Bottom };
+            addressBoxes.Children.Add(streetBox);
+            addressBoxes.Children.Add(aptBox);
+            addressBoxes.Children.Add(cityBox);
+
+            StackPanel phoneBoxes = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Bottom };
+            phoneBoxes.Children.Add(prefixBox);
+            phoneBoxes.Children.Add(phoneBox);
+
+            StackPanel birthdateBoxes = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Bottom };
+            birthdateBoxes.Children.Add(dayBox);
+            birthdateBoxes.Children.Add(monthBox);
+            birthdateBoxes.Children.Add(yearBox);
+
+            StackPanel birthdateBlocks = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Bottom };
+            birthdateBlocks.Children.Add(dayBlock);
+            birthdateBlocks.Children.Add(monthBlock);
+            birthdateBlocks.Children.Add(yearBlock);
+
+            StackPanel cityBlocks = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom };
+            cityBlocks.Children.Add(cityBlock);
+
+            StackPanel nextBox = new StackPanel { Orientation = Orientation.Vertical, VerticalAlignment = VerticalAlignment.Bottom };
+            nextBox.Children.Add(nextButton);
 
             StackPanel head = new StackPanel();
             head.Children.Add(logo);
@@ -470,8 +574,14 @@ namespace Trivia_Client
             // Adding controls to grid
             MainGrid.Children.Add(head);
             MainGrid.Children.Add(blocks);
+            MainGrid.Children.Add(cityBlocks);
+            MainGrid.Children.Add(birthdateBlocks);
             MainGrid.Children.Add(phoneText);
             MainGrid.Children.Add(boxes);
+            MainGrid.Children.Add(addressBoxes);
+            MainGrid.Children.Add(phoneBoxes);
+            MainGrid.Children.Add(birthdateBoxes);
+            MainGrid.Children.Add(nextBox);
             MainGrid.Children.Add(visiblePasswordBox);
             MainGrid.Children.Add(passwordEye);
         }
@@ -481,7 +591,7 @@ namespace Trivia_Client
         Input: none
         Output: none
         */
-        private void SetMenuWindow()
+            private void SetMenuWindow()
         {
             SetWindow(420, 400, true);
 
@@ -540,7 +650,12 @@ namespace Trivia_Client
                 Text = "The room name is taken!",
                 Foreground = Brushes.White
             };
-            TextBox roomNameBox = new TextBox { Style = (Style)Resources["brightTextBox"], Margin = new Thickness(0, 0, 0, 5) };
+            ToolTip roomName = new ToolTip();
+            roomName.Style = (Style)Resources["ToolTip"];
+            roomName.Background = new LinearGradientBrush(Colors.Red, Colors.DarkRed, 90);
+            roomName.Content = "Choose your own unique room name!\n" +
+                "can contain only letters and numbers.";
+            TextBox roomNameBox = new TextBox { Style = (Style)Resources["brightTextBox"], Margin = new Thickness(0, 0, 0, 5), ToolTip = roomName };
             roomNameBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(roomNameBlock, roomNameBox));
 
             TextBlock questionTimeMessageBlock = new TextBlock
@@ -555,7 +670,6 @@ namespace Trivia_Client
             {
                 questionTimeBox.Items.Add(i.ToString());
             }
-
             TextBlock questionNumMessageBlock = new TextBlock
             {
                 Style = (Style)Resources["messageBlock"],
@@ -1088,12 +1202,22 @@ namespace Trivia_Client
         Input: the TextBlock to handle, the TextBox to determine visibility.
         Output: none
         */
-        public void HandleBlockOutput(TextBlock textBlock, TextBox textBox, TextBlock textBlock2 = null)
+        public void HandleBlockOutput(TextBlock textBlock, TextBox textBox, TextBlock textBlock2 = null, List<TextBox> textBoxes = null)
         {
             if (textBox.BorderBrush == Brushes.Red)
             { // for wrong input that were corrected
-                textBox.BorderBrush = Brushes.DarkBlue;
                 textBlock2.Visibility = Visibility.Hidden;
+                if (textBoxes != null)
+                {
+                    foreach (TextBox box in textBoxes)
+                    {
+                        box.BorderBrush = Brushes.DarkBlue;
+                    }
+                }
+                else
+                {
+                    textBox.BorderBrush = Brushes.DarkBlue;
+                }
             }
             if (textBox.Text != "") // If the user inserts input
             {
@@ -1111,10 +1235,14 @@ namespace Trivia_Client
         Input: the TextBlock to handle, the PasswordBox to determine visibility.
         Output: none
         */
-        public void HandleBlockOutput(TextBlock textBlock, PasswordBox passwordBox, TextBlock textBlock2 = null)
+        public void HandleBlockOutput(TextBlock textBlock, PasswordBox passwordBox, TextBlock textBlock2 = null, TextBox hidden = null)
         {
             if (passwordBox.BorderBrush == Brushes.Red)
             { // for wrong input that were corrected
+                if (hidden != null)
+                {
+                    hidden.BorderBrush = Brushes.DarkBlue;
+                }
                 passwordBox.BorderBrush = Brushes.DarkBlue;
                 textBlock2.Visibility = Visibility.Hidden;
             }
@@ -1169,76 +1297,137 @@ namespace Trivia_Client
                     case Windows.MENU:
                         if (_currWindow == Windows.LOGIN)
                         {
-                            _using_communicator.WaitOne();
-                            LoginStatus login = _communicator.login(textBoxes[0].Text, passwordBox.Password);
-                            _using_communicator.ReleaseMutex();
-  
-                            switch (login)
+                            if (textBoxes[0].Text.Length == 0)
                             {
-                                case LoginStatus.SUCCESS:
-                                    _username = textBoxes[0].Text;
-                                    _currWindow = Windows.MENU;
-                                    SetMenuWindow();
-                                    break;
-                                case LoginStatus.ALREADYINGAME:
-                                    textBoxes[0].BorderBrush = Brushes.Red;
-                                    textBlocks[1].Text = "This account already logged in.";
-                                    textBlocks[1].Visibility = Visibility.Visible;
-                                    break;
-                                case LoginStatus.WRONGPASSWORD:
-                                    passwordBox.BorderBrush = Brushes.Red;
-                                    textBlocks[0].Visibility = Visibility.Visible;
-                                    break;
-                                case LoginStatus.WRONGUSERNAME:
-                                    textBoxes[0].BorderBrush = Brushes.Red;
-                                    textBlocks[1].Text = "The user name doesn't exists in our lists.";
-                                    textBlocks[1].Visibility = Visibility.Visible;
-                                    break;
-                                default:
-                                    break;
+                                textBoxes[0].BorderBrush = Brushes.Red;
+                                textBlocks[1].Text = "Please enter an user name.";
+                                textBlocks[1].Visibility = Visibility.Visible;
+                            }
+                            else if (checkUsername(textBoxes[0].Text, textBlocks[1]))
+                            { // name doesn't exists
+                                textBoxes[0].BorderBrush = Brushes.Red;
+                                textBlocks[1].Text = "The user name doesn't exists in our lists.";
+                                textBlocks[1].Visibility = Visibility.Visible;
+                            }
+                            else
+                            {
+                                _using_communicator.WaitOne();
+                                LoginStatus login = _communicator.login(textBoxes[0].Text, passwordBox.Password);
+                                _using_communicator.ReleaseMutex();
+
+                                switch (login)
+                                {
+                                    case LoginStatus.SUCCESS:
+                                        _username = textBoxes[0].Text;
+                                        _currWindow = Windows.MENU;
+                                        SetMenuWindow();
+                                        break;
+                                    case LoginStatus.ALREADYINGAME:
+                                        textBoxes[0].BorderBrush = Brushes.Red;
+                                        textBlocks[1].Text = "This account already logged in.";
+                                        textBlocks[1].Visibility = Visibility.Visible;
+                                        break;
+                                    case LoginStatus.WRONGPASSWORD:
+                                        textBoxes[1].BorderBrush = Brushes.Red;
+                                        passwordBox.BorderBrush = Brushes.Red;
+                                        textBlocks[0].Visibility = Visibility.Visible;
+                                        break;
+                                    case LoginStatus.WRONGUSERNAME:
+                                        textBoxes[0].BorderBrush = Brushes.Red;
+                                        textBlocks[1].Text = "The user name doesn't exists in our lists.";
+                                        textBlocks[1].Visibility = Visibility.Visible;
+                                        break;
+                                    default:
+                                        break;
+                                }
                             }
                         }
                         else if (_currWindow == Windows.SIGNUP)
                         {
-                            _using_communicator.WaitOne();
-                            SignupStatus signup = _communicator.signup(textBoxes[0].Text, passwordBox.Password, textBoxes[1].Text,
-                                textBoxes[2].Text, string.Format("{0}-{1}", comboBoxes[0].Text, textBoxes[3].Text), textBoxes[4].Text);
-                            _using_communicator.ReleaseMutex();
-
-                            switch (signup)
+                            string day = "";
+                            string month = "";
+                            string year = "";
+                            bool problem = false;
+                            if (!checkDate(textBoxes[6].Text, textBoxes[7].Text, textBoxes[8].Text))
+                            { // birthdate
+                                textBlocks[4].Visibility = Visibility.Visible;
+                                textBoxes[6].BorderBrush = Brushes.Red; // day
+                                textBoxes[7].BorderBrush = Brushes.Red; // month
+                                textBoxes[8].BorderBrush = Brushes.Red; // year
+                                problem = true;
+                            }
+                            else
                             {
-                                case SignupStatus.SIGNUP_SUCCESS:
+                                day = textBoxes[6].Text.Length == 1 ? "0" + textBoxes[6].Text : textBoxes[6].Text;
+                                month = textBoxes[7].Text.Length == 1 ? "0" + textBoxes[7].Text : textBoxes[7].Text;
+                                for (int i = 0; i < textBoxes[6].Text.Length; i++)
+                                {
+                                    year += "0";
+                                }
+                                year += textBoxes[8].Text;
+                            }
+                            if (!checkUsername(textBoxes[0].Text, textBlocks[5]))
+                            { // name
+                                textBlocks[5].Visibility = Visibility.Visible;
+                                textBoxes[0].BorderBrush = Brushes.Red;
+                                problem = true;
+                            }
+                            if (!checkPassword(passwordBox.Password))
+                            { // password
+                                textBlocks[0].Visibility = Visibility.Visible;
+                                passwordBox.BorderBrush = Brushes.Red;
+                                textBoxes[9].BorderBrush = Brushes.Red;
+                                problem = true;
+                            }
+                            if (!checkEmail(textBoxes[1].Text))
+                            { // email
+                                textBlocks[1].Visibility = Visibility.Visible;
+                                textBoxes[1].BorderBrush = Brushes.Red;
+                                problem = true;
+                            }
+                            if (!checkAddress(textBoxes[2].Text, textBoxes[3].Text, textBoxes[4].Text))
+                            { // address
+                                textBlocks[2].Visibility = Visibility.Visible;
+                                textBoxes[2].BorderBrush = Brushes.Red; // street
+                                textBoxes[3].BorderBrush = Brushes.Red; // apartment
+                                textBoxes[4].BorderBrush = Brushes.Red; // city
+                                problem = true;
+                            }
+                            if (comboBoxes[0].Text.Length == 0)
+                            {
+                                textBlocks[3].Visibility = Visibility.Visible;
+                                textBlocks[3].Text = "Enter a prefix.";
+                                problem = true;
+                            }
+                            else
+                            {
+                                textBlocks[3].Visibility = Visibility.Hidden;
+                            }
+                            if (!checkPhone(textBoxes[5].Text))
+                            { // phone
+                                textBlocks[3].Visibility = Visibility.Visible;
+                                textBoxes[5].BorderBrush = Brushes.Red;
+                                textBlocks[3].Text = "Your phone is invalid.";
+                                problem = true;
+                            }
+
+                            if (!problem)
+                            {
+                                _using_communicator.WaitOne();
+                                int signup = _communicator.signup(textBoxes[0].Text, passwordBox.Password, textBoxes[1].Text,
+                                    string.Format("{0}, {1}, {2}", textBoxes[2].Text, textBoxes[3].Text, textBoxes[4].Text),
+                                    string.Format("{0}-{1}", comboBoxes[0].Text, textBoxes[5].Text),
+                                    string.Format("{0}.{1}.{2}", day, month, year));
+                                _using_communicator.ReleaseMutex();
+
+                                if (signup == 1)
+                                {
                                     _username = textBoxes[0].Text;
                                     _currWindow = Windows.MENU;
                                     SetMenuWindow();
-                                    break;
-                                case SignupStatus.INVALID_NAME:
-                                    textBlocks[5].Visibility = Visibility.Visible;
-                                    textBoxes[0].BorderBrush = Brushes.Red;
-                                    break;
-                                case SignupStatus.INVALID_PASSWORD:
-                                    textBlocks[0].Visibility = Visibility.Visible;
-                                    passwordBox.BorderBrush = Brushes.Red;
-                                    break;
-                                case SignupStatus.INVALID_EMAIL:
-                                    textBlocks[1].Visibility = Visibility.Visible;
-                                    textBoxes[1].BorderBrush = Brushes.Red; 
-                                    break;
-                                case SignupStatus.INVALID_ADDRESS:
-                                    textBlocks[2].Visibility = Visibility.Visible;
-                                    textBoxes[2].BorderBrush = Brushes.Red;
-                                    break;
-                                case SignupStatus.INVALID_PHONE:
-                                    textBlocks[3].Visibility = Visibility.Visible;
-                                    textBoxes[3].BorderBrush = Brushes.Red;
-                                    break;
-                                case SignupStatus.INVALID_BIRTHDATE:
-                                    textBlocks[4].Visibility = Visibility.Visible;
-                                    textBoxes[4].BorderBrush = Brushes.Red;
-                                    break;
-                                default:
-                                    break;
+                                }
                             }
+                            
                         }
                         else if (_currWindow == Windows.ROOM)
                         {
@@ -1329,11 +1518,34 @@ namespace Trivia_Client
                                 textBlocks[3].Visibility = Visibility.Visible;
                                 success = false;
                             }
-                            if (textBoxes[0].Text == "")
+                            if (textBoxes[0].Text.Length == 0)
                             { // check the room name box
                                 textBlocks[0].Text = "Please enter a name";
                                 textBlocks[0].Visibility = Visibility.Visible;
                                 success = false;
+                            }
+                            foreach (char ch in textBoxes[0].Text)
+                            {
+                                if (!isDigit(ch) && !isLower(ch) && !isUpper(ch))
+                                {
+                                    textBlocks[0].Text = "Invalid room name.";
+                                    textBlocks[0].Visibility = Visibility.Visible;
+                                    success = false;
+                                    break;
+                                }
+                            }
+                            _using_communicator.WaitOne();
+                            List<RoomData> rooms = _communicator.getAvailableRooms();
+                            _using_communicator.ReleaseMutex();
+                            foreach (RoomData room in rooms)
+                            {
+                                if (room.name == textBoxes[0].Text)
+                                {
+                                    textBlocks[0].Text = "Your room name is taken.";
+                                    textBlocks[0].Visibility = Visibility.Visible;
+                                    success = false;
+                                    break;
+                                }
                             }
                             if (success)
                             {
@@ -1364,7 +1576,7 @@ namespace Trivia_Client
                         else if (_currWindow == Windows.JOIN_ROOM)
                         {
                             _using_communicator.WaitOne();
-                            RoomData r = _communicator.getRoomData(roomName);
+                            RoomData r = _communicator.getRoomData(roomName.Split(" >".ToCharArray())[0]);
                             _using_communicator.ReleaseMutex();
 
                             if (r.name != "")
@@ -1660,6 +1872,148 @@ namespace Trivia_Client
             {
                 args.Item3.Items.Add(p.username + ": " + (1 / p.averageAnswerTime * p.correctAnswerCount / (p.correctAnswerCount + p.wrongAnswerCount) * 100).ToString());
             }
+        }
+
+        /*
+        This function checks if a char is a lower case letter
+        Input: character
+        Output: true - char is lower letter, false - else
+        */
+        private bool isLower(char ch)
+        {
+            return ch >= 'a' && ch <= 'z';
+        }
+        /*
+        This function checks if a char is a upper case letter
+        Input: character
+        Output: true - char is upper letter, false - else
+        */
+        private bool isUpper(char ch)
+        {
+            return ch >= 'A' && ch <= 'Z';
+        }
+        /*
+        This function checks if a char is a digit
+        Input: character
+        Output: true - char is digit, false - else
+        */
+        private bool isDigit(char ch)
+        {
+            return ch >= '0' && ch <= '9';
+        }
+
+        /*
+        This function checks if user name is valid
+        Input: username, his message text block
+        Output: true - name is valid, false - name is invalid or taken
+        */
+        private bool checkUsername(string username, TextBlock textBlock)
+        {
+            textBlock.Text = "Your user name is invalid.";
+
+            string pattern = @"^\w+$";
+            Regex rgx = new Regex(pattern, RegexOptions.None);
+
+            if (rgx.IsMatch(username) == false)
+            {
+                return false;
+            }
+
+            _using_communicator.WaitOne();
+            LoginStatus login = _communicator.login(username, "");
+            _using_communicator.ReleaseMutex();
+
+            if (login == LoginStatus.WRONGUSERNAME)
+            {
+                return true;
+            }
+            textBlock.Text = "Your user name is taken.";
+            return false;
+        }
+
+        /*
+        This function checks if password is valid
+        Input: password
+        Output: true - password is valid, false - password is invalid or taken
+        */
+        private bool checkPassword(string password)
+        {
+            string pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8}$";
+            Regex rgx = new Regex(pattern, RegexOptions.None);
+
+            return rgx.IsMatch(password);
+        }
+
+        /*
+        This function checks if email is valid
+        Input: email
+        Output: true - email is valid, false - email is invalid or taken
+        */
+        private bool checkEmail(string email)
+        {
+            string pattern = @"^[a-zA-Z0-9]+@[a-zA-Z]+(\.[a-zA-Z]{2,})+$";
+            Regex rgx = new Regex(pattern, RegexOptions.None);
+
+            if (rgx.IsMatch(email) == false)
+            {
+                return false;
+            }
+
+            string domain = email.Split('@')[1];
+            try
+            {
+                IPHostEntry iPHostEntry = Dns.GetHostEntry(domain);
+            }
+            catch (Exception e)
+            { // the domain is invalid
+                return false;
+            }
+            return true;
+        }
+
+        /*
+        This function checks if address is valid
+        Input: street, apt, city
+        Output: true - address is valid, false - address is invalid or taken
+        */
+        private bool checkAddress(string street, string apt, string city)
+        {
+            string pattern = @"^[a-zA-Z]{2,},\ \d+,\ [a-zA-Z\ ]{2,}$";
+            Regex rgx = new Regex(pattern, RegexOptions.None);
+
+            return rgx.IsMatch(street + ", " + apt + ", " + city);
+        }
+
+        /*
+        This function checks if phone is valid
+        Input: phone number
+        Output: true - phone is valid, false - phone is invalid or taken
+        */
+        private bool checkPhone(string phone)
+        {
+            string pattern = @"^\d{7}$";
+            Regex rgx = new Regex(pattern, RegexOptions.None);
+
+            return rgx.IsMatch(phone);
+        }
+
+        /*
+        This function checks if date is valid
+        Input: day, month, year
+        Output: true - date is valid, false - date is invalid or taken
+        */
+        private bool checkDate(string day, string month, string year)
+        {
+            string date = day + "." + month + "." + year;
+            DateTime temp;
+            string pattern = @"^(((3[0-3]|[0-2]\d)\/(0\d|1[0-2])\/(\d{4}))|((3[0-3]|[0-2]\d)\.(0\d|1[0-2])\.(\d{4})))$";
+            Regex rgx = new Regex(pattern, RegexOptions.None);
+
+            if (!rgx.IsMatch(date) || !DateTime.TryParse(date, out temp) || temp > DateTime.Now)
+            {
+                return false;
+            }
+            return true;
         }
 
         private string _username;
