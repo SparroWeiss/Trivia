@@ -21,6 +21,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows.Threading;
 using Newtonsoft.Json;
 using System.Net;
+using System.Text.RegularExpressions;
 
 namespace Trivia_Client
 {
@@ -423,13 +424,23 @@ namespace Trivia_Client
                 HorizontalAlignment = HorizontalAlignment.Left, Height = 30,
                 ToolTip = prefix,
                 Foreground = Brushes.DarkBlue, Width = 60 };
+            /*0[2-48-9])|(05\d)*/
+
             prefixBox.Items.Add("02");
             prefixBox.Items.Add("03");
             prefixBox.Items.Add("04");
+            prefixBox.Items.Add("08");
+            prefixBox.Items.Add("09");
             prefixBox.Items.Add("050");
+            prefixBox.Items.Add("051");
             prefixBox.Items.Add("052");
+            prefixBox.Items.Add("053");
             prefixBox.Items.Add("054");
             prefixBox.Items.Add("055");
+            prefixBox.Items.Add("056");
+            prefixBox.Items.Add("057");
+            prefixBox.Items.Add("058");
+            prefixBox.Items.Add("059");
 
             ToolTip phone = new ToolTip();
             phone.Style = (Style)Resources["ToolTip"];
@@ -580,7 +591,7 @@ namespace Trivia_Client
         Input: none
         Output: none
         */
-        private void SetMenuWindow()
+            private void SetMenuWindow()
         {
             SetWindow(420, 400, true);
 
@@ -1890,15 +1901,7 @@ namespace Trivia_Client
         {
             return ch >= '0' && ch <= '9';
         }
-        /*
-        This function checks if a char is one of those: '!', '@', '#', '$', '%', '^', '&', '*'
-        Input: character
-        Output: true - char is special, false - else
-        */
-        private bool isSpecial(char ch)
-        { // '!', '@', '#', '$', '%', '^', '&', '*'
-            return ch == '!' || ch == '@' || ch == '#' || ch == '$' || ch == '%' || ch == '^' || ch == '&' || ch == '*';
-        }
+
         /*
         This function checks if user name is valid
         Input: username, his message text block
@@ -1907,16 +1910,13 @@ namespace Trivia_Client
         private bool checkUsername(string username, TextBlock textBlock)
         {
             textBlock.Text = "Your user name is invalid.";
-            if (username.Length == 0)
+
+            string pattern = @"^\w+$";
+            Regex rgx = new Regex(pattern, RegexOptions.None);
+
+            if (rgx.IsMatch(username) == false)
             {
                 return false;
-            }
-            foreach (char ch in username)
-            {
-                if (!isDigit(ch) && !isLower(ch) && !isUpper(ch))
-                {
-                    return false;
-                }
             }
 
             _using_communicator.WaitOne();
@@ -1930,6 +1930,7 @@ namespace Trivia_Client
             textBlock.Text = "Your user name is taken.";
             return false;
         }
+
         /*
         This function checks if password is valid
         Input: password
@@ -1937,39 +1938,12 @@ namespace Trivia_Client
         */
         private bool checkPassword(string password)
         {
-            bool lowercase = false;
-            bool uppercase = false;
-            bool special = false;
-            bool digit = false;
-            if (password.Length != 8)
-            {
-                return false;
-            }
-            foreach (char ch in password)
-            {
-                if (isLower(ch))
-                { // one lower case
-                    lowercase = true;
-                }
-                else if (isUpper(ch))
-                { // one upper case
-                    uppercase = true;
-                }
-                else if (isDigit(ch))
-                { // one digit
-                    digit = true;
-                }
-                else if (isSpecial(ch))
-                { // one special
-                    special = true;
-                }
-                else
-                { // unknown char
-                    return false;
-                }
-            }
-            return lowercase && uppercase && digit && special;
+            string pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8}$";
+            Regex rgx = new Regex(pattern, RegexOptions.None);
+
+            return rgx.IsMatch(password);
         }
+
         /*
         This function checks if email is valid
         Input: email
@@ -1977,10 +1951,14 @@ namespace Trivia_Client
         */
         private bool checkEmail(string email)
         {
-            if (email.Length == 0 || !email.Contains('@') || email.Contains(' '))
+            string pattern = @"^[a-zA-Z0-9]+@[a-zA-Z]+(\.[a-zA-Z]{2,})+$";
+            Regex rgx = new Regex(pattern, RegexOptions.None);
+
+            if (rgx.IsMatch(email) == false)
             {
                 return false;
             }
+
             string domain = email.Split('@')[1];
             try
             {
@@ -1992,6 +1970,7 @@ namespace Trivia_Client
             }
             return true;
         }
+
         /*
         This function checks if address is valid
         Input: street, apt, city
@@ -1999,33 +1978,12 @@ namespace Trivia_Client
         */
         private bool checkAddress(string street, string apt, string city)
         {
-            if (street.Length == 0 || apt.Length == 0 || city.Length == 0)
-            {
-                return false;
-            }
-            foreach (char ch in street)
-            {
-                if (!isUpper(ch) && !isLower(ch))
-                { // if it's not a letter
-                    return false;
-                }
-            }
-            foreach (char ch in city)
-            {
-                if (!isUpper(ch) && !isLower(ch))
-                { // if it's not a letter
-                    return false;
-                }
-            }
-            foreach (char ch in apt)
-            {
-                if (!isDigit(ch))
-                { // if it's not a digit
-                    return false;
-                }
-            }
-            return true;
+            string pattern = @"^[a-zA-Z]{2,},\ \d+,\ [a-zA-Z\ ]{2,}$";
+            Regex rgx = new Regex(pattern, RegexOptions.None);
+
+            return rgx.IsMatch(street + ", " + apt + ", " + city);
         }
+
         /*
         This function checks if phone is valid
         Input: phone number
@@ -2033,15 +1991,12 @@ namespace Trivia_Client
         */
         private bool checkPhone(string phone)
         {
-            foreach (char ch in phone)
-            {
-                if (!isDigit(ch))
-                {
-                    return false;
-                }
-            }
-            return phone.Length == 7;
+            string pattern = @"^\d{7}$";
+            Regex rgx = new Regex(pattern, RegexOptions.None);
+
+            return rgx.IsMatch(phone);
         }
+
         /*
         This function checks if date is valid
         Input: day, month, year
@@ -2051,8 +2006,10 @@ namespace Trivia_Client
         {
             string date = day + "." + month + "." + year;
             DateTime temp;
-            if (day.Length == 0 || month.Length == 0 || year.Length == 0
-                || !DateTime.TryParse(date, out temp) || temp > DateTime.Now || day[0] == '-' || month[0] == '-' || year[0] == '-')
+            string pattern = @"^(((3[0-3]|[0-2]\d)\/(0\d|1[0-2])\/(\d{4}))|((3[0-3]|[0-2]\d)\.(0\d|1[0-2])\.(\d{4})))$";
+            Regex rgx = new Regex(pattern, RegexOptions.None);
+
+            if (!rgx.IsMatch(date) || !DateTime.TryParse(date, out temp) || temp > DateTime.Now)
             {
                 return false;
             }
