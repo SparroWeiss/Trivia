@@ -173,7 +173,7 @@ namespace Trivia_Client
                 "and at least 1 special character:\n" +
                 "'!', '@', '#', '$', '%', '^', '&', '*'";
             PasswordBox hiddenPasswordBox = new PasswordBox { Style = (Style)Resources["darkPasswordBox"], ToolTip = password, Margin = new Thickness(0, 25, 0, 20) };
-            hiddenPasswordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, hiddenPasswordBox, passwordMessageBlock));
+
             TextBox visiblePasswordBox = new TextBox
             {
                 Style = (Style)Resources["darkTextBox"],
@@ -190,20 +190,29 @@ namespace Trivia_Client
                 Style = (Style)Resources["passwordEyeButton"],
                 Background = new ImageBrush(new BitmapImage(new Uri("..\\..\\Resources\\HidePassword.png", UriKind.Relative)))
             };
+            visiblePasswordBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, visiblePasswordBox, passwordMessageBlock));
+            hiddenPasswordBox.PasswordChanged += new RoutedEventHandler((sender, args) => HandleBlockOutput(passwordBlock, hiddenPasswordBox, passwordMessageBlock, visiblePasswordBox));
+
             passwordEye.Click += (sender, args) =>
             {
                 if (hiddenPasswordBox.Password.Length != 0)
                 {
                     if (hiddenPasswordBox.Visibility == Visibility.Visible)
                     {
-                        visiblePasswordBox.Text = hiddenPasswordBox.Password;
+                        if (hiddenPasswordBox.Password != visiblePasswordBox.Text)
+                        {
+                            visiblePasswordBox.Text = hiddenPasswordBox.Password;
+                        }
                         hiddenPasswordBox.Visibility = Visibility.Hidden;
                         visiblePasswordBox.Visibility = Visibility.Visible;
                         passwordEye.Background = new ImageBrush(new BitmapImage(new Uri("..\\..\\Resources\\ShowPassword.png", UriKind.Relative)));
                     }
                     else
                     {
-                        hiddenPasswordBox.Password = visiblePasswordBox.Text;
+                        if (hiddenPasswordBox.Password != visiblePasswordBox.Text)
+                        {
+                            hiddenPasswordBox.Password = visiblePasswordBox.Text;
+                        }
                         visiblePasswordBox.Visibility = Visibility.Hidden;
                         hiddenPasswordBox.Visibility = Visibility.Visible;
                         passwordEye.Background = new ImageBrush(new BitmapImage(new Uri("..\\..\\Resources\\HidePassword.png", UriKind.Relative)));
@@ -211,7 +220,7 @@ namespace Trivia_Client
                 }
             };
 
-            List<TextBox> textBoxes = new List<TextBox> { usernameBox };
+            List<TextBox> textBoxes = new List<TextBox> { usernameBox, visiblePasswordBox };
             List<TextBlock> textBlocks = new List<TextBlock> { passwordMessageBlock, usernameMessageBlock };
             Button nextButton = new Button { Style = (Style)Resources["darkButton"], Content = "Next",
                HorizontalAlignment = HorizontalAlignment.Right };
@@ -630,7 +639,12 @@ namespace Trivia_Client
                 Text = "The room name is taken!",
                 Foreground = Brushes.White
             };
-            TextBox roomNameBox = new TextBox { Style = (Style)Resources["brightTextBox"], Margin = new Thickness(0, 0, 0, 5) };
+            ToolTip roomName = new ToolTip();
+            roomName.Style = (Style)Resources["ToolTip"];
+            roomName.Background = new LinearGradientBrush(Colors.Red, Colors.DarkRed, 90);
+            roomName.Content = "Choose your own unique room name!\n" +
+                "can contain only letters and numbers.";
+            TextBox roomNameBox = new TextBox { Style = (Style)Resources["brightTextBox"], Margin = new Thickness(0, 0, 0, 5), ToolTip = roomName };
             roomNameBox.TextChanged += new TextChangedEventHandler((sender, args) => HandleBlockOutput(roomNameBlock, roomNameBox));
 
             TextBlock questionTimeMessageBlock = new TextBlock
@@ -645,7 +659,6 @@ namespace Trivia_Client
             {
                 questionTimeBox.Items.Add(i.ToString());
             }
-
             TextBlock questionNumMessageBlock = new TextBlock
             {
                 Style = (Style)Resources["messageBlock"],
@@ -1273,33 +1286,49 @@ namespace Trivia_Client
                     case Windows.MENU:
                         if (_currWindow == Windows.LOGIN)
                         {
-                            _using_communicator.WaitOne();
-                            LoginStatus login = _communicator.login(textBoxes[0].Text, passwordBox.Password);
-                            _using_communicator.ReleaseMutex();
-  
-                            switch (login)
+                            if (textBoxes[0].Text.Length == 0)
                             {
-                                case LoginStatus.SUCCESS:
-                                    _username = textBoxes[0].Text;
-                                    _currWindow = Windows.MENU;
-                                    SetMenuWindow();
-                                    break;
-                                case LoginStatus.ALREADYINGAME:
-                                    textBoxes[0].BorderBrush = Brushes.Red;
-                                    textBlocks[1].Text = "This account already logged in.";
-                                    textBlocks[1].Visibility = Visibility.Visible;
-                                    break;
-                                case LoginStatus.WRONGPASSWORD:
-                                    passwordBox.BorderBrush = Brushes.Red;
-                                    textBlocks[0].Visibility = Visibility.Visible;
-                                    break;
-                                case LoginStatus.WRONGUSERNAME:
-                                    textBoxes[0].BorderBrush = Brushes.Red;
-                                    textBlocks[1].Text = "The user name doesn't exists in our lists.";
-                                    textBlocks[1].Visibility = Visibility.Visible;
-                                    break;
-                                default:
-                                    break;
+                                textBoxes[0].BorderBrush = Brushes.Red;
+                                textBlocks[1].Text = "Please enter an user name.";
+                                textBlocks[1].Visibility = Visibility.Visible;
+                            }
+                            else if (checkUsername(textBoxes[0].Text, textBlocks[1]))
+                            { // name doesn't exists
+                                textBoxes[0].BorderBrush = Brushes.Red;
+                                textBlocks[1].Text = "The user name doesn't exists in our lists.";
+                                textBlocks[1].Visibility = Visibility.Visible;
+                            }
+                            else
+                            {
+                                _using_communicator.WaitOne();
+                                LoginStatus login = _communicator.login(textBoxes[0].Text, passwordBox.Password);
+                                _using_communicator.ReleaseMutex();
+
+                                switch (login)
+                                {
+                                    case LoginStatus.SUCCESS:
+                                        _username = textBoxes[0].Text;
+                                        _currWindow = Windows.MENU;
+                                        SetMenuWindow();
+                                        break;
+                                    case LoginStatus.ALREADYINGAME:
+                                        textBoxes[0].BorderBrush = Brushes.Red;
+                                        textBlocks[1].Text = "This account already logged in.";
+                                        textBlocks[1].Visibility = Visibility.Visible;
+                                        break;
+                                    case LoginStatus.WRONGPASSWORD:
+                                        textBoxes[1].BorderBrush = Brushes.Red;
+                                        passwordBox.BorderBrush = Brushes.Red;
+                                        textBlocks[0].Visibility = Visibility.Visible;
+                                        break;
+                                    case LoginStatus.WRONGUSERNAME:
+                                        textBoxes[0].BorderBrush = Brushes.Red;
+                                        textBlocks[1].Text = "The user name doesn't exists in our lists.";
+                                        textBlocks[1].Visibility = Visibility.Visible;
+                                        break;
+                                    default:
+                                        break;
+                                }
                             }
                         }
                         else if (_currWindow == Windows.SIGNUP)
@@ -1478,11 +1507,34 @@ namespace Trivia_Client
                                 textBlocks[3].Visibility = Visibility.Visible;
                                 success = false;
                             }
-                            if (textBoxes[0].Text == "")
+                            if (textBoxes[0].Text.Length == 0)
                             { // check the room name box
                                 textBlocks[0].Text = "Please enter a name";
                                 textBlocks[0].Visibility = Visibility.Visible;
                                 success = false;
+                            }
+                            foreach (char ch in textBoxes[0].Text)
+                            {
+                                if (!isDigit(ch) && !isLower(ch) && !isUpper(ch))
+                                {
+                                    textBlocks[0].Text = "Invalid room name.";
+                                    textBlocks[0].Visibility = Visibility.Visible;
+                                    success = false;
+                                    break;
+                                }
+                            }
+                            _using_communicator.WaitOne();
+                            List<RoomData> rooms = _communicator.getAvailableRooms();
+                            _using_communicator.ReleaseMutex();
+                            foreach (RoomData room in rooms)
+                            {
+                                if (room.name == textBoxes[0].Text)
+                                {
+                                    textBlocks[0].Text = "Your room name is taken.";
+                                    textBlocks[0].Visibility = Visibility.Visible;
+                                    success = false;
+                                    break;
+                                }
                             }
                             if (success)
                             {
@@ -1513,7 +1565,7 @@ namespace Trivia_Client
                         else if (_currWindow == Windows.JOIN_ROOM)
                         {
                             _using_communicator.WaitOne();
-                            RoomData r = _communicator.getRoomData(roomName);
+                            RoomData r = _communicator.getRoomData(roomName.Split(" >".ToCharArray())[0]);
                             _using_communicator.ReleaseMutex();
 
                             if (r.name != "")
