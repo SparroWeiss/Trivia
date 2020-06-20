@@ -35,7 +35,6 @@ public:
 private:
 	RequestHandlerFactory();
 	static RequestHandlerFactory* instance;
-	static int instances;
 
 	LoginManager* m_loginManager;
 	IDataBase* m_database;

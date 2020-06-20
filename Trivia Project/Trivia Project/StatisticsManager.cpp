@@ -24,7 +24,6 @@ StatisticsManager* StatisticsManager::getInstance()
 	{
 		instance = new StatisticsManager();
 	}
-	instances++;
 	return instance;
 }
 
@@ -34,11 +33,6 @@ frees allocated memory
 */
 StatisticsManager::~StatisticsManager()
 {
-	instances--;
-	if (instances == 0)
-	{
-		delete instance;
-	}
 }
 
 /*

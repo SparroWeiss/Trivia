@@ -24,7 +24,6 @@ RoomManager* RoomManager::getInstance()
 	{
 		instance = new RoomManager();
 	}
-	instances++;
 	return instance;
 }
 
@@ -34,12 +33,7 @@ frees allocated memory
 */
 RoomManager::~RoomManager()
 {
-	instances--;
-	if (instances == 0)
-	{
-		m_rooms.clear();
-		delete instance;
-	}
+	m_rooms.clear();
 }
 
 /*

@@ -3,8 +3,11 @@
 #include "IDataBase.h"
 #include "Communicator.h"
 #include "RequestHandlerFactory.h"
+#include <tlhelp32.h>
+#include <comdef.h>
 
 #define EXIT "EXIT"
+#define NGROK_PATH "python \"..\\Trivia Project\\scripts\\ngrok.py\""
 
 class Server
 {
@@ -16,9 +19,9 @@ public:
 private:
 	Server();
 	static Server* instance;
-	static int instances;
 
 	IDataBase* m_database;
 	Communicator* m_communicator;
 	RequestHandlerFactory* m_RequestHandlerFactory;
+	PROCESS_INFORMATION _ngrokProcessInfo;
 };

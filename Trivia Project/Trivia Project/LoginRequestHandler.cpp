@@ -8,8 +8,8 @@ initializes the variables of the object
 */
 LoginRequestHandler::LoginRequestHandler()
 {
-	m_handlerFactory = m_handlerFactory->getInstance();
-	m_loginManager = m_loginManager->getInstance();
+	m_handlerFactory = RequestHandlerFactory::getInstance();
+	m_loginManager = LoginManager::getInstance();
 }
 
 /*

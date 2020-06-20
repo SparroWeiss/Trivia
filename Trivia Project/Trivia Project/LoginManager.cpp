@@ -25,7 +25,6 @@ LoginManager* LoginManager::getInstance()
 	{
 		instance = new LoginManager();
 	}
-	instances++;
 	return instance;
 }
 
@@ -35,11 +34,6 @@ frees allocated memory
 */
 LoginManager::~LoginManager()
 {
-	instances--;
-	if (instances == 0)
-	{
-		delete instance;
-	}
 }
 
 /*

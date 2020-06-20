@@ -25,7 +25,6 @@ GameManager* GameManager::getInstance()
 	{
 		instance = new GameManager();
 	}
-	instances++;
 	return instance;
 }
 
@@ -35,12 +34,7 @@ frees allocated memory
 */
 GameManager::~GameManager()
 {
-	instances--;
-	if (instances == 0)
-	{
-		m_games.clear();
-		delete instance;
-	}
+	m_games.clear();
 }
 
 /*

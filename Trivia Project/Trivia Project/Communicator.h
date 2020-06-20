@@ -59,7 +59,7 @@ public:
 private:
 	Communicator();
 	static Communicator* instance;//singleton
-	static int instances;
+	SOCKET listening_socket;
 
 	std::map<SOCKET, IRequestHandler*> m_clients;
 	RequestHandlerFactory* m_handlerFactory;
