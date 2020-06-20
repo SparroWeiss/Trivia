@@ -111,7 +111,10 @@ namespace Trivia_Client
             }
             catch (Exception)
             {
-                throw new Exception("Lost connection to the server :(");
+                throw new Exception("It looks like you have lost connection with the server,\n" +
+                        "You can try:\n" +
+                        "- Close and open the app\n" +
+                        "- Check your internet connection\n");
             }
 
             if (code[0] == (byte)messageCode.ERRORCODE)

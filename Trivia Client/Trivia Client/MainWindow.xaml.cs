@@ -58,25 +58,20 @@ namespace Trivia_Client
             _using_communicator = new Mutex();
 
             // Creating connection with server
-        connect:
-                try
-                {
-                    _communicator = new Communicator();
-                }
-                catch (Exception e)
-                {
-                    MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
-                        MessageBoxButton.YesNo, MessageBoxImage.Error, MessageBoxResult.Yes);
+            try
+            {
+                _communicator = new Communicator();
+            }
+            catch (Exception e)
+            {
+                MessageBoxResult result = MessageBox.Show("It looks like you can't connect to the server,\n" +
+                        "You can try:\n" +
+                        "- Close and open the app\n" +
+                        "- Check your internet connection\n", "Trivia",
+                        MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.Yes);
 
-                    if (result.Equals(MessageBoxResult.Yes))
-                    {
-                        goto connect; // Try again to connect
-                    }
-                    else
-                    {
-                        this.Close(); // Exit
-                    }
-                }
+                this.Close(); // Exit
+            }
             _currWindow = Windows.ENTRY;
             SetEntryWindow();
         }
