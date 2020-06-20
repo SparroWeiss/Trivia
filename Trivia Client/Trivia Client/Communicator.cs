@@ -27,19 +27,27 @@ namespace Trivia_Client
         {
             // get the server ip and port from the config file
             string line;
-            System.IO.StreamReader file = new System.IO.StreamReader(CONFIG_PATH);
-            while ((line = file.ReadLine()) != null)
+            System.IO.StreamReader file;
+            try
             {
-                if(line.Contains("port="))
+                file = new System.IO.StreamReader(CONFIG_PATH);
+                while ((line = file.ReadLine()) != null)
                 {
-                    _serverPort = Int32.Parse(line.Substring(5));
+                    if(line.Contains("port="))
+                    {
+                        _serverPort = Int32.Parse(line.Substring(5));
+                    }
+                    else if (line.Contains("server_ip="))
+                    {
+                        _serverIp = line.Substring(10);
+                    }
                 }
-                else if (line.Contains("server_ip="))
-                {
-                    _serverIp = line.Substring(10);
-                }
+                file.Close();
             }
-            file.Close();
+            catch
+            {
+                throw new Exception("Couldn't find config file.\n Do you wish to try again?");
+            }
 
             _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             IPAddress[] iPs = Dns.GetHostAddresses(_serverIp);
@@ -50,7 +58,7 @@ namespace Trivia_Client
             }
             catch (Exception)
             {
-                throw new Exception("Faild to connect to server.\n Do you wish to try again?");
+                throw new Exception("Failed to connect to server.\n Do you wish to try again?");
             }
         }
 
@@ -111,15 +119,21 @@ namespace Trivia_Client
             }
             catch (Exception)
             {
-                throw new Exception("It looks like you have lost connection with the server,\n" +
-                        "You can try:\n" +
-                        "- Close and open the app\n" +
-                        "- Check your internet connection\n");
+                throw new Exception("Lost connection to the server :(");
             }
 
             if (code[0] == (byte)messageCode.ERRORCODE)
             {
-                throw new Exception(JsonConvert.DeserializeObject<ErrorRes>(System.Text.Encoding.ASCII.GetString(msg)) + " :(");
+                string server_msg = "";
+                try
+                {
+                    server_msg = JsonConvert.DeserializeObject<ErrorRes>(System.Text.Encoding.ASCII.GetString(msg)) + " :(";
+                }
+                catch
+                {
+                    throw new Exception("Lost connection to the server :(");
+                }
+                throw new Exception(server_msg);
             }
             else if (code[0] == (byte)messageCode.GETQUESTIONCODE)
             {
