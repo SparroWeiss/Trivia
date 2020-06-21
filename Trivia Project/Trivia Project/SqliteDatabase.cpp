@@ -204,7 +204,6 @@ SqliteDatabase* SqliteDatabase::getInstance()
 	{
 		instance = new SqliteDatabase();
 	}
-	instances++;
 	return instance;
 }
 
@@ -214,15 +213,10 @@ frees allocated memory
 */
 SqliteDatabase::~SqliteDatabase()
 {
-	instances--;
-	if (instances == 0)
-	{
-		sqlite3_close(_db);
-		_db = nullptr;
-		_usersRows.clear();
-		_questionsRows.clear();
-		delete instance;
-	}
+	sqlite3_close(_db);
+	_db = nullptr;
+	_usersRows.clear();
+	_questionsRows.clear();
 }
 
 /*

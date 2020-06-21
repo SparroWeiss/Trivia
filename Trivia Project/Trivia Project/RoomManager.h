@@ -20,7 +20,6 @@ public:
 private:
 	RoomManager();
 	static RoomManager* instance;
-	static int instances;
 
 	std::map<unsigned int, Room*> m_rooms;
 	unsigned int curr_id;

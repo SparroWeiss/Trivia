@@ -10,6 +10,14 @@ Server::Server()
 	m_database = SqliteDatabase::getInstance();
 	m_RequestHandlerFactory = m_RequestHandlerFactory->getInstance();
 	m_communicator = m_communicator->getInstance();
+	
+	STARTUPINFOA info = { sizeof(info) };
+	std::string scriptCommandLine = NGROK_PATH;
+
+	if (!CreateProcessA(NULL, LPSTR(scriptCommandLine.c_str()), NULL, NULL, FALSE, NULL, NULL, NULL, &info, &_ngrokProcessInfo))
+	{
+		std::cout << "Faild to open tunnel with ngrok. Error " << GetLastError() << std::endl; // should not happen
+	}
 }
 
 /*
@@ -23,7 +31,6 @@ Server* Server::getInstence()
 	{
 		instance = new Server();
 	}
-	instances++;
 	return instance;
 }
 
@@ -33,11 +40,27 @@ frees allocated memory
 */
 Server::~Server()
 {
-	instances--;
-	if (instances == 0)
+	PROCESSENTRY32 entry;
+	entry.dwSize = sizeof(PROCESSENTRY32);
+
+	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
+
+	if (Process32First(snapshot, &entry) == TRUE)
 	{
-		delete instance;
+		while (Process32Next(snapshot, &entry) == TRUE)
+		{
+			_bstr_t processName(entry.szExeFile);
+			if (strnicmp((const char*)processName, "ngrok.exe", 9) == 0)
+			{
+				HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, entry.th32ProcessID);
+				TerminateProcess(hProcess, 0);
+				CloseHandle(hProcess);
+			}
+		}
 	}
+	CloseHandle(snapshot);
+	CloseHandle(_ngrokProcessInfo.hProcess);
+	CloseHandle(_ngrokProcessInfo.hThread);
 }
 
 /*
@@ -47,6 +70,7 @@ output: none
 */
 void Server::run()
 {
+	std::cout << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
 	std::string input = "";
 	std::thread(&Communicator::startHandleRequests, m_communicator).detach();
 	std::cout << "thread startHandleRequests has created and detached." << std::endl;
@@ -57,7 +81,7 @@ void Server::run()
 		if (input == EXIT)
 		{
 			std::cout << "goodbye!" << std::endl;
-			exit(0);
+			return;
 		}
 	}
 }

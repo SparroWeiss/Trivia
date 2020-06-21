@@ -45,7 +45,6 @@ public:
 private:
 	LoginManager();
 	static LoginManager* instance;
-	static int instances;
 
 	IDataBase* m_database;
 	std::vector<LoggedUser> m_loggedUsers;

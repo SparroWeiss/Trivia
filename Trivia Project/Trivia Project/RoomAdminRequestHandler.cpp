@@ -87,7 +87,7 @@ RequestResult RoomAdminRequestHandler::startGame(RequestInfo info)
 	IRequestHandler* newHandle = this; // if the starting request isn't valid, stay in same handler
 	StartGameResponse startRes = { 0 }; // status: 0
 	std::lock_guard<std::mutex> locker(_mutex_room);
-	if (m_room->getAllUsers().size() >= 1)
+	if (m_room->getAllUsers().size() > 1)
 	{
 		startRes = { 1 }; // status: 1
 		m_room->setGame(m_handlerFactory->getGameManager().createGame(*m_room));

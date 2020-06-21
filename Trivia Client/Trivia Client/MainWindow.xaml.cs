@@ -58,20 +58,25 @@ namespace Trivia_Client
             _using_communicator = new Mutex();
 
             // Creating connection with server
-            try
-            {
-                _communicator = new Communicator();
-            }
-            catch (Exception e)
-            {
-                MessageBoxResult result = MessageBox.Show("It looks like you can't connect to the server,\n" +
-                        "You can try:\n" +
-                        "- Close and open the app\n" +
-                        "- Check your internet connection\n", "Trivia",
-                        MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.Yes);
+        connect:
+                try
+                {
+                    _communicator = new Communicator();
+                }
+                catch (Exception e)
+                {
+                    MessageBoxResult result = MessageBox.Show(e.Message, "Trivia",
+                        MessageBoxButton.YesNo, MessageBoxImage.Error, MessageBoxResult.Yes);
 
-                this.Close(); // Exit
-            }
+                    if (result.Equals(MessageBoxResult.Yes))
+                    {
+                        goto connect; // Try again to connect
+                    }
+                    else
+                    {
+                        this.Close(); // Exit
+                    }
+                }
             _currWindow = Windows.ENTRY;
             SetEntryWindow();
         }
@@ -586,7 +591,7 @@ namespace Trivia_Client
         Input: none
         Output: none
         */
-            private void SetMenuWindow()
+        private void SetMenuWindow()
         {
             SetWindow(420, 400, true);
 
@@ -1713,8 +1718,8 @@ namespace Trivia_Client
             catch (Exception ex)
             {
                 _using_communicator.ReleaseMutex();
-                MessageBoxResult result = MessageBox.Show(ex.Message, "Trivia",
-                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
+                //MessageBoxResult result = MessageBox.Show(ex.Message, "Trivia",
+                  //  MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
             }
         }
 
@@ -1766,8 +1771,6 @@ namespace Trivia_Client
             catch (Exception ex)
             {
                 _using_communicator.ReleaseMutex();
-                MessageBoxResult result = MessageBox.Show(ex.Message, "Trivia",
-                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
             }
         }
 

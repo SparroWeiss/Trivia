@@ -11,20 +11,11 @@ RoomManager* RoomManager::instance = 0;
 StatisticsManager* StatisticsManager::instance = 0;
 GameManager* GameManager::instance = 0;
 
-int Server::instances = 0;
-int Communicator::instances = 0;
-int LoginManager::instances = 0;
-int RequestHandlerFactory::instances = 0;
-int SqliteDatabase::instances = 0;
-int RoomManager::instances = 0;
-int StatisticsManager::instances = 0;
-int GameManager::instances = 0;
-
 unsigned int Question::curr_id = 0;
 
 int main()
 {
-	Server* server = server->getInstence();
+	Server* server = Server::getInstence();
 
 	try
 	{
@@ -34,8 +25,16 @@ int main()
 	catch (const std::exception& e)
 	{
 		std::cout << e.what() << std::endl;
-		exit(-1);
 	}
+	Sleep(1000);
+	delete Communicator::getInstance();
+	delete Server::getInstence();
+	delete SqliteDatabase::getInstance();
+	delete LoginManager::getInstance();
+	delete GameManager::getInstance();
+	delete RoomManager::getInstance();
+	delete RequestHandlerFactory::getInstance();
+	delete StatisticsManager::getInstance();
 
 	return 0;
 }

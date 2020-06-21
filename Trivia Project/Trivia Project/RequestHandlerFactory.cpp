@@ -8,10 +8,10 @@ initializes the variables of the object
 RequestHandlerFactory::RequestHandlerFactory()
 {
 	m_database = SqliteDatabase::getInstance();
-	m_loginManager = m_loginManager->getInstance();
-	m_roomManager = m_roomManager->getInstance();
-	m_statisticsManager = m_statisticsManager->getInstance();
-	m_gameManager = m_gameManager->getInstance();
+	m_loginManager = LoginManager::getInstance();
+	m_roomManager = RoomManager::getInstance();
+	m_statisticsManager = StatisticsManager::getInstance();
+	m_gameManager = GameManager::getInstance();
 }
 
 /*
@@ -25,7 +25,6 @@ RequestHandlerFactory* RequestHandlerFactory::getInstance()
 	{
 		instance = new RequestHandlerFactory();
 	}
-	instances++;
 	return instance;
 }
 
@@ -35,11 +34,6 @@ frees allocated memory
 */
 RequestHandlerFactory::~RequestHandlerFactory()
 {
-	instances--;
-	if (instances == 0)
-	{
-		delete instance;
-	}
 }
 
 /*
