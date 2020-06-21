@@ -2,7 +2,7 @@
 #define NOT_A_QUESTION ""
 
 
-///////////////////////////////////////Question
+/**********Question************/
 /*
 constructor
 initializes the variables of the object
@@ -81,7 +81,7 @@ void Question::setCorrectAnswer(std::string correct)
 }
 
 
-////////////////////////////////////////Game
+/***************Game***************/
 
 std::mutex _mutex_players;
 
@@ -90,6 +90,7 @@ constructors
 initializes the variables of the object
 */
 Game::Game(){}
+
 Game::Game(std::vector<LoggedUser> users, std::vector<Question> Questions)
 {
 	m_questions = Questions;

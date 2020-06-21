@@ -70,7 +70,7 @@ output: none
 */
 void Server::run()
 {
-	std::cout << std::endl << std::endl << std::endl << std::endl << std::endl;
+	std::cout << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
 	std::string input = "";
 	std::thread(&Communicator::startHandleRequests, m_communicator).detach();
 	std::cout << "thread startHandleRequests has created and detached." << std::endl;

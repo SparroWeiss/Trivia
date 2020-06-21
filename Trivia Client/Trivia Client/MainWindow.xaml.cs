@@ -591,7 +591,7 @@ namespace Trivia_Client
         Input: none
         Output: none
         */
-            private void SetMenuWindow()
+        private void SetMenuWindow()
         {
             SetWindow(420, 400, true);
 
@@ -1718,8 +1718,8 @@ namespace Trivia_Client
             catch (Exception ex)
             {
                 _using_communicator.ReleaseMutex();
-                MessageBoxResult result = MessageBox.Show(ex.Message, "Trivia",
-                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
+                //MessageBoxResult result = MessageBox.Show(ex.Message, "Trivia",
+                  //  MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
             }
         }
 
