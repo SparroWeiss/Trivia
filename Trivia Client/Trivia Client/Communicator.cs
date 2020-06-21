@@ -26,29 +26,28 @@ namespace Trivia_Client
         public Communicator()
         {
             // get the server ip and port from the config file
-            string line;
-            System.IO.StreamReader file;
-            try
+            System.Diagnostics.Process process = new System.Diagnostics.Process();
+            System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo
             {
-                file = new System.IO.StreamReader(CONFIG_PATH);
-                while ((line = file.ReadLine()) != null)
-                {
-                    if(line.Contains("port="))
-                    {
-                        _serverPort = Int32.Parse(line.Substring(5));
-                    }
-                    else if (line.Contains("server_ip="))
-                    {
-                        _serverIp = line.Substring(10);
-                    }
-                }
-                file.Close();
-            }
-            catch
-            {
-                throw new Exception("Couldn't find config file.\n Do you wish to try again?");
-            }
+                WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden,
+                FileName = "cmd.exe",
+                Arguments = "/C python ..\\..\\Resources\\getServer.py",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            };
+            process.StartInfo = startInfo;
+            process.Start();
 
+            List<string> address = new List<string>();
+            while (!process.StandardOutput.EndOfStream)
+            { // reading what the python file is printing
+                address.Add(process.StandardOutput.ReadLine());
+                // address[0] = ip, address[1] = port
+            }
+            _serverIp = address[0];
+            _serverPort = Int32.Parse(address[1]);
+            
             _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             IPAddress[] iPs = Dns.GetHostAddresses(_serverIp);
 
@@ -67,7 +66,10 @@ namespace Trivia_Client
         */
         ~Communicator()
         {
-            _serverSocket.Close();
+            if (_serverSocket != null)
+            {
+                _serverSocket.Close();
+            }
         }
 
         /*

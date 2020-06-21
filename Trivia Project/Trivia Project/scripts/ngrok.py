@@ -2,6 +2,7 @@ import subprocess
 import requests
 import time
 import socket
+import setServer
 
 LOGIN = "1dJa9zaxL0PLcBbq6r5W4PPFr4W_6yxMxy7cdkiDwS8qMnuiv"
 
@@ -18,6 +19,8 @@ def main():
     print(ip)
     port = res.content.decode().split("tcp.ngrok.io:")[1].split('","')[0]
     print(port)
+
+    setServer.update(ip, port)
 
 
 if __name__ == '__main__':
