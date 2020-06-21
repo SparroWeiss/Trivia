@@ -1771,8 +1771,6 @@ namespace Trivia_Client
             catch (Exception ex)
             {
                 _using_communicator.ReleaseMutex();
-                MessageBoxResult result = MessageBox.Show(ex.Message, "Trivia",
-                    MessageBoxButton.OK, MessageBoxImage.Hand, MessageBoxResult.OK);
             }
         }
 
