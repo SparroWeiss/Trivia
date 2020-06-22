@@ -40,6 +40,10 @@ namespace Trivia_Client
                 address.Add(process.StandardOutput.ReadLine());
                 // address[0] = ip, address[1] = port
             }
+            if (address.Count < 2)
+            {
+                throw new Exception("Failed to connect to server.\n Do you wish to try again?");
+            }
             _serverIp = address[0];
             _serverPort = Int32.Parse(address[1]);
             
