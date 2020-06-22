@@ -5,6 +5,12 @@
 
 class RequestHandlerFactory;
 
+enum LeaveRoomStatus
+{
+	FAILED = 0, 
+	LEFT_ROOM, 
+	PLAY
+};
 
 class RoomMemberRequestHandler : public IRequestHandler
 {
@@ -21,5 +27,4 @@ private:
 
 	RequestResult leaveRoom(RequestInfo info);
 	RequestResult getRoomState(RequestInfo info);
-
 };

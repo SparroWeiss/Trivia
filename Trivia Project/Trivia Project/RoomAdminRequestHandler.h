@@ -5,7 +5,6 @@
 
 class RequestHandlerFactory;
 
-
 class RoomAdminRequestHandler : public IRequestHandler
 {
 public:

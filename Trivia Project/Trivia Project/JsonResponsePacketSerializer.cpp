@@ -610,7 +610,6 @@ Buffer JsonResponsePacketSerializer::serializeResponse(LeaveGameResponse leave_g
 	return createResponseBuf(LEAVEGAME, leave_gameSize, leave_gameData);
 }
 
-
 /*
 This helper method converts 'int' type to 'Buffer' type.
 Input: int

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Trivia_Client
 {
@@ -43,17 +42,23 @@ namespace Trivia_Client
 
     enum ActiveMode
     {
-        WAITING = 1, START_PLAYING, DONE
+        WAITING = 1, 
+        START_PLAYING, 
+        DONE
     }
 
     enum GameMode
     {
-        FINISHED = 1, WAITING_FOR_PLAYERS
+        FINISHED = 1, 
+        WAITING_FOR_PLAYERS
     };
 
     enum LoginStatus
     {
-        SUCCESS = 1, WRONGPASSWORD, WRONGUSERNAME, ALREADYINGAME
+        SUCCESS = 1, 
+        WRONGPASSWORD, 
+        WRONGUSERNAME, 
+        ALREADYINGAME
     };
     
     struct RoomData
@@ -74,7 +79,7 @@ namespace Trivia_Client
         public float averageAnswerTime;
     }
 
-    /**** Communication Structs ****/
+    /** Communication Structs - Requests & Results **/
 
     struct ErrorRes
     {

@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
-using System.Windows;
 using Newtonsoft.Json;
 
 namespace Trivia_Client
@@ -15,32 +11,42 @@ namespace Trivia_Client
     {
         private string _serverIp;
         private int _serverPort;
-        private const string CONFIG_PATH = "config.txt";
         private Socket _serverSocket;
 
         /*
-        constructor:
-        get the server ip and port from the config file
-        connect to the server
+        Constructor:
+        Get the server ip and port from the virtual config file.
+        Connect to the server.
         */
         public Communicator()
         {
-            // get the server ip and port from the config file
-            string line;
-            System.IO.StreamReader file = new System.IO.StreamReader(CONFIG_PATH);
-            while ((line = file.ReadLine()) != null)
+            // Create process which get the ip and the port from the virtual config file
+            System.Diagnostics.Process process = new System.Diagnostics.Process();
+            System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo
             {
-                if(line.Contains("port="))
-                {
-                    _serverPort = Int32.Parse(line.Substring(5));
-                }
-                else if (line.Contains("server_ip="))
-                {
-                    _serverIp = line.Substring(10);
-                }
-            }
-            file.Close();
+                WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden,
+                FileName = "cmd.exe",
+                Arguments = "/C python Resources\\getServer.py",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            };
+            process.StartInfo = startInfo;
+            process.Start();
 
+            List<string> address = new List<string>();
+            while (!process.StandardOutput.EndOfStream) // Reading what the python file is printing
+            { 
+                address.Add(process.StandardOutput.ReadLine());
+                // address[0] = ip, address[1] = port
+            }
+            if (address.Count < 2)
+            {
+                throw new Exception("Failed to connect to server.\n Do you wish to try again?");
+            }
+            _serverIp = address[0];
+            _serverPort = Int32.Parse(address[1]);
+            
             _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             IPAddress[] iPs = Dns.GetHostAddresses(_serverIp);
 
@@ -50,22 +56,26 @@ namespace Trivia_Client
             }
             catch (Exception)
             {
-                throw new Exception("Faild to connect to server.\n Do you wish to try again?");
+                throw new Exception("Failed to connect to server.\n Do you wish to try again?");
             }
         }
 
         /*
-        destructor - close the socket with the server
+        Destructor:
+        Close the socket with the server.
         */
         ~Communicator()
         {
-            _serverSocket.Close();
+            if (_serverSocket != null)
+            {
+                _serverSocket.Close();
+            }
         }
 
         /*
-        this function build the message and send it to the server
-        input: the code of the message and the message
-        output: none
+        This function build the message and send it to the server
+        Input: the code of the message and the message
+        Output: none
         */
         public void send_data(messageCode code, string msg = "")
         {
@@ -90,9 +100,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function is using template, it receive message from the server and deserialize it
-        input: none
-        output: the deserialized message by it`s template
+        This function is using template, it receive message from the server and deserialize it
+        Input: none
+        Output: the deserialized message by it`s template
         */
         public Res recv_data<Res>()
         {
@@ -111,20 +121,27 @@ namespace Trivia_Client
             }
             catch (Exception)
             {
-                throw new Exception("It looks like you have lost connection with the server,\n" +
-                        "You can try:\n" +
-                        "- Close and open the app\n" +
-                        "- Check your internet connection\n");
+                throw new Exception("Lost connection to the server :(");
             }
 
-            if (code[0] == (byte)messageCode.ERRORCODE)
+            if (code[0] == (byte)messageCode.ERRORCODE) // In case the server sent error result
             {
-                throw new Exception(JsonConvert.DeserializeObject<ErrorRes>(System.Text.Encoding.ASCII.GetString(msg)) + " :(");
+                string server_msg = "";
+                try
+                {
+                    server_msg = JsonConvert.DeserializeObject<ErrorRes>(System.Text.Encoding.ASCII.GetString(msg)) + " :(";
+                }
+                catch
+                {
+                    throw new Exception("Lost connection to the server :(");
+                }
+                throw new Exception(server_msg);
             }
             else if (code[0] == (byte)messageCode.GETQUESTIONCODE)
             {
                 string message = System.Text.Encoding.ASCII.GetString(msg);
 
+                // Makes the message to JSON
                 message = message.Replace("[[", "{").Replace("]]", "}");
                 message = message.Replace("],[", ",");
                 message = message.Replace(",\"", ":\"").Replace("}:\"", "},\"").Replace("\":\"status\"", "\",\"status\"");
@@ -136,9 +153,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function send a login request to the server
-        input: the username and the password
-        output: did login or not (true \ false)
+        This function send a login request to the server
+        Input: the username and the password
+        Output: did login or not (true \ false)
         */
         public LoginStatus login(string username, string password)
         {
@@ -152,9 +169,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function send a signup request to the server
-        input: the username, password, email, address, phone and birth date
-        output: did signup or not (true \ false)
+        This function send a signup request to the server
+        Input: the username, password, email, address, phone and birth date
+        Output: did signup or not (true \ false)
         */
         public int signup(string username, string password, string email, string address, string phone, string birthdate)
         {
@@ -172,9 +189,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function send a logout request to the server
-        input: none
-        output: did logout or not (true \ false)
+        This function send a logout request to the server
+        Input: none
+        Output: did logout or not (true \ false)
         */
         public bool logout()
         {
@@ -184,9 +201,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function send a get user statistics request to the server
-        input: none
-        output: list of the user statistics
+        This function send a get user statistics request to the server
+        Input: none
+        Output: list of the user statistics
         */
         public List<string> getUserStatistics()
         {
@@ -203,9 +220,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function send a get high scores request to the server
-        input: none
-        output: dictionary of the top 5 users and their score
+        This function send a get high scores request to the server
+        Input: none
+        Output: dictionary of the top 5 users and their score
         */
         public Dictionary<string, string> getHighScores()
         {
@@ -231,9 +248,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function send a create room request to the server
-        input: the room name, maximum users, number of question and time for question
-        output: did create room or not (true \ false)
+        This function send a create room request to the server
+        Input: the room name, maximum users, number of question and time for question
+        Output: did create room or not (true \ false)
         */
         public bool createRoom(string roomName, string maxUsers, string questionCount, string answerTimeout)
         {
@@ -262,9 +279,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function send a join room request to the server
-        input: the room name
-        output: did join room or not (true \ false)
+        This function send a join room request to the server
+        Input: the room name
+        Output: did join room or not (true \ false)
         */
         public bool joinRoom(string roomName)
         {
@@ -276,7 +293,7 @@ namespace Trivia_Client
 
             roomName = roomName.Split(delimeter, StringSplitOptions.RemoveEmptyEntries).First();
 
-            // get the room id
+            // Get the room id
             foreach (RoomData r in getAvailableRooms())
             {
                 if (r.name == roomName)
@@ -293,7 +310,6 @@ namespace Trivia_Client
                 JoinRoomRes result = recv_data<JoinRoomRes>();
                 return (result.status == 1);
             }
-
             else
             {
                 return false;
@@ -301,17 +317,17 @@ namespace Trivia_Client
         }
 
         /*
-        this function get the room data from the server
-        input: the room name
-        output: the room data
+        This function get the room data from the server
+        Input: the room name
+        Output: the room data
         */
         public RoomData getRoomData(string roomName)
         {
-            foreach (RoomData r in getAvailableRooms())
+            foreach (RoomData room in getAvailableRooms())
             {
-                if (r.name == roomName)
+                if (room.name == roomName)
                 {
-                    return r;
+                    return room;
                 }
             }
 
@@ -319,9 +335,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function send a get availabe rooms request to the server
-        input: none
-        output: list of each room data
+        This function send a get availabe rooms request to the server
+        Input: none
+        Output: list of each room data
         */
         public List<RoomData> getAvailableRooms()
         {
@@ -342,9 +358,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function send a get players in a room request to the server
-        input: the room id
-        output: number of players
+        This function send a get players in a room request to the server
+        Input: the room id
+        Output: number of players
         */
         public int getPlayersInRoom(uint room_id)
         {
@@ -358,9 +374,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function get the room admin from the server
-        input: none
-        output: the room admin
+        This function get the room admin from the server
+        Input: none
+        Output: the room admin
         */
         public string getRoomAdmin()
         {
@@ -368,9 +384,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function send a get room state request to the server
-        input: none
-        output: the room state
+        This function send a get room state request to the server
+        Input: none
+        Output: the room state
         */
         public GetRoomStateRes getRoomState()
         {
@@ -380,9 +396,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function send a close room request to the server
-        input: none
-        output: did close room or not (true \ false)
+        This function send a close room request to the server
+        Input: none
+        Output: did close room or not (true \ false)
         */
         public bool closeRoom()
         {
@@ -392,9 +408,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function send a leave room request to the server
-        input: none
-        output: did leave room or not (true \ false)
+        This function send a leave room request to the server
+        Input: none
+        Output: did leave room or not (true \ false)
         */
         public bool leaveRoom()
         {
@@ -404,9 +420,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function send a start game request to the server
-        input: none
-        output: did start game or not (true \ false)
+        This function send a start game request to the server
+        Input: none
+        Output: did start game or not (true \ false)
         */
         public bool startGame()
         {
@@ -416,9 +432,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function send a submit answer request to the server
-        input: the client answer id and the time 
-        output: the id of the correct answer, zero if request faild
+        This function send a submit answer request to the server
+        Input: the client answer id and the time 
+        Output: the id of the correct answer, zero if request faild
         */
         public uint submitAnswer(uint answer_id, float time)
         {
@@ -436,9 +452,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function send a get game results request to the server
-        input: none
-        output: list of the players result sorted by the score, empty list if request faild
+        This function send a get game results request to the server
+        Input: none
+        Output: list of the players result sorted by the score, empty list if request faild
         */
         public List<PlayerResults> getGameResults()
         {
@@ -446,7 +462,7 @@ namespace Trivia_Client
             GetGameResultsRes result = recv_data<GetGameResultsRes>();
             if(result.status == (uint)GameMode.FINISHED)
             {
-                // sort the list
+                // Sort the list
                 List<PlayerResults> results = result.results.OrderBy(o => (1 / o.averageAnswerTime * o.correctAnswerCount / (o.correctAnswerCount + o.wrongAnswerCount))).ToList();
                 results.Reverse();
                 return results;
@@ -455,9 +471,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function send a get question request to the server
-        input: none
-        output: a GetQuestionRes struct (the question and the answers), empty GetQuestionRes if request faild
+        This function send a get question request to the server
+        Input: none
+        Output: a GetQuestionRes struct (the question and the answers), empty GetQuestionRes if request faild
         */
         public GetQuestionRes getQuestion()
         {
@@ -471,9 +487,9 @@ namespace Trivia_Client
         }
 
         /*
-        this function send a leave game request to the server
-        input: none
-        output: did leave game or not (true \ false)
+        This function send a leave game request to the server
+        Input: none
+        Output: did leave game or not (true \ false)
         */
         public bool leaveGame()
         {

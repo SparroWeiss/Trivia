@@ -1,13 +1,9 @@
 #include "RoomMemberRequestHandler.h"
 #include "Communicator.h"
 
-enum LeaveRoomStatus
-{
-	FAILED = 0, LEFT_ROOM, PLAY
-};
 /*
-constructor
-initializes the variables of the object
+Constructor:
+Initializes the variables of the object
 */
 RoomMemberRequestHandler::RoomMemberRequestHandler(LoggedUser user, Room * room) : m_handlerFactory(m_handlerFactory->getInstance())
 {
@@ -16,17 +12,14 @@ RoomMemberRequestHandler::RoomMemberRequestHandler(LoggedUser user, Room * room)
 }
 
 /*
-destructor
-frees allocated memory
+Destructor
 */
-RoomMemberRequestHandler::~RoomMemberRequestHandler()
-{
-}
+RoomMemberRequestHandler::~RoomMemberRequestHandler() {}
 
 /*
-function checks if a request is relevant to the handler
-input : request info
-output : true - request is relevant, false - request isn't relevant
+Function checks if a request is relevant to the handler
+Input : request info
+Output : true - request is relevant, false - request isn't relevant
 */
 bool RoomMemberRequestHandler::isRequestRelevant(RequestInfo info)
 {
@@ -34,9 +27,9 @@ bool RoomMemberRequestHandler::isRequestRelevant(RequestInfo info)
 }
 
 /*
-function gets the result of a request
-input: request info
-output: request result
+Function gets the result of a request
+Input: request info
+Output: request result
 */
 RequestResult RoomMemberRequestHandler::handleRequest(RequestInfo info)
 {
@@ -48,9 +41,9 @@ RequestResult RoomMemberRequestHandler::handleRequest(RequestInfo info)
 }
 
 /*
-function leaves the room
-input: request info
-output: request result
+Function leaves the room
+Input: request info
+Output: request result
 */
 RequestResult RoomMemberRequestHandler::leaveRoom(RequestInfo info)
 {
@@ -59,18 +52,18 @@ RequestResult RoomMemberRequestHandler::leaveRoom(RequestInfo info)
 	std::unique_lock<std::mutex> locker(_mutex_room);
 	if (m_room->removeUser(m_user.getUsername()))
 	{
-		if (m_room->getData().isActive == ActiveMode::START_PLAYING)
-		{ // if the game has started, the user needs to join the game handler
+		if (m_room->getData().isActive == ActiveMode::START_PLAYING) // if the game has started, the user needs to join the game handler
+		{ 
 			leaveRoomRes = { LeaveRoomStatus::PLAY }; // status: 2
 			newHandle = m_handlerFactory->createGameRequestHandler(m_user, m_room); // pointer to the next handle : game
 		}
-		else
-		{ // if the game hasn't started yet and the user wants to log out
+		else // if the game hasn't started yet and the user wants to log out
+		{ 
 			leaveRoomRes = { LeaveRoomStatus::LEFT_ROOM }; // status: 1
 			newHandle = m_handlerFactory->createMenuRequestHandler(m_user.getUsername()); // pointer to the previous handle : menu
 		}
-		if (m_room->getAllUsers().empty())
-		{ // the room is empty
+		if (m_room->getAllUsers().empty()) // the room is empty
+		{ 
 			m_handlerFactory->getRoomManager().deleteRoom(m_room->getData().id);
 		}
 		locker.unlock();
@@ -81,9 +74,9 @@ RequestResult RoomMemberRequestHandler::leaveRoom(RequestInfo info)
 }
 
 /*
-function gets the room state
-input: request info
-output: request result
+Function gets the room state
+Input: request info
+Output: request result
 */
 RequestResult RoomMemberRequestHandler::getRoomState(RequestInfo info)
 {

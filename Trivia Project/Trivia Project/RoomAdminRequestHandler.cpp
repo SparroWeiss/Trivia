@@ -2,8 +2,8 @@
 #include "Communicator.h"
 
 /*
-constructor
-initializes the variables of the object
+Constructor:
+Initializes the variables of the object
 */
 RoomAdminRequestHandler::RoomAdminRequestHandler(LoggedUser user, Room* room)
 {
@@ -13,17 +13,14 @@ RoomAdminRequestHandler::RoomAdminRequestHandler(LoggedUser user, Room* room)
 }
 
 /*
-destructor
-frees allocated memory
+Destructor
 */
-RoomAdminRequestHandler::~RoomAdminRequestHandler()
-{
-}
+RoomAdminRequestHandler::~RoomAdminRequestHandler() {}
 
 /*
-function checks if a request is relevant to the handler
-input : request info
-output : true - request is relevant, false - request isn't relevant
+Function checks if a request is relevant to the handler
+Input : request info
+Output : true - request is relevant, false - request isn't relevant
 */
 bool RoomAdminRequestHandler::isRequestRelevant(RequestInfo info)
 {
@@ -33,9 +30,9 @@ bool RoomAdminRequestHandler::isRequestRelevant(RequestInfo info)
 }
 
 /*
-function gets the result of a request
-input: request info
-output: request result
+Function gets the result of a request
+Input: request info
+Output: request result
 */
 RequestResult RoomAdminRequestHandler::handleRequest(RequestInfo info)
 {
@@ -54,9 +51,9 @@ RequestResult RoomAdminRequestHandler::handleRequest(RequestInfo info)
 }
 
 /*
-function closes room
-input: request info
-output: request result
+Function closes room
+Input: request info
+Output: request result
 */
 RequestResult RoomAdminRequestHandler::closeRoom(RequestInfo info)
 {
@@ -78,16 +75,16 @@ RequestResult RoomAdminRequestHandler::closeRoom(RequestInfo info)
 }
 
 /*
-function starts the game
-input: request info
-output: request result
+Function starts the game
+Input: request info
+Output: request result
 */
 RequestResult RoomAdminRequestHandler::startGame(RequestInfo info)
 {
 	IRequestHandler* newHandle = this; // if the starting request isn't valid, stay in same handler
 	StartGameResponse startRes = { 0 }; // status: 0
 	std::lock_guard<std::mutex> locker(_mutex_room);
-	if (m_room->getAllUsers().size() >= 1)
+	if (m_room->getAllUsers().size() > 1)
 	{
 		startRes = { 1 }; // status: 1
 		m_room->setGame(m_handlerFactory->getGameManager().createGame(*m_room));
@@ -100,9 +97,9 @@ RequestResult RoomAdminRequestHandler::startGame(RequestInfo info)
 }
 
 /*
-function gets the room state
-input: request info
-output: request result
+Function gets the room state
+Input: request info
+Output: request result
 */
 RequestResult RoomAdminRequestHandler::getRoomState(RequestInfo info)
 {

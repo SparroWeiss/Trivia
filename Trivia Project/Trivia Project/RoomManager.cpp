@@ -4,8 +4,8 @@ std::mutex _mutex_rooms;
 std::mutex _mutex_curr_id;
 
 /*
-constructor
-initializes the variables of the object
+Constructor:
+Initializes the variables of the object
 */
 RoomManager::RoomManager()
 {
@@ -14,9 +14,9 @@ RoomManager::RoomManager()
 }
 
 /*
-function make sure that there is only one instance of the object
-input: none
-output: pointer of the only instance
+Function make sure that there is only one instance of the object
+Input: none
+Output: pointer of the only instance
 */
 RoomManager* RoomManager::getInstance()
 {
@@ -24,28 +24,22 @@ RoomManager* RoomManager::getInstance()
 	{
 		instance = new RoomManager();
 	}
-	instances++;
 	return instance;
 }
 
 /*
-destructor
-frees allocated memory
+Destructor:
+Frees allocated memory
 */
 RoomManager::~RoomManager()
 {
-	instances--;
-	if (instances == 0)
-	{
-		m_rooms.clear();
-		delete instance;
-	}
+	m_rooms.clear();
 }
 
 /*
-function creates a new room and inserts it into the map
-input: the user that created the room
-output: room id
+Function creates a new room and inserts it into the map
+Input: the user that created the room
+Output: room id
 */
 Room* RoomManager::createRoom(LoggedUser first_user, RoomData data)
 {
@@ -61,9 +55,9 @@ Room* RoomManager::createRoom(LoggedUser first_user, RoomData data)
 }
 
 /*
-function deletes a room from the map
-input: the room id
-output: true - room deleted, false - room couldn't be found
+Function deletes a room from the map
+Input: the room id
+Output: true - room deleted, false - room couldn't be found
 */
 bool RoomManager::deleteRoom(unsigned int id)
 {
@@ -79,9 +73,9 @@ bool RoomManager::deleteRoom(unsigned int id)
 }
 
 /*
-function gets a room state
-input: the room id
-output: the state of a room
+Function gets a room state
+Input: the room id
+Output: the state of a room
 */
 unsigned int RoomManager::getRoomState(unsigned int id)
 {
@@ -95,9 +89,9 @@ unsigned int RoomManager::getRoomState(unsigned int id)
 }
 
 /*
-function gets a list of the rooms
-input: none
-output: vector of the rooms in the server
+Function gets a list of the rooms
+Input: none
+Output: vector of the rooms in the server
 */
 std::vector<Room*> RoomManager::getRooms()
 {

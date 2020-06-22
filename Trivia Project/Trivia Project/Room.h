@@ -1,10 +1,11 @@
 #pragma once
-///#include "LoginManager.h"
 #include "Game.h"
 
 enum
 {
-	WAITING = 1, START_PLAYING, DONE
+	WAITING = 1, 
+	START_PLAYING, 
+	DONE
 }typedef ActiveMode;
 
 struct
@@ -30,8 +31,8 @@ public:
 	RoomData getData() const;
 	std::vector<std::string> getAllUsers();
 
-	void setGame(Game* game); // helper : for the admin
-	Game* getGame(); // helper : for game handler
+	void setGame(Game* game); 
+	Game* getGame(); 
 private:
 	Game* m_game; // helper : to notify the member to which game to go
 	RoomData m_metaData;

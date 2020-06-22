@@ -24,10 +24,8 @@ public:
 
 private:
 	StatisticsManager();
-	static StatisticsManager* instance;
-	static int instances;
-
 	void getTopPlayers(StatisticsData& data);
 
+	static StatisticsManager* instance;
 	IDataBase* m_database;
 };

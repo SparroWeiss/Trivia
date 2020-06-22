@@ -18,13 +18,12 @@
 
 class JsonResponsePacketSerializer;
 class JsonRequestPacketDeserializer;
+class RequestHandlerFactory;
 
 #define CODE_SIZE 1
 #define LENGTH_SIZE 4
 #define SPACE ' '
 #define LISTENING_PORT 8998
-
-class RequestHandlerFactory;
 
 enum messageCode
 {
@@ -58,14 +57,13 @@ public:
 
 private:
 	Communicator();
-	static Communicator* instance;//singleton
-	static int instances;
-
-	std::map<SOCKET, IRequestHandler*> m_clients;
-	RequestHandlerFactory* m_handlerFactory;
-	
 	void handleNewClient(SOCKET client_socket);
 	void send_data(SOCKET, std::string);
 	Buffer recv_data(SOCKET, int);
 	RequestInfo getRequest(SOCKET);
+
+	static Communicator* instance; // For singleton
+	SOCKET listening_socket;
+	std::map<SOCKET, IRequestHandler*> m_clients;
+	RequestHandlerFactory* m_handlerFactory;
 };

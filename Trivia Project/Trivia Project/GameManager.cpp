@@ -5,8 +5,8 @@ std::mutex _using_db;
 std::mutex _using_games;
 
 /*
-constructor
-initializes the variables of the object
+Constructor:
+Initializes the variables of the object
 */
 GameManager::GameManager()
 {
@@ -15,9 +15,9 @@ GameManager::GameManager()
 }
 
 /*
-function make sure that there is only one instance of the object
-input: none
-output: pointer of the only instance
+Function make sure that there is only one instance of the object
+Input: none
+Output: pointer of the only instance
 */
 GameManager* GameManager::getInstance()
 {
@@ -25,22 +25,16 @@ GameManager* GameManager::getInstance()
 	{
 		instance = new GameManager();
 	}
-	instances++;
 	return instance;
 }
 
 /*
-destructor
-frees allocated memory
+Destructor:
+Frees allocated memory
 */
 GameManager::~GameManager()
 {
-	instances--;
-	if (instances == 0)
-	{
-		m_games.clear();
-		delete instance;
-	}
+	m_games.clear();
 }
 
 /*
@@ -74,8 +68,6 @@ bool GameManager::deleteGame(Game* game)
 
 	if (it != m_games.end())
 	{
-		std::unique_lock<std::mutex> locker(_using_db);
-		locker.unlock();
 		m_games.erase(it);
 		try
 		{
@@ -91,9 +83,9 @@ bool GameManager::deleteGame(Game* game)
 }
 
 /*
-this function update the user statistics in the DB
-input: the game that the user played in
-output: none
+This function update the user statistics in the DB
+Input: the game that the user played in
+Output: none
 */
 void GameManager::updateUserStatistics(Game* game, std::string username)
 {
