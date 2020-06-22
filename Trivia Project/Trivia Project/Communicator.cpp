@@ -125,25 +125,29 @@ Output: none
 void Communicator::handleNewClient(SOCKET client_socket)
 {
 	std::string name = "%unknown%";
-	bool loggedIn = false;
 	while (true)
 	{
 		try
 		{
 			RequestInfo currRequest = getRequest(client_socket);
-	
+
 			std::unique_lock<std::mutex> locker(_using_clients);
 			if (m_clients[client_socket] && m_clients[client_socket]->isRequestRelevant(currRequest))
 			{
-				RequestResult currResult = m_clients[client_socket]->handleRequest(currRequest); // Deserialize request
-				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(currResult.response)); // Send serialized response to client
-				if (m_clients[client_socket] != currResult.newHandler) // If the handler has changed
-				{
+				RequestResult currResult = m_clients[client_socket]->handleRequest(currRequest); // deserialize request
+				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(currResult.response)); // send serialized response to client
+				if (m_clients[client_socket] != currResult.newHandler)
+				{ // if the handler has changed
 					delete m_clients[client_socket];
-					m_clients[client_socket] = currResult.newHandler; // Updating client state
+					m_clients[client_socket] = currResult.newHandler; // updating client state
+					if (currRequest.id == SIGNOUT)
+					{
+						std::cout << "### " << name << " left" << std::endl;
+						name = "%unknown%";
+					}
 				}
 				locker.unlock();
-				if (!loggedIn) // not enter to this block more than once
+				if (currRequest.id == SIGNUPCODE || currRequest.id == LOGINCODE)
 				{
 					try
 					{
@@ -152,23 +156,14 @@ void Communicator::handleNewClient(SOCKET client_socket)
 						if (loginRes.status == 1) // the user logged in into the server
 						{
 							name = JsonRequestPacketDeserializer::deserializeLoginRequest(currRequest.buffer).username;
-							std::cout << "### "<< name << " joined" << std::endl; // rememberring the name for the thread
-							loggedIn = true; // there is no need to enter this block again, we got what we need
+							std::cout << "### " << name << " joined" << std::endl; // rememberring the name for the thread
 						}
 					}
 					catch (const std::exception& e)
 					{
 						std::cout << e.what() << std::endl;
 					}
-					
-				}
-				if (m_clients[client_socket] == nullptr) // If the user logged out
-				{ 
-					std::cout << "### " << name << " logged out" << std::endl;
-					std::lock_guard<std::mutex> locker(_using_clients);
-					m_clients.erase(client_socket);
-					closesocket(client_socket);
-					return;
+
 				}
 			}
 			else
@@ -179,17 +174,17 @@ void Communicator::handleNewClient(SOCKET client_socket)
 						ErrorResponse{ "Invalid request per state" })));
 			}
 		}
-		catch (const std::exception & e)
+		catch (const std::exception& e)
 		{
-			if (m_clients[client_socket]->isRequestRelevant(RequestInfo{ CLOSEROOM, "", Buffer() })) // If the user was a room admin
+			if (m_clients[client_socket]->isRequestRelevant(RequestInfo{ CLOSEROOM, "", Buffer() }))
 			{
 				m_clients[client_socket]->handleRequest(RequestInfo{ CLOSEROOM, "", Buffer() });
 			}
-			else if (m_clients[client_socket]->isRequestRelevant(RequestInfo{ LEAVEROOM, "", Buffer() })) // If the user were in a room
+			else if (m_clients[client_socket]->isRequestRelevant(RequestInfo{ LEAVEROOM, "", Buffer() }))
 			{
 				m_clients[client_socket]->handleRequest(RequestInfo{ LEAVEROOM, "", Buffer() });
 			}
-			else if (m_clients[client_socket]->isRequestRelevant(RequestInfo{ LEAVEGAME, "", Buffer() })) // If the user were in a game
+			else if (m_clients[client_socket]->isRequestRelevant(RequestInfo{ LEAVEGAME, "", Buffer() }))
 			{
 				m_clients[client_socket]->handleRequest(RequestInfo{ LEAVEGAME, "", Buffer() });
 			}
@@ -199,7 +194,7 @@ void Communicator::handleNewClient(SOCKET client_socket)
 			m_clients.erase(client_socket);
 			locker.unlock();
 			m_handlerFactory->getLoginManager().logout(name);
-			closesocket(client_socket); 
+			closesocket(client_socket);
 			return;
 		}
 	}

@@ -297,7 +297,7 @@ float SqliteDatabase::getPlayerAverageAnswerTime(std::string name)
 	getStatistics(name);
 	if (_statisticsRows.front()._totalAnswers)
 	{
-		return  _statisticsRows.front()._answersTime / _statisticsRows.front()._totalAnswers;
+		return _statisticsRows.front()._answersTime / _statisticsRows.front()._totalAnswers;
 	}
 	return 0;
 }
@@ -415,8 +415,7 @@ void SqliteDatabase::updateStatistics(std::map<std::string, GameData> usersGameD
 						curr._totalAnswers + static_cast<int>(gameQuestions),
 						curr._correctAnswers + static_cast<int>(player.second.correctAnswersCount),
 						curr._numOfGames + 1,
-						static_cast<float>((curr._answersTime * curr._totalAnswers + player.second.averageAnswerTime * gameQuestions)
-						/ (curr._totalAnswers + static_cast<int>(gameQuestions))) });
+						static_cast<float>(curr._answersTime + player.second.averageAnswerTime * gameQuestions) });
 					break;
 				}
 			}

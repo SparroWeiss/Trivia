@@ -89,10 +89,19 @@ Output: vector of the users
 std::vector<std::string> Room::getAllUsers()
 {
 	std::vector<std::string> names;
-	std::lock_guard<std::mutex> locker(_mutex_users);
-	for (std::vector<LoggedUser>::iterator i = m_users.begin(); i != m_users.end(); ++i)
+	try
 	{
-		names.push_back((*i).getUsername());
+		std::unique_lock<std::mutex> locker(_mutex_users);
+		std::vector<LoggedUser> users = m_users;
+		locker.unlock();
+		for (std::vector<LoggedUser>::iterator i = users.begin(); i != users.end(); ++i)
+		{
+			names.push_back((*i).getUsername());
+		}
+	}
+	catch (const std::exception&)
+	{
+		// there is nothing to do, just catch
 	}
 	return names;
 }

@@ -84,10 +84,17 @@ bool GameManager::deleteGame(Game* game)
 
 /*
 This function update the user statistics in the DB
-Input: the game that the user played in
+Input: the game that the user played in, the user name, if he left the game
 Output: none
 */
-void GameManager::updateUserStatistics(Game* game, std::string username)
+void GameManager::updateUserStatistics(Game* game, std::string username, bool left)
 {
-	m_database->updateStatistics(game->getUsersData(), username, game->getNumOfQuestions());
+	if (left)
+	{
+		m_database->updateStatistics(game->getUsersData(), username, 0);
+	}
+	else
+	{
+		m_database->updateStatistics(game->getUsersData(), username, game->getNumOfQuestions());
+	}
 }

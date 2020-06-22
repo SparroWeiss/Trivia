@@ -463,7 +463,7 @@ namespace Trivia_Client
             if(result.status == (uint)GameMode.FINISHED)
             {
                 // Sort the list
-                List<PlayerResults> results = result.results.OrderBy(o => (1 / o.averageAnswerTime * o.correctAnswerCount / (o.correctAnswerCount + o.wrongAnswerCount))).ToList();
+                List<PlayerResults> results = result.results.OrderBy(o => (o.correctAnswerCount / (o.averageAnswerTime * (o.correctAnswerCount + o.wrongAnswerCount)))).ToList();
                 results.Reverse();
                 return results;
             }

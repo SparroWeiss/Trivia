@@ -122,7 +122,7 @@ RequestResult MenuRequestHandler::getStatistics(RequestInfo info)
 	GetStatisticsResponse statisticsRes = { 1 }; // status: 1
 	statisticsRes.statiatics.push_back(data._username); // [0] - username
 	statisticsRes.statiatics.push_back(std::to_string(data._totalAnswers)); // [1] - total answers
-	statisticsRes.statiatics.push_back(std::to_string(data._correctAnswers)); // [2] - coorect answers
+	statisticsRes.statiatics.push_back(std::to_string(data._correctAnswers)); // [2] - correct answers
 	statisticsRes.statiatics.push_back(std::to_string(data._incorrectAnswers)); // [3] - incorrect answers
 	statisticsRes.statiatics.push_back(std::to_string(data._averageAnswerTime)); // [4] - average time per answer
 	statisticsRes.statiatics.push_back(std::to_string(data._numOfGames)); // [5] - number of games

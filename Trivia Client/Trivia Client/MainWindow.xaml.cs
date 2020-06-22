@@ -819,7 +819,7 @@ namespace Trivia_Client
             
             TextBlock incorrectAnswersBlock = new TextBlock { Style = (Style)Resources["brightText"], Text = "Incorrect Answers: " + statistics[2] };
             
-            TextBlock avgTimeBlock = new TextBlock { Style = (Style)Resources["brightText"], Text = "Avg Time Per Answer: " + statistics[3] };
+            TextBlock avgTimeBlock = new TextBlock { Style = (Style)Resources["brightText"], Text = "Avg Time Per Answer: " + statistics[3].Substring(0, 5) };
            
             TextBlock totalGamesBlock = new TextBlock { Style = (Style)Resources["brightText"], Text = "Total Games: " + statistics[4] };
 
@@ -1566,7 +1566,6 @@ namespace Trivia_Client
                         break;
 
                     case Windows.GAME:
-                        _currWindow = Windows.GAME;
                         _using_communicator.WaitOne();
                         GetRoomStateRes roomState = _communicator.getRoomState();
                         bool started = _communicator.startGame();
@@ -1574,7 +1573,6 @@ namespace Trivia_Client
 
                         if(!started)
                         {
-                            _currWindow = Windows.ROOM;
                             MessageBoxResult result = MessageBox.Show("Faild to start game :( \nTry again.", "Trivia",
                                 MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
                             break;
@@ -1582,6 +1580,7 @@ namespace Trivia_Client
                         _using_communicator.WaitOne();
                         GetQuestionRes firstQuestion = _communicator.getQuestion();
                         _using_communicator.ReleaseMutex();
+                        _currWindow = Windows.GAME;
                         SetGameWindow(1, roomState.questionCount, 0, roomState.answerTimeout, firstQuestion.question, firstQuestion.answers, false);
                         break;
                     default:
@@ -1633,7 +1632,7 @@ namespace Trivia_Client
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _using_communicator.ReleaseMutex();
             }

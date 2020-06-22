@@ -104,7 +104,7 @@ RequestResult GameRequestHandler::getGameResults(RequestInfo info)
 
 	if (!m_updateStatistics)
 	{
-		m_gameManager->updateUserStatistics(m_game, m_user.getUsername());
+		m_gameManager->updateUserStatistics(m_game, m_user.getUsername(), false);
 		m_updateStatistics = true;
 	}
 	locker.unlock();
@@ -115,7 +115,11 @@ RequestResult GameRequestHandler::getGameResults(RequestInfo info)
 		{
 			getGameRes.status = GameMode::WAITING_FOR_PLAYERS;
 		}
-		getGameRes.results.push_back({ i->first, i->second.correctAnswersCount, i->second.wrongAnswersCount, i->second.averageAnswerTime });
+		if (i->second.averageAnswerTime == 0)
+		{ // can't be divided by 0
+			i->second.averageAnswerTime = 1;
+		}
+		getGameRes.results.push_back({ i->first, i->second.correctAnswersCount, m_game->getNumOfQuestions() - i->second.correctAnswersCount, i->second.averageAnswerTime });
 	}
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(getGameRes), this };
 }
@@ -135,7 +139,7 @@ RequestResult GameRequestHandler::leaveGame(RequestInfo info)
 	{
 		if (!m_updateStatistics)
 		{
-			m_gameManager->updateUserStatistics(m_game, m_user.getUsername());
+			m_gameManager->updateUserStatistics(m_game, m_user.getUsername(), true);
 			m_updateStatistics = true;
 		}
 		if (m_game->getUsersAmount() == 0) // If all players left the game
