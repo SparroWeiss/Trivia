@@ -4,8 +4,8 @@ std::mutex _mutex_users;
 std::mutex _mutex_data;
 
 /*
-constructor
-initializes the variables of the object
+Constructor:
+Initializes the variables of the object
 */
 Room::Room()
 {
@@ -16,26 +16,24 @@ Room::Room()
 }
 
 /*
-destructor
-frees allocated memory
+Destructor:
+Frees allocated memory
 */
 Room::~Room()
 {
 	m_users.clear();
 }
 
-
 /*
-function insert a new user into the room
-input: user
-output: true - success, false - the room is full
+Function insert a new user into the room
+Input: user
+Output: true - success, false - the room is full
 */
 bool Room::addUser(LoggedUser user)
 {
 	std::lock_guard<std::mutex> locker(_mutex_users);
-	// prevents few people to enter in the same time into a full room
-	if (m_metaData.maxPlayers > m_users.size())
-	{ // the room isn't full
+	if (m_metaData.maxPlayers > m_users.size()) // the room isn't full
+	{ 
 		m_users.push_back(user);
 		return true;
 	}
@@ -43,13 +41,13 @@ bool Room::addUser(LoggedUser user)
 }
 
 /*
-function removes a user from the room
-input: username (might be changed later)
-output: true - removed, false - can't be found
+Function removes a user from the room
+Input: username (might be changed later)
+Output: true - removed, false - can't be found
 */
 bool Room::removeUser(std::string name)
 {
-	std::lock_guard<std::mutex> locker(_mutex_users); // prevent any access to the users while someone logs out
+	std::lock_guard<std::mutex> locker(_mutex_users);
 	for (std::vector<LoggedUser>::iterator i = m_users.begin(); i != m_users.end(); ++i)
 	{
 		if (name == (*i).getUsername())
@@ -62,9 +60,9 @@ bool Room::removeUser(std::string name)
 }
 
 /*
-function sets the room data
-input: room data
-output: none
+Function sets the room data
+Input: room data
+Output: none
 */
 void Room::setData(RoomData data)
 {
@@ -73,9 +71,9 @@ void Room::setData(RoomData data)
 }
 
 /*
-function gets the room data
-input: none
-output: room data
+Function gets the room data
+Input: none
+Output: room data
 */
 RoomData Room::getData() const
 {
@@ -84,9 +82,9 @@ RoomData Room::getData() const
 }
 
 /*
-function gets the list of users
-input: none
-output: vector of the users
+Function gets the list of users
+Input: none
+Output: vector of the users
 */
 std::vector<std::string> Room::getAllUsers()
 {
@@ -99,11 +97,12 @@ std::vector<std::string> Room::getAllUsers()
 	return names;
 }
 
-/////////////////////////////Game Helpers
+/********* Game Helpers **********/
+
 /*
-function sets the game of the room
-input: pointer to the game
-output: none
+Function sets the game of the room
+Input: pointer to the game
+Output: none
 */
 void Room::setGame(Game* game)
 {
@@ -111,9 +110,9 @@ void Room::setGame(Game* game)
 }
 
 /*
-function gets the game of the room
-input: none
-output: pointer to the game
+Function gets the game of the room
+Input: none
+Output: pointer to the game
 */
 Game* Room::getGame()
 {

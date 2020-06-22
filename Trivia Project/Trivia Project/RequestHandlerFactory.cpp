@@ -2,8 +2,8 @@
 #include "SqliteDatabase.h"
 
 /*
-constructor
-initializes the variables of the object
+Constructor:
+Initializes the variables of the object
 */
 RequestHandlerFactory::RequestHandlerFactory()
 {
@@ -15,9 +15,9 @@ RequestHandlerFactory::RequestHandlerFactory()
 }
 
 /*
-function make sure that there is only one instance of the object
-input: none
-output: pointer of the only instance
+Function make sure that there is only one instance of the object
+Input: none
+Output: pointer of the only instance
 */
 RequestHandlerFactory* RequestHandlerFactory::getInstance()
 {
@@ -29,17 +29,14 @@ RequestHandlerFactory* RequestHandlerFactory::getInstance()
 }
 
 /*
-destructor
-frees allocated memory
+Destructor
 */
-RequestHandlerFactory::~RequestHandlerFactory()
-{
-}
+RequestHandlerFactory::~RequestHandlerFactory() {}
 
 /*
-function creates new Login request handler
-input: none
-output: Login request handler
+Function creates new Login request handler
+Input: none
+Output: Login request handler
 */
 LoginRequestHandler* RequestHandlerFactory::createLoginRequestHandler()
 {
@@ -47,9 +44,9 @@ LoginRequestHandler* RequestHandlerFactory::createLoginRequestHandler()
 }
 
 /*
-function creates new Menu request handler
-input: none
-output: Menu request handler
+Function creates new Menu request handler
+Input: none
+Output: Menu request handler
 */
 MenuRequestHandler* RequestHandlerFactory::createMenuRequestHandler(std::string username)
 {
@@ -57,9 +54,9 @@ MenuRequestHandler* RequestHandlerFactory::createMenuRequestHandler(std::string 
 }
 
 /*
-function creates new Room Admin handler
-input: logged user, pointer to the room
-output: Room Admin handler
+Function creates new Room Admin handler
+Input: logged user, pointer to the room
+Output: Room Admin handler
 */
 RoomAdminRequestHandler* RequestHandlerFactory::createRoomAdminRequestHandler(LoggedUser user, Room* room)
 {
@@ -67,9 +64,9 @@ RoomAdminRequestHandler* RequestHandlerFactory::createRoomAdminRequestHandler(Lo
 }
 
 /*
-function creates new Room Member handler
-input: logged user, pointer to the room
-output: Room Member handler
+Function creates new Room Member handler
+Input: logged user, pointer to the room
+Output: Room Member handler
 */
 RoomMemberRequestHandler* RequestHandlerFactory::createRoomMemberRequestHandler(LoggedUser user, Room* room)
 {
@@ -77,9 +74,9 @@ RoomMemberRequestHandler* RequestHandlerFactory::createRoomMemberRequestHandler(
 }
 
 /*
-function creates new Game handler
-input: logged user, pointer to the room
-output: Game handler
+Function creates new Game handler
+Input: logged user, pointer to the room
+Output: Game handler
 */
 GameRequestHandler* RequestHandlerFactory::createGameRequestHandler(LoggedUser user, Room* room)
 {
@@ -87,9 +84,9 @@ GameRequestHandler* RequestHandlerFactory::createGameRequestHandler(LoggedUser u
 }
 
 /*
-function returns the Login Manager
-input: none
-output: Login Manager
+Function returns the Login Manager
+Input: none
+Output: Login Manager
 */
 LoginManager& RequestHandlerFactory::getLoginManager()
 {
@@ -97,9 +94,9 @@ LoginManager& RequestHandlerFactory::getLoginManager()
 }
 
 /*
-function returns the Room Manager
-input: none
-output: Room Manager
+Function returns the Room Manager
+Input: none
+Output: Room Manager
 */
 RoomManager& RequestHandlerFactory::getRoomManager()
 {
@@ -107,9 +104,9 @@ RoomManager& RequestHandlerFactory::getRoomManager()
 }
 
 /*
-function returns the Statistics Manager
-input: none
-output: Statistics Manager
+Function returns the Statistics Manager
+Input: none
+Output: Statistics Manager
 */
 StatisticsManager& RequestHandlerFactory::getStatisticsManager()
 {
@@ -117,9 +114,9 @@ StatisticsManager& RequestHandlerFactory::getStatisticsManager()
 }
 
 /*
-function returns the Game Manager
-input: none
-output: Game Manager
+Function returns the Game Manager
+Input: none
+Output: Game Manager
 */
 GameManager& RequestHandlerFactory::getGameManager()
 {

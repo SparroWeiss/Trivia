@@ -2,8 +2,8 @@
 #include "SqliteDatabase.h"
 
 /*
-constructor
-initializes the variables of the object
+Constructor:
+Initializes the variables of the object
 */
 Server::Server()
 {
@@ -21,9 +21,9 @@ Server::Server()
 }
 
 /*
-function make sure that there is only one instance of the object
-input: none
-output: pointer of the only instance
+Function make sure that there is only one instance of the object
+Input: none
+Output: pointer of the only instance
 */
 Server* Server::getInstence()
 {
@@ -35,8 +35,8 @@ Server* Server::getInstence()
 }
 
 /*
-destructor
-frees allocated memory
+Destructor:
+Terminate ngrok.exe process
 */
 Server::~Server()
 {

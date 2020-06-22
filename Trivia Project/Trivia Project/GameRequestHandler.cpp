@@ -4,8 +4,8 @@
 std::mutex _mutex_game;
 
 /*
-constructor
-initializes the variables of the object
+Donstructor:
+Initializes the variables of the object
 */
 GameRequestHandler::GameRequestHandler(LoggedUser user, Room* room)
 {
@@ -17,17 +17,14 @@ GameRequestHandler::GameRequestHandler(LoggedUser user, Room* room)
 }
 
 /*
-destructor
-frees allocated memory
+Destructor
 */
-GameRequestHandler::~GameRequestHandler()
-{
-}
+GameRequestHandler::~GameRequestHandler() {}
 
 /*
-function checks if a request is relevant to the handler
-input : request info
-output : true - request is relevant, false - request isn't relevant
+Function checks if a request is relevant to the handler
+Input : request info
+Output : true - request is relevant, false - request isn't relevant
 */
 bool GameRequestHandler::isRequestRelevant(RequestInfo info)
 {
@@ -38,9 +35,9 @@ bool GameRequestHandler::isRequestRelevant(RequestInfo info)
 }
 
 /*
-function gets the result of a request
-input: request info
-output: request result
+Function gets the result of a request
+Input: request info
+Output: request result
 */
 RequestResult GameRequestHandler::handleRequest(RequestInfo info)
 {
@@ -60,9 +57,9 @@ RequestResult GameRequestHandler::handleRequest(RequestInfo info)
 }
 
 /*
-function gets the question of the user
-input: request info
-output: request result
+Function gets the question of the user
+Input: request info
+Output: request result
 */
 RequestResult GameRequestHandler::getQuestion(RequestInfo info)
 {
@@ -77,9 +74,9 @@ RequestResult GameRequestHandler::getQuestion(RequestInfo info)
 }
 
 /*
-function submits a user's answer
-input: request info
-output: request result
+Function submits a user's answer
+Input: request info
+Output: request result
 */
 RequestResult GameRequestHandler::submitAnswer(RequestInfo info)
 {
@@ -94,9 +91,9 @@ RequestResult GameRequestHandler::submitAnswer(RequestInfo info)
 }
 
 /*
-function gets the results of the game
-input: request info
-output: request result
+Function gets the results of the game
+Input: request info
+Output: request result
 */
 RequestResult GameRequestHandler::getGameResults(RequestInfo info)
 {
@@ -124,9 +121,9 @@ RequestResult GameRequestHandler::getGameResults(RequestInfo info)
 }
 
 /*
-function signs out a user from the game
-input: request info
-output: request result
+Function signs out a user from the game
+Input: request info
+Output: request result
 */
 RequestResult GameRequestHandler::leaveGame(RequestInfo info)
 {

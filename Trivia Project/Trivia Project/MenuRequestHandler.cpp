@@ -5,8 +5,8 @@
 std::mutex _mutex_room_vector;
 
 /*
-constructor
-initializes the variables of the object
+Constructor:
+Initializes the variables of the object
 */
 MenuRequestHandler::MenuRequestHandler(std::string username) : 
 	m_handlerFactory(m_handlerFactory->getInstance())
@@ -15,17 +15,14 @@ MenuRequestHandler::MenuRequestHandler(std::string username) :
 }
 
 /*
-destructor
-frees allocated memory
+Destructor
 */
-MenuRequestHandler::~MenuRequestHandler()
-{
-}
+MenuRequestHandler::~MenuRequestHandler() {}
 
 /*
-function checks if a request is relevant to the handler
-input : request info
-output : true - request is relevant, false - request isn't relevant
+Function checks if a request is relevant to the handler
+Input : request info
+Output : true - request is relevant, false - request isn't relevant
 */
 bool MenuRequestHandler::isRequestRelevant(RequestInfo info)
 {
@@ -35,9 +32,9 @@ bool MenuRequestHandler::isRequestRelevant(RequestInfo info)
 }
 
 /*
-function gets the result of a request
-input: request info
-output: request result
+Function gets the result of a request
+Input: request info
+Output: request result
 */
 RequestResult MenuRequestHandler::handleRequest(RequestInfo info)
 {
@@ -61,16 +58,17 @@ RequestResult MenuRequestHandler::handleRequest(RequestInfo info)
 }
 
 /*
-function signs out a user
-input: request info
-output: request result
+Function signs out a user
+Input: request info
+Output: request result
 */
 RequestResult MenuRequestHandler::signout(RequestInfo info)
 {
 	IRequestHandler* newHandle = this; // if the logout request isn't valid, stay in same handler
 	SignupResponse signOutRes = { 0 }; // status: 0
-	if (m_handlerFactory->getLoginManager().logout(m_user.getUsername()))
-	{ // if the sign out request is valid
+
+	if (m_handlerFactory->getLoginManager().logout(m_user.getUsername())) // if the sign out request is valid
+	{ 
 		signOutRes = { 1 }; // status: 1
 		newHandle = m_handlerFactory->createLoginRequestHandler(); // pointer to the next handle : login
 	}
@@ -78,9 +76,9 @@ RequestResult MenuRequestHandler::signout(RequestInfo info)
 }
 
 /*
-function gets the rooms in the server
-input: request info
-output: request result
+Function gets the rooms in the server
+Input: request info
+Output: request result
 */
 RequestResult MenuRequestHandler::getRooms(RequestInfo info)
 {
@@ -98,9 +96,9 @@ RequestResult MenuRequestHandler::getRooms(RequestInfo info)
 }
 
 /*
-function gets the players in a room
-input: request info
-output: request result
+Function gets the players in a room
+Input: request info
+Output: request result
 */
 RequestResult MenuRequestHandler::getPlayersInRoom(RequestInfo info)
 {
@@ -113,14 +111,15 @@ RequestResult MenuRequestHandler::getPlayersInRoom(RequestInfo info)
 }
 
 /*
-function gets the statistics of a user
-input: request info
-output: request result
+Function gets the statistics of a user
+Input: request info
+Output: request result
 */
 RequestResult MenuRequestHandler::getStatistics(RequestInfo info)
 {
-	GetStatisticsResponse statisticsRes = { 1 }; // status: 1
 	StatisticsData data = m_handlerFactory->getStatisticsManager().getStatistics(m_user.getUsername());
+
+	GetStatisticsResponse statisticsRes = { 1 }; // status: 1
 	statisticsRes.statiatics.push_back(data._username); // [0] - username
 	statisticsRes.statiatics.push_back(std::to_string(data._totalAnswers)); // [1] - total answers
 	statisticsRes.statiatics.push_back(std::to_string(data._correctAnswers)); // [2] - coorect answers
@@ -139,9 +138,9 @@ RequestResult MenuRequestHandler::getStatistics(RequestInfo info)
 }
 
 /*
-function joins a member to a room
-input: request info
-output: request result
+Function joins a member to a room
+Input: request info
+Output: request result
 */
 RequestResult MenuRequestHandler::joinRoom(RequestInfo info)
 {
@@ -149,6 +148,7 @@ RequestResult MenuRequestHandler::joinRoom(RequestInfo info)
 	IRequestHandler* newHandle = this; // if the joining request isn't valid, stey in same handler
 	JoinRoomResponse joinRoomRes = { 0 }; // status: 0
 	Room * room = findRoom(joinRoomReq.roomId);
+
 	if (room != nullptr && room->addUser(m_user))
 	{
 		joinRoomRes.status = 1; // status: 1
@@ -158,9 +158,9 @@ RequestResult MenuRequestHandler::joinRoom(RequestInfo info)
 }
 
 /*
-function creates room by demand
-input: request info
-output: request result
+Function creates room by demand
+Input: request info
+Output: request result
 */
 RequestResult MenuRequestHandler::createRoom(RequestInfo info)
 {
@@ -168,6 +168,7 @@ RequestResult MenuRequestHandler::createRoom(RequestInfo info)
 	IRequestHandler* newHandle = this; // if the creating request isn't valid, stey in same handler
 	CreateRoomResponse createRoomRes = { 1 }; // status: 1
 	RoomData data = { 0, createRoomReq.roomName, createRoomReq.maxUsers, createRoomReq.answerTimeout, ActiveMode::WAITING, createRoomReq.questionCount };
+	
 	std::unique_lock<std::mutex> locker(_mutex_room_vector);
 	newHandle = m_handlerFactory->createRoomAdminRequestHandler(m_user, 
 		m_handlerFactory->getRoomManager().createRoom(m_user, data)); // pointer to the next handle : room admin
@@ -175,11 +176,12 @@ RequestResult MenuRequestHandler::createRoom(RequestInfo info)
 	return RequestResult{ JsonResponsePacketSerializer::serializeResponse(createRoomRes), newHandle };
 }
 
-//////////////////////////////////HELPER
+/*************** Helper *************/
+
 /*
-function finds the room
-input: room id
-output: iterator for the room
+Function finds the room
+Input: room id
+Output: iterator for the room
 */
 Room* MenuRequestHandler::findRoom(unsigned int id)
 {

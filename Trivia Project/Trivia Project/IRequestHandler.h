@@ -2,7 +2,6 @@
 #include <ctime>
 #include "Buffer.h"
 
-
 class IRequestHandler;
 
 struct

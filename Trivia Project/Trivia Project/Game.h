@@ -4,12 +4,15 @@
 
 enum GameMode
 {
-	FINISHED = 1, WAITING_FOR_PLAYERS
+	FINISHED = 1, 
+	WAITING_FOR_PLAYERS
 };
 
 enum PlayerMode
 {
-	LEFT = 1, PLAYING, WAITING_FOR_RESULTS
+	LEFT = 1, 
+	PLAYING, 
+	WAITING_FOR_RESULTS
 };
 
 class Game
@@ -24,6 +27,7 @@ public:
 	std::map<std::string, GameData> getUsersData();
 	unsigned int getUsersAmount();
 	unsigned int getNumOfQuestions();
+
 private:
 	std::map<std::string, GameData> m_players;
 	std::vector<Question> m_questions;

@@ -24,13 +24,6 @@ public:
 
 private:
 	SqliteDatabase();
-	static SqliteDatabase* instance;
-
-	sqlite3* _db;
-	std::vector<SignupRequest> _usersRows;
-	std::vector<Statistic> _statisticsRows;
-	std::vector<Question> _questionsRows;
-
 	void refreshQuestions(int);
 	void getStatistics(std::string name);
 	void updateUserStatistic(Statistic userStatistic);
@@ -39,7 +32,12 @@ private:
 	friend int questionsCallback(void* data, int size, char** argv, char** colName);
 	friend int statisticsCallback(void* data, int size, char** argv, char** colName);
 
-	
+	static SqliteDatabase* instance;
+	sqlite3* _db;
+	std::vector<SignupRequest> _usersRows;
+	std::vector<Statistic> _statisticsRows;
+	std::vector<Question> _questionsRows;
+
 	std::mutex _using_db;
 	std::mutex _mutex_statistics;
 	std::mutex _mutex_users;

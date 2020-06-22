@@ -5,7 +5,6 @@
 
 class RequestHandlerFactory;
 
-
 class MenuRequestHandler : public IRequestHandler
 {
 public:

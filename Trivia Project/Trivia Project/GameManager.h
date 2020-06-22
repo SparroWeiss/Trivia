@@ -17,8 +17,8 @@ public:
 
 private:
 	GameManager();
-	static GameManager* instance;
 
+	static GameManager* instance;
 	IDataBase* m_database;
 	std::vector<Game*> m_games;
 };

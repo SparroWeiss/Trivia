@@ -22,18 +22,18 @@
 #define ANSWERS_TIME_COLUMN std::string("ANSWERS_TIME") // (summery not average)
 
 #define MAX_QUESTIONS 50
-#define SCRIPT_PATH "python \"..\\Trivia Project\\scripts\\getQuestions.py\" "
+#define SCRIPT_PATH "python \"scripts\\getQuestions.py\" "
 #define DELIMITER "~~~"
 #define NAME_MATCH_CHECK "."
 
 
 
 /*
-this helper function gets the data that the DB returned
+This helper function gets the data that the DB returned
 and transforms it into a reachable variable
-input: data - pointer to the reachable variable, size - number of columns in the table,
-		argv - array of the data of each column, colName - the name of the column
-output: 0, it doesn't realy matters
+Input: data - pointer to the reachable variable, size - number of columns in the table,
+	   argv - array of the data of each column, colName - the name of the column
+Output: 0, it doesn't realy matters
 */
 int usersCallback(void* data, int size, char** argv, char** colName)
 {
@@ -112,11 +112,11 @@ int questionsCallback(void* data, int size, char** argv, char** colName)
 }
 
 /*
-this helper function gets the data that the DB returned
+This helper function gets the data that the DB returned
 and transforms it into a reachable variable
-input: data - pointer to the reachable variable, size - number of columns in the table,
+Input: data - pointer to the reachable variable, size - number of columns in the table,
 		argv - array of the data of each column, colName - the name of the column
-output: 0, it doesn't realy matters
+Output: 0, it doesn't realy matters
 */
 int statisticsCallback(void* data, int size, char** argv, char** colName)
 {
@@ -151,19 +151,19 @@ int statisticsCallback(void* data, int size, char** argv, char** colName)
 }
 
 /*
-constructor
-initializes the variables of the object
+Constructor:
+Initializes the variables of the object
 */
 SqliteDatabase::SqliteDatabase()
 {
 	int fileNotExists = _access(DB_NAME.c_str(), 0); // checks if file already exists
 	int res = sqlite3_open(DB_NAME.c_str(), &_db); // create the file if doesn't exists, open the file if exists.
-	if (res != SQLITE_OK)
-	{ // never happened
+	if (res != SQLITE_OK) // should never happened
+	{ 
 		_db = nullptr;
 	}
 	if (fileNotExists)
-	{ // file doesn't exists
+	{ 
 		std::string query = "CREATE TABLE USERS(" + NAME_COLUMN +
 			" TEXT PRIMARY KEY NOT NULL, " + PASSWORD_COLUMN +
 			" TEXT NOT NULL, " + EMAIL_COLUMN +
@@ -194,9 +194,9 @@ SqliteDatabase::SqliteDatabase()
 }
 
 /*
-function make sure that there is only one instance of the object
-input: none
-output: pointer of the only instance
+Function make sure that there is only one instance of the object
+Input: none
+Output: pointer of the only instance
 */
 SqliteDatabase* SqliteDatabase::getInstance()
 {
@@ -208,8 +208,8 @@ SqliteDatabase* SqliteDatabase::getInstance()
 }
 
 /*
-destructor
-frees allocated memory
+Destructor:
+Frees allocated memory
 */
 SqliteDatabase::~SqliteDatabase()
 {
@@ -220,9 +220,9 @@ SqliteDatabase::~SqliteDatabase()
 }
 
 /*
-function checks if a username already exists
-input: username
-output: true - the username exists in the DB, false - the username can't be found in
+Function checks if a username already exists
+Input: username
+Output: true - the username exists in the DB, false - the username can't be found in
 */
 bool SqliteDatabase::doesUserExist(std::string name)
 {
@@ -230,9 +230,9 @@ bool SqliteDatabase::doesUserExist(std::string name)
 }
 
 /*
-function checks if a password matches to the username
-input: username, password
-output: true - the password matches the username, false - the password doesn't match the username
+Function checks if a password matches to the username
+Input: username, password
+Output: true - the password matches the username, false - the password doesn't match the username
 */
 bool SqliteDatabase::doesPasswordMatch(std::string name, std::string password)
 {
@@ -242,24 +242,26 @@ bool SqliteDatabase::doesPasswordMatch(std::string name, std::string password)
 	std::lock_guard<std::mutex> locker2(_using_db);
 	sqlite3_exec(_db, query.c_str(), usersCallback, &_usersRows, nullptr);
 	return !_usersRows.empty() && (password == _usersRows.front().password || password == NAME_MATCH_CHECK);
-	
 }
 
 /*
-function adds a new user
-input: the user specs: username, password, email
-output: true - the user's specs are valid, false - there is already someone with that username
+Function adds a new user
+Input: the user specs: username, password, email
+Output: true - the user's specs are valid, false - there is already someone with that username
 */
 bool SqliteDatabase::addNewUser(std::string name, std::string password, std::string email, std::string address, std::string phone, std::string birthdate)
 {
-	if (doesUserExist(name))
-	{ // can't make two users with the same name
+	if (doesUserExist(name)) // can't make two users with the same name
+	{ 
 		return false;
 	}
+
 	std::string query = "INSERT INTO USERS(NAME, PASSWORD, EMAIL, ADDRESS, PHONE, BIRTHDATE) VALUES ('" +
 		name + "', '" + password + "', '" + email + "', '" + address + "', '" + phone + "', '" + birthdate +  "');";
+
 	std::lock_guard<std::mutex> locker(_using_db);
 	sqlite3_exec(_db, query.c_str(), nullptr, nullptr, nullptr);
+
 	query = "INSERT INTO STATISTICS(NAME, TOTAL_ANSWERS, CORRECT_ANSWERS, NUM_OF_GAMES, ANSWERS_TIME) VALUES ('" +
 		name + "', 0, 0, 0, 0);";
 	sqlite3_exec(_db, query.c_str(), nullptr, nullptr, nullptr);
@@ -267,9 +269,9 @@ bool SqliteDatabase::addNewUser(std::string name, std::string password, std::str
 }
 
 /*
-function gets the questions from the DB
-input: amount of questions
-output: list of questions
+Function gets the questions from the DB
+Input: amount of questions
+Output: list of questions
 */
 std::vector<Question> SqliteDatabase::getQuestions(int amount)
 {
@@ -279,17 +281,15 @@ std::vector<Question> SqliteDatabase::getQuestions(int amount)
 	_questionsRows.clear(); // remove the previous data
 
 	refreshQuestions(amount); // refreshing DB questions
-
 	sqlite3_exec(_db, query.c_str(), questionsCallback, &_questionsRows, nullptr);
-
 
 	return std::vector<Question>(_questionsRows);
 }
 
 /*
-function gets the average time per answer
-input: username
-output: the average time for a answer
+Function gets the average time per answer
+Input: username
+Output: the average time for a answer
 */
 float SqliteDatabase::getPlayerAverageAnswerTime(std::string name)
 {
@@ -303,9 +303,9 @@ float SqliteDatabase::getPlayerAverageAnswerTime(std::string name)
 }
 
 /*
-function gets the number of correct answers the user answered
-input: username
-output: the number of correct answers
+Function gets the number of correct answers the user answered
+Input: username
+Output: the number of correct answers
 */
 int SqliteDatabase::getNumOfCorrectAnswers(std::string name)
 {
@@ -315,9 +315,9 @@ int SqliteDatabase::getNumOfCorrectAnswers(std::string name)
 }
 
 /*
-function gets the number of answers the user answered
-input: username
-output: the number of answers
+Function gets the number of answers the user answered
+Input: username
+Output: the number of answers
 */
 int SqliteDatabase::getNumOfTotalAnswers(std::string name)
 {
@@ -327,9 +327,9 @@ int SqliteDatabase::getNumOfTotalAnswers(std::string name)
 }
 
 /*
-function gets the number of games the user played
-input: username
-output: the number of games
+Function gets the number of games the user played
+Input: username
+Output: the number of games
 */
 int SqliteDatabase::getNumOfPlayerGames(std::string name)
 {
@@ -353,7 +353,7 @@ void SqliteDatabase::refreshQuestions(int amount)
 		amount = MAX_QUESTIONS;
 	}
 
-	std::string scriptCommandLine = SCRIPT_PATH + std::to_string(amount) + " \"..\\Trivia Project\\" + DB_NAME + "\"";
+	std::string scriptCommandLine = SCRIPT_PATH + std::to_string(amount) + " \"" + DB_NAME + "\"";
 
 	if (CreateProcessA(NULL, LPSTR(scriptCommandLine.c_str()), NULL, NULL, FALSE, NULL, NULL, NULL, &info, &processInfo))
 	{
@@ -369,9 +369,9 @@ void SqliteDatabase::refreshQuestions(int amount)
 }
 
 /*
-this function creates a row of statistics info of a user
-input: username
-output: none
+This function creates a row of statistics info of a user
+Input: username
+Output: none
 */
 void SqliteDatabase::getStatistics(std::string name)
 {
@@ -382,9 +382,9 @@ void SqliteDatabase::getStatistics(std::string name)
 }
 
 /*
-function gets the statistic of all the users
-input: none
-output: vector of statistics
+Function gets the statistic of all the users
+Input: none
+Output: vector of statistics
 */
 std::vector<Statistic> SqliteDatabase::getStatistics()
 {
@@ -397,9 +397,9 @@ std::vector<Statistic> SqliteDatabase::getStatistics()
 }
 
 /*
-function updates the statistics of the users
-input: the usernames and their data
-output: none
+Function updates the statistics of the users
+Input: the usernames and their data
+Output: none
 */
 void SqliteDatabase::updateStatistics(std::map<std::string, GameData> usersGameData, std::string username, unsigned int gameQuestions)
 {
@@ -426,9 +426,9 @@ void SqliteDatabase::updateStatistics(std::map<std::string, GameData> usersGameD
 }
 
 /*
-function updates a user's statistics
-input: the statistics of the user
-output: none
+Function updates a user's statistics
+Input: the statistics of the user
+Output: none
 */
 void SqliteDatabase::updateUserStatistic(Statistic userStatistic)
 {

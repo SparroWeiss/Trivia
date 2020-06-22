@@ -5,8 +5,8 @@
 #define TOP_PLAYERS 5
 
 /*
-constructor
-initializes the variables of the object
+Constructor:
+Initializes the variables of the object
 */
 StatisticsManager::StatisticsManager()
 {
@@ -14,9 +14,9 @@ StatisticsManager::StatisticsManager()
 }
 
 /*
-function make sure that there is only one instance of the object
-input: none
-output: pointer of the only instance
+Function make sure that there is only one instance of the object
+Input: none
+Output: pointer of the only instance
 */
 StatisticsManager* StatisticsManager::getInstance()
 {
@@ -28,17 +28,14 @@ StatisticsManager* StatisticsManager::getInstance()
 }
 
 /*
-destructor
-frees allocated memory
+Destructor
 */
-StatisticsManager::~StatisticsManager()
-{
-}
+StatisticsManager::~StatisticsManager() {}
 
 /*
-function gets all the statistics of a user
-input: username
-output: struct of the statistics
+Function gets all the statistics of a user
+Input: username
+Output: struct of the statistics
 */
 StatisticsData StatisticsManager::getStatistics(std::string name)
 {
@@ -53,7 +50,13 @@ StatisticsData StatisticsManager::getStatistics(std::string name)
 	return data;
 }
 
-////////////////////////////////////////////////////////HELPER
+/********** Helper ***********/
+
+/*
+This function sort the vector by it's value
+Input: the vector
+Output: the sorted vector
+*/
 std::vector<std::pair<std::string, float>> sortByVal(std::vector<std::pair<std::string, float>> ranks)
 {
 	int size = ranks.size();
@@ -71,6 +74,7 @@ std::vector<std::pair<std::string, float>> sortByVal(std::vector<std::pair<std::
 	}
 	return ranks;
 }
+
 /*
 function gets the top logged in players in the server
 input: reference to the statistics data

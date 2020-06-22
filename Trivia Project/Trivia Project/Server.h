@@ -1,5 +1,4 @@
 #pragma once
-
 #include "IDataBase.h"
 #include "Communicator.h"
 #include "RequestHandlerFactory.h"
@@ -7,7 +6,7 @@
 #include <comdef.h>
 
 #define EXIT "EXIT"
-#define NGROK_PATH "python \"..\\Trivia Project\\scripts\\ngrok.py\""
+#define NGROK_PATH "python \"scripts\\ngrok.py\""
 
 class Server
 {

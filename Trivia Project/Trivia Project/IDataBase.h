@@ -19,6 +19,7 @@ public:
 
 	unsigned int getCorrectAnswer();
 	void setCorrectAnswer(std::string);
+
 private:
 	static unsigned int curr_id;
 	std::string m_question;
