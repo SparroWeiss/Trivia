@@ -3,7 +3,6 @@
 #include "Communicator.h"
 #include "json.hpp"
 #include "Room.h"
-//#include <map>
 
 using json = nlohmann::json;
 
@@ -18,7 +17,6 @@ struct
 	unsigned int wrongAnswerCount;
 	float averageAnswerTime;
 }typedef PlayerResults;
-
 
 struct 
 {
@@ -114,7 +112,6 @@ struct
 	unsigned int status;
 	std::vector<PlayerResults> results;
 }typedef GetGameResultsResponse;
-
 
 class JsonResponsePacketSerializer
 {

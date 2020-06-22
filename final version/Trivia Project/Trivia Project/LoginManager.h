@@ -5,25 +5,27 @@
 
 enum loginStatus
 {
-	SUCCESS = 1, WRONGPASSWORD, WRONGUSERNAME, ALREADYINGAME
+	SUCCESS = 1, 
+	WRONGPASSWORD, 
+	WRONGUSERNAME, 
+	ALREADYINGAME
 };
 
 class LoggedUser
 {
 public:
-	/*
-	constructors
-	*/
+	// Constractors
 	LoggedUser() : LoggedUser("") {}
 	LoggedUser(std::string name)
 	{
 		m_username = name;
 	}
 	~LoggedUser(){}
+	
 	/*
-	function gets the username
-	input: none
-	output: the username
+	Function gets the username
+	Input: none
+	Output: the username
 	*/
 	std::string getUsername() const
 	{
@@ -44,9 +46,9 @@ public:
 
 private:
 	LoginManager();
-	static LoginManager* instance;
+	std::vector<LoggedUser>::iterator findUsername(std::string username);
 
+	static LoginManager* instance;
 	IDataBase* m_database;
 	std::vector<LoggedUser> m_loggedUsers;
-	std::vector<LoggedUser>::iterator findUsername(std::string username);
 };

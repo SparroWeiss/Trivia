@@ -4,8 +4,8 @@
 std::mutex _using_clients;
 
 /*
-constructor
-initializes the variables of the object
+Constructor:
+Initializes the variables of the object
 */
 Communicator::Communicator()
 {
@@ -14,9 +14,9 @@ Communicator::Communicator()
 }
 
 /*
-function make sure that there is only one instance of the object
-input: none
-output: pointer of the only instance
+Function make sure that there is only one instance of the object
+Input: none
+Output: pointer of the only instance
 */
 Communicator* Communicator::getInstance()
 {
@@ -28,7 +28,7 @@ Communicator* Communicator::getInstance()
 }
 
 /*
-destructor
+Destructor:
 frees allocated memory
 */
 Communicator::~Communicator()
@@ -42,10 +42,10 @@ Communicator::~Communicator()
 }
 
 /*
-this function create the listening socket,
+This function create the listening socket,
 connects between the socket and the configuration and return it
-input: none
-output: the listening socket
+Input: none
+Output: the listening socket
 */
 SOCKET Communicator::bindAndListen()
 {
@@ -80,9 +80,9 @@ SOCKET Communicator::bindAndListen()
 }
 
 /*
-this function listen, accept client and create new thread for each client
-input: none
-output: none
+This function listen, accept client and create new thread for each client
+Input: none
+Output: none
 */
 void Communicator::startHandleRequests()
 {
@@ -97,7 +97,6 @@ void Communicator::startHandleRequests()
 		client_socket = ::accept(listening_socket, NULL, NULL);
 		if (client_socket == INVALID_SOCKET)
 		{
-			//std::cout << __FUNCTION__ " - error with accept client" << std::endl;
 			continue;
 		}
 		
@@ -109,9 +108,9 @@ void Communicator::startHandleRequests()
 }
 
 /*
-function will help the room admin
-input: none
-output: map of the users
+Function will help the room admin
+Input: none
+Output: map of the users
 */
 std::map<SOCKET, IRequestHandler*> Communicator::getClients()
 {
@@ -119,9 +118,9 @@ std::map<SOCKET, IRequestHandler*> Communicator::getClients()
 }
 
 /*
-this function "talk" with the client
-input: the client socket
-output: none
+This function "talk" with the client
+Input: the client socket
+Output: none
 */
 void Communicator::handleNewClient(SOCKET client_socket)
 {
@@ -136,12 +135,12 @@ void Communicator::handleNewClient(SOCKET client_socket)
 			std::unique_lock<std::mutex> locker(_using_clients);
 			if (m_clients[client_socket] && m_clients[client_socket]->isRequestRelevant(currRequest))
 			{
-				RequestResult currResult = m_clients[client_socket]->handleRequest(currRequest); // deserialize request
-				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(currResult.response)); // send serialized response to client
-				if (m_clients[client_socket] != currResult.newHandler)
-				{ // if the handler has changed
+				RequestResult currResult = m_clients[client_socket]->handleRequest(currRequest); // Deserialize request
+				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(currResult.response)); // Send serialized response to client
+				if (m_clients[client_socket] != currResult.newHandler) // If the handler has changed
+				{
 					delete m_clients[client_socket];
-					m_clients[client_socket] = currResult.newHandler; // updating client state
+					m_clients[client_socket] = currResult.newHandler; // Updating client state
 				}
 				locker.unlock();
 				if (!loggedIn) // not enter to this block more than once
@@ -163,8 +162,8 @@ void Communicator::handleNewClient(SOCKET client_socket)
 					}
 					
 				}
-				if (m_clients[client_socket] == nullptr)
-				{ // if the user logged out
+				if (m_clients[client_socket] == nullptr) // If the user logged out
+				{ 
 					std::cout << "### " << name << " logged out" << std::endl;
 					std::lock_guard<std::mutex> locker(_using_clients);
 					m_clients.erase(client_socket);
@@ -182,15 +181,15 @@ void Communicator::handleNewClient(SOCKET client_socket)
 		}
 		catch (const std::exception & e)
 		{
-			if (m_clients[client_socket]->isRequestRelevant(RequestInfo{ CLOSEROOM, "", Buffer() }))
+			if (m_clients[client_socket]->isRequestRelevant(RequestInfo{ CLOSEROOM, "", Buffer() })) // If the user was a room admin
 			{
 				m_clients[client_socket]->handleRequest(RequestInfo{ CLOSEROOM, "", Buffer() });
 			}
-			else if (m_clients[client_socket]->isRequestRelevant(RequestInfo{ LEAVEROOM, "", Buffer() }))
+			else if (m_clients[client_socket]->isRequestRelevant(RequestInfo{ LEAVEROOM, "", Buffer() })) // If the user were in a room
 			{
 				m_clients[client_socket]->handleRequest(RequestInfo{ LEAVEROOM, "", Buffer() });
 			}
-			else if (m_clients[client_socket]->isRequestRelevant(RequestInfo{ LEAVEGAME, "", Buffer() }))
+			else if (m_clients[client_socket]->isRequestRelevant(RequestInfo{ LEAVEGAME, "", Buffer() })) // If the user were in a game
 			{
 				m_clients[client_socket]->handleRequest(RequestInfo{ LEAVEGAME, "", Buffer() });
 			}
@@ -256,8 +255,8 @@ RequestInfo Communicator::getRequest(SOCKET client_socket)
 {
 	unsigned int requestCode = recv_data(client_socket, CODE_SIZE).m_buffer[0];
 	
-	if (requestCode == SPACE)
-	{ // the user disconnected
+	if (requestCode == SPACE) // the user disconnected
+	{ 
 		throw std::exception("disconnected in the middle of the conversation");
 	}
 

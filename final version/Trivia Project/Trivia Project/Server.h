@@ -1,5 +1,4 @@
 #pragma once
-
 #include "IDataBase.h"
 #include "Communicator.h"
 #include "RequestHandlerFactory.h"

@@ -2,15 +2,15 @@
 #define NOT_A_QUESTION ""
 
 
-/**********Question************/
+/********** Question ************/
 /*
-constructor
-initializes the variables of the object
+Constructor:
+Initializes the variables of the object
 */
 Question::Question() : m_correctAnswer(0), m_question(NOT_A_QUESTION) {}
 
 /*
-destructor
+Destructor:
 frees allocated memory
 */
 Question::~Question()
@@ -19,9 +19,9 @@ Question::~Question()
 }
 
 /*
-function gets the question
-input: none 
-output: the question 
+Function gets the question
+Input: none 
+Output: the question 
 */
 std::string Question::getQuestion()
 {
@@ -29,9 +29,9 @@ std::string Question::getQuestion()
 }
 
 /*
-function sets the question
-input: the question
-output: none
+Function sets the question
+Input: the question
+Output: none
 */
 void Question::setQuestion(std::string que)
 {
@@ -39,9 +39,9 @@ void Question::setQuestion(std::string que)
 }
 
 /*
-function gets the possible answers
-input: none
-output: the question
+Function gets the possible answers
+Input: none
+Output: the question
 */
 std::map<unsigned int, std::string> Question::getPossibleAnswers()
 {
@@ -49,9 +49,9 @@ std::map<unsigned int, std::string> Question::getPossibleAnswers()
 }
 
 /*
-function adds an answer to the possible answers
-input: new answer
-output: none
+Function adds an answer to the possible answers
+Input: new answer
+Output: none
 */
 void Question::addPossibleAnswers(std::string answer)
 {
@@ -60,9 +60,9 @@ void Question::addPossibleAnswers(std::string answer)
 }
 
 /*
-function gets the correct answer id
-input: none
-output: the answer id
+Function gets the correct answer id
+Input: none
+Output: the answer id
 */
 unsigned int Question::getCorrectAnswer()
 {
@@ -70,9 +70,9 @@ unsigned int Question::getCorrectAnswer()
 }
 
 /*
-function sets the correct answer
-input: none
-output: the correct answer
+Function sets the correct answer
+Input: none
+Output: the correct answer
 */
 void Question::setCorrectAnswer(std::string correct)
 {
@@ -81,16 +81,15 @@ void Question::setCorrectAnswer(std::string correct)
 }
 
 
-/***************Game***************/
+/*************** Game ***************/
 
 std::mutex _mutex_players;
 
 /*
-constructors
-initializes the variables of the object
+Constructors:
+Initializes the variables of the object
 */
 Game::Game(){}
-
 Game::Game(std::vector<LoggedUser> users, std::vector<Question> Questions)
 {
 	m_questions = Questions;
@@ -101,8 +100,8 @@ Game::Game(std::vector<LoggedUser> users, std::vector<Question> Questions)
 }
 
 /*
-destructor
-frees allocated memory
+Destructor:
+Frees allocated memory
 */
 Game::~Game()
 {
@@ -111,9 +110,9 @@ Game::~Game()
 }
 
 /*
-function gets the question of the user
-input: the user
-ouput: the question
+Function gets the question of the user
+Input: the user
+Ouput: the question
 */
 Question Game::getQuestionForUser(LoggedUser& user)
 {
@@ -121,9 +120,9 @@ Question Game::getQuestionForUser(LoggedUser& user)
 }
 
 /*
-function submits the user's answer
-input: answer id, the user, the game, the time it took to answer
-output: the id of the correct answer
+Function submits the user's answer
+Input: answer id, the user, the game, the time it took to answer
+Output: the id of the correct answer
 */
 unsigned int Game::submitAnswer(unsigned int answerId, LoggedUser& user, float timeForAnswer)
 {
@@ -140,8 +139,8 @@ unsigned int Game::submitAnswer(unsigned int answerId, LoggedUser& user, float t
 	data.averageAnswerTime = (answerCount * data.averageAnswerTime + timeForAnswer) / (answerCount + 1);
 
 	data.currentQuestion = getNextQuestion(data.currentQuestion);
-	if (data.currentQuestion.getQuestion() == NOT_A_QUESTION)
-	{ // finished all questions
+	if (data.currentQuestion.getQuestion() == NOT_A_QUESTION) // finished all questions
+	{ 
 		data.playing = PlayerMode::WAITING_FOR_RESULTS;
 	}
 
@@ -152,9 +151,9 @@ unsigned int Game::submitAnswer(unsigned int answerId, LoggedUser& user, float t
 }
 
 /*
-function removes a player
-input: the player
-output: true - removed, false - couldn't be removed
+Function removes a player
+Input: the player
+Output: true - removed, false - couldn't be removed
 */
 bool Game::removePlayer(LoggedUser& user)
 {
@@ -164,9 +163,9 @@ bool Game::removePlayer(LoggedUser& user)
 }
 
 /*
-function gets the users data (helps for the game results function)
-input: none
-output: map of the users and their data
+Function gets the users data (helps for the game results function)
+Input: none
+Output: map of the users and their data
 */
 std::map<std::string, GameData> Game::getUsersData()
 {
@@ -174,6 +173,11 @@ std::map<std::string, GameData> Game::getUsersData()
 	return m_players;
 }
 
+/*
+Function gets the user amount
+Input: none
+Output: number of users
+*/
 unsigned int Game::getUsersAmount()
 {
 	unsigned int sum = 0;
@@ -189,21 +193,21 @@ unsigned int Game::getUsersAmount()
 }
 
 /*
-function gets how many question there are in the game
-input: none
-output: the number of questions
+Function gets how many question there are in the game
+Input: none
+Output: the number of questions
 */
 unsigned int Game::getNumOfQuestions()
 {
 	return m_questions.size();
 }
 
-/////////////////////////HELPER
+/********* Helper **********/
 
 /*
-function gets the next question in the game
-input: current question
-output: next question
+Function gets the next question in the game
+Input: current question
+Output: next question
 */
 Question Game::getNextQuestion(Question current)
 {

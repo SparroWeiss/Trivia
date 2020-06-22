@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include <iostream>
 
 typedef unsigned char byte;
 
