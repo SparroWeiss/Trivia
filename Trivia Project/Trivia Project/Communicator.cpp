@@ -134,12 +134,12 @@ void Communicator::handleNewClient(SOCKET client_socket)
 			std::unique_lock<std::mutex> locker(_using_clients);
 			if (m_clients[client_socket] && m_clients[client_socket]->isRequestRelevant(currRequest))
 			{
-				RequestResult currResult = m_clients[client_socket]->handleRequest(currRequest); // deserialize request
-				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(currResult.response)); // send serialized response to client
+				RequestResult currResult = m_clients[client_socket]->handleRequest(currRequest); // Deserialize request
+				send_data(client_socket, JsonRequestPacketDeserializer::bytesToString(currResult.response)); // Send serialized response to client
 				if (m_clients[client_socket] != currResult.newHandler)
-				{ // if the handler has changed
+				{ // If the handler has changed
 					delete m_clients[client_socket];
-					m_clients[client_socket] = currResult.newHandler; // updating client state
+					m_clients[client_socket] = currResult.newHandler; // Updating client state
 					if (currRequest.id == SIGNOUT)
 					{
 						std::cout << "### " << name << " left" << std::endl;
@@ -152,11 +152,11 @@ void Communicator::handleNewClient(SOCKET client_socket)
 					try
 					{
 						json j = json::parse(JsonRequestPacketDeserializer::bytesToString(currResult.response).substr(5));
-						LoginResponse loginRes = j.get<LoginResponse>(); // extracting the login response from the result of the user's action 
-						if (loginRes.status == 1) // the user logged in into the server
+						LoginResponse loginRes = j.get<LoginResponse>(); // Extracting the login response from the result of the user's action 
+						if (loginRes.status == 1) // The user logged in into the server
 						{
 							name = JsonRequestPacketDeserializer::deserializeLoginRequest(currRequest.buffer).username;
-							std::cout << "### " << name << " joined" << std::endl; // rememberring the name for the thread
+							std::cout << "### " << name << " joined" << std::endl; // Rememberring the name for the thread
 						}
 					}
 					catch (const std::exception& e)
